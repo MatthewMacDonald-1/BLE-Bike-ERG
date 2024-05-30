@@ -5,7 +5,7 @@
 #include <vector>
 #include <set>
 #include "MattsUtils/string-func.hpp"
-#include "MattsUtils/parsing.hpp"
+#include "MattsUtils/number.hpp"
 
 #define VIDEO_SETTINGS_VERSION 1;
 

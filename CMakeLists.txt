@@ -31,8 +31,8 @@ set(MAIN_SRC
     src/MattsUtils/raylib-structs.hpp
     src/MattsUtils/bounds.cpp
     src/MattsUtils/bounds.hpp
-    src/MattsUtils/parsing.cpp
-    src/MattsUtils/parsing.hpp
+    src/MattsUtils/number.cpp
+    src/MattsUtils/number.hpp
     src/MattsUtils/string-func.cpp
     src/MattsUtils/string-func.hpp
 )
