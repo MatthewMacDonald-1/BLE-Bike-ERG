@@ -20,6 +20,8 @@ set(MAIN_SRC
     src/font-settings.hpp
     src/video-settings.cpp
     src/video-settings.hpp
+    src/bluetooth-controller.cpp
+    src/bluetooth-controller.hpp
     src/scene.cpp
     src/scene.hpp
     src/main-menu.cpp

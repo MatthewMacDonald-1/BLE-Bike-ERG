@@ -5,11 +5,10 @@
 #include "raylib.h"
 #include "raymath.h"
 
-#include <simpleble/SimpleBLE.h>
-
 #include "config.hpp"
 #include "font-settings.hpp"
 #include "video-settings.hpp"
+#include "bluetooth-controller.hpp"
 #include "scene.hpp"
 #include "main-menu.hpp"
 
@@ -55,7 +54,10 @@ int main(void) {
     FontSettings::InitializeFontSettings();
 
     // BLE Initilization
-    bleSupported = SimpleBLE::Adapter::bluetooth_enabled();
+    int bleRes = BluetoothController::InitializeBluetooth();
+    if (BluetoothController::BluetoothSupported() && bleRes == EXIT_SUCCESS) {
+        bleSupported = true;
+    }
 
     /// Window Start time in ms.
     long long windowStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
