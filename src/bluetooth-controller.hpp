@@ -17,8 +17,16 @@ public:
 	/// </summary>
 	static void StopScan();
 
+	/// <summary>
+	/// Return list of devices found in scan.
+	/// </summary>
+	static std::vector<SimpleBLE::Peripheral> GetDiscoveredDevices();
+
 private:
 	static bool initialized;
 	static SimpleBLE::Adapter activeAdapter;
+
+	/// Devices found in scan.
+	static std::vector<SimpleBLE::Peripheral> foundDevices;
 
 };

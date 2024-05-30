@@ -6,6 +6,9 @@
 bool BluetoothController::initialized = false;
 SimpleBLE::Adapter BluetoothController::activeAdapter;
 
+/// Devices found in scan.
+std::vector<SimpleBLE::Peripheral> BluetoothController::foundDevices;
+
 bool BluetoothController::BluetoothSupported()
 {
 	return SimpleBLE::Adapter::bluetooth_enabled();
@@ -22,6 +25,7 @@ int BluetoothController::InitializeBluetooth()
 
 	// ToDo: Set callbacks for scanning. Start, Stop, on found.
 	activeAdapter.set_callback_on_scan_start([]() {
+		foundDevices.clear();
 		TraceLog(LOG_INFO, "BLE: Scan started");
 	});
 
@@ -33,6 +37,7 @@ int BluetoothController::InitializeBluetooth()
 	// Set the callback to be called when the scan finds a new peripheral
 	activeAdapter.set_callback_on_scan_found([](SimpleBLE::Peripheral peripheral) {
 		TraceLog(LOG_INFO, "BLE: Peripheral found: %s, %s", peripheral.identifier().c_str(), peripheral.address().c_str());
+		foundDevices.push_back(peripheral);
 	});
 
 	// Set the callback to be called when a peripheral property has changed
@@ -57,4 +62,9 @@ void BluetoothController::StopScan()
 	if (activeAdapter.scan_is_active()) {
 		activeAdapter.scan_stop();
 	}
+}
+
+std::vector<SimpleBLE::Peripheral> BluetoothController::GetDiscoveredDevices()
+{
+	return foundDevices;
 }

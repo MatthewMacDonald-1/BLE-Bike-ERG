@@ -40,11 +40,18 @@ int MainMenuScene::DrawCall()
 	Vector2 topCorner = MattsUtils::raylib::ConstructVector2(120, 148);
 	Vector2 panelDimensions = MattsUtils::raylib::ConstructVector2(GetScreenWidth() - 240, GetScreenHeight() - 240);
 	panelRec = MattsUtils::raylib::ConstructRectangle(topCorner.x, topCorner.y, panelDimensions.x, panelDimensions.y);
+	panelContentRec.width = panelRec.width - 200;
 
 	GuiScrollPanel(panelRec, NULL, panelContentRec, &panelScroll, &panelView);
 
 	BeginScissorMode(panelView.x, panelView.y, panelView.width, panelView.height);
 	GuiGrid(MattsUtils::raylib::ConstructRectangle(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y, panelContentRec.width, panelContentRec.height), NULL, 16, 3, NULL);
+
+	std::vector<SimpleBLE::Peripheral> discoveredDevices = BluetoothController::GetDiscoveredDevices();
+	for (int i = 0; i < discoveredDevices.size(); i++) {
+		RelativeDrawing::DrawTextRelEx(fontType, TextFormat("Device: %s, %s", discoveredDevices.at(i).identifier().c_str(), discoveredDevices.at(i).address().c_str()), raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + 32 * i), RelativeDrawing::TopLeft, RelativeDrawing::TopLeft, 24, 1.5, BLACK);
+	}
+
 	EndScissorMode();
 
 	if (showContentArea) DrawRectangle(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y, panelContentRec.width, panelContentRec.height, Fade(RED, 0.1));
