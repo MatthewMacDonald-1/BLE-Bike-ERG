@@ -4,6 +4,7 @@
 
 #include "raygui.h"
 
+#include "bluetooth-controller.hpp"
 #include "font-settings.hpp"
 #include "MattsUtils/relative-drawing.hpp"
 #include "MattsUtils/raylib-structs.hpp"
@@ -13,6 +14,7 @@ using namespace MattsUtils;
 MainMenuScene::MainMenuScene()
 {
     menuBackground = LoadTexture("./resources/images/test-background.png"); // Important Note: the file path is relative to the executable
+	BluetoothController::StartScan();
 }
 
 MainMenuScene::~MainMenuScene()
@@ -62,6 +64,7 @@ int MainMenuScene::DrawCall()
 
 	bool quitRes = RelativeDrawing::GuiButtonRelative("Quit", offsetDstBC, buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
 	if (quitRes) {
+		BluetoothController::StopScan();
 		return SIGNAL_WINDOW_CLOSE;
 	}
 
