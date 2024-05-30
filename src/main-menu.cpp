@@ -33,6 +33,23 @@ int MainMenuScene::DrawCall()
 
 	RelativeDrawing::DrawTextRelEx(fontType, "Bike ERG", raylib::ConstructVector2(0, 0), RelativeDrawing::TopCenter, RelativeDrawing::TopCenter, 128, 1.5, BLACK);
 
+	// Scroll Area Start --------------------------------------------------------------------------
+
+	Vector2 topCorner = MattsUtils::raylib::ConstructVector2(120, 148);
+	Vector2 panelDimensions = MattsUtils::raylib::ConstructVector2(GetScreenWidth() - 240, GetScreenHeight() - 240);
+	panelRec = MattsUtils::raylib::ConstructRectangle(topCorner.x, topCorner.y, panelDimensions.x, panelDimensions.y);
+
+	GuiScrollPanel(panelRec, NULL, panelContentRec, &panelScroll, &panelView);
+
+	BeginScissorMode(panelView.x, panelView.y, panelView.width, panelView.height);
+	GuiGrid(MattsUtils::raylib::ConstructRectangle(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y, panelContentRec.width, panelContentRec.height), NULL, 16, 3, NULL);
+	EndScissorMode();
+
+	if (showContentArea) DrawRectangle(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y, panelContentRec.width, panelContentRec.height, Fade(RED, 0.1));
+
+	// Scroll Area End ----------------------------------------------------------------------------
+
+
 	// Buttons Start ------------------------------------------------------------------------------
 	GuiSetFont(fontType);
 
@@ -41,7 +58,7 @@ int MainMenuScene::DrawCall()
 	Vector2 offsetDstBC = raylib::ConstructVector2(0, -24);
 	Vector2 offsetDstBR = raylib::ConstructVector2(-24, -24);
 
-	bool skipRes = RelativeDrawing::GuiButtonRelative("Skip", offsetDstBR, buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
+	bool skipRes = RelativeDrawing::GuiButtonRelative("Next", offsetDstBR, buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
 
 	bool quitRes = RelativeDrawing::GuiButtonRelative("Quit", offsetDstBC, buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
 	if (quitRes) {
