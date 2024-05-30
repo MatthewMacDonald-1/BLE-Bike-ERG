@@ -12,5 +12,37 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/lib/raylib ${CMAKE_BINARY_DIR}/raylib
 
 include_directories(${CMAKE_CURRENT_LIST_DIR}/include)
 
-add_subdirectory(src)
+# Main Program
+set(MAIN_SRC 
+    src/main.cpp
+    src/config.hpp
+    src/font-settings.cpp
+    src/font-settings.hpp
+    src/video-settings.cpp
+    src/video-settings.hpp
+    src/scene.cpp
+    src/scene.hpp
+    src/main-menu.cpp
+    src/main-menu.hpp
+
+    src/MattsUtils/relative-drawing.cpp
+    src/MattsUtils/relative-drawing.hpp
+    src/MattsUtils/raylib-structs.cpp
+    src/MattsUtils/raylib-structs.hpp
+    src/MattsUtils/bounds.cpp
+    src/MattsUtils/bounds.hpp
+    src/MattsUtils/parsing.cpp
+    src/MattsUtils/parsing.hpp
+    src/MattsUtils/string-func.cpp
+    src/MattsUtils/string-func.hpp
+)
+
+add_executable(BLE_BIKE_ERG ${MAIN_SRC})
+target_link_libraries(BLE_BIKE_ERG simpleble::simpleble)
+target_link_libraries(BLE_BIKE_ERG raylib)
+set_target_properties(BLE_BIKE_ERG
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/bin"
+)
+
 
