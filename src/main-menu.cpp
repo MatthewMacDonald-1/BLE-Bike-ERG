@@ -251,6 +251,29 @@ int MainMenuScene::DrawDiscoveredBluetoothDevice(SimpleBLE::Peripheral device, V
 {
 	Font fontType = FontSettings::GetMainFont();
 
+	std::vector<SimpleBLE::Service> deviceServices = device.services();
+	std::stringstream ss;
+	bool containsUnknwon = false || deviceServices.size() == 0;
+	for (int i = 0; i < deviceServices.size(); i++) {
+		BleUtils::ServiceType type = BleUtils::GetServiceType(deviceServices.at(i).uuid());
+		if (type == BleUtils::UNKNOWN) {
+			containsUnknwon = true;
+		}
+
+		ss << BleUtils::ToString(type);
+		if (i + 1 < deviceServices.size()) {
+			ss << ", ";
+		}
+	}
+
+#ifdef HIDE_UNKNOWN_BLE_DEVICES
+	if (containsUnknwon) {
+		return 0;
+	}
+#endif // HIDE_UNKNOWN_BLE_DEVICES
+
+	
+
 	RelativeDrawing::DrawRectangle(
 		position,
 		raylib::ConstructVector2(width, 64),
@@ -266,20 +289,7 @@ int MainMenuScene::DrawDiscoveredBluetoothDevice(SimpleBLE::Peripheral device, V
 		raylib::ConstructColor(206, 206, 206)
 	);
 
-	std::vector<SimpleBLE::Service> deviceServices = device.services();
-	std::stringstream ss;
-	bool containsUnknwon = false || deviceServices.size() == 0;
-	for (int i = 0; i < deviceServices.size(); i++) {
-		BleUtils::ServiceType type = BleUtils::GetServiceType(deviceServices.at(i).uuid());
-		if (type == BleUtils::UNKNOWN) {
-			containsUnknwon = true;
-		}
-
-		ss << BleUtils::ToString(type);
-		if (i + 1 < deviceServices.size()) {
-			ss << ", ";
-		}
-	}
+	
 
 	RelativeDrawing::DrawTextRelEx(
 		fontType,

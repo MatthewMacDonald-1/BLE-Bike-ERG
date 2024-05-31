@@ -12,6 +12,7 @@
 #endif // DEBUG
 #ifndef DEBUG
 #define DEBUG_OVERLAY_DEFAULT_STATE false
+#define HIDE_UNKNOWN_BLE_DEVICES
 #endif // DEBUG
 
 
