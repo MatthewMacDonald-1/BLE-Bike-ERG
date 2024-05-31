@@ -62,6 +62,7 @@ int MainMenuScene::DrawCall()
 				1.5, 
 				BLACK
 			);
+
 			actualIndex++;
 		}
 	}

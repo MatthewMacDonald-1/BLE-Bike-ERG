@@ -22,6 +22,8 @@ set(MAIN_SRC
     src/video-settings.hpp
     src/bluetooth-controller.cpp
     src/bluetooth-controller.hpp
+    src/bluetooth-utils.cpp
+    src/bluetooth-utils.hpp
     src/scene.cpp
     src/scene.hpp
     src/main-menu.cpp

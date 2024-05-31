@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include "raylib.h"
+#include "bluetooth-utils.hpp"
 
 bool BluetoothController::initialized = false;
 SimpleBLE::Adapter BluetoothController::activeAdapter;
@@ -37,6 +38,13 @@ int BluetoothController::InitializeBluetooth()
 	// Set the callback to be called when the scan finds a new peripheral
 	activeAdapter.set_callback_on_scan_found([](SimpleBLE::Peripheral peripheral) {
 		TraceLog(LOG_INFO, "BLE: Peripheral found: %s, %s", peripheral.identifier().c_str(), peripheral.address().c_str());
+		if (peripheral.identifier().length() != 0) {
+			std::vector<SimpleBLE::Service> avalibleServices = peripheral.services();
+			TraceLog(LOG_INFO, "BLE: \t\tP Service count: %d", avalibleServices.size());
+			for (int i = 0; i < avalibleServices.size(); i++) {
+				TraceLog(LOG_INFO, "BLE: \t\t\tService: %s, %s", BleUtils::ToString(BleUtils::GetServiceType(avalibleServices.at(i).uuid())).c_str(), avalibleServices.at(i).uuid().c_str());
+			}
+		}
 		foundDevices.push_back(peripheral);
 	});
 
