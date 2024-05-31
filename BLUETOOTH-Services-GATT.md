@@ -1,6 +1,6 @@
 # Bluetooth
 
-I have been doing some experimenting with try ti read the bluetooth service.
+I have been doing some experimenting with try to read the bluetooth service.
 
 ### Wonderful BLE GATT service description lookup
 
