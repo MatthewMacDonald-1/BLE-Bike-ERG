@@ -50,23 +50,12 @@ int MainMenuScene::DrawCall()
 	GuiScrollPanel(panelRec, NULL, panelContentRec, &panelScroll, &panelView);
 
 	BeginScissorMode(panelView.x, panelView.y, panelView.width, panelView.height);
-	//GuiGrid(raylib::ConstructRectangle(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y, panelContentRec.width, panelContentRec.height), NULL, 16, 3, NULL);
 	int panelInnerHeight = 0;
 
 	std::vector<SimpleBLE::Peripheral> discoveredDevices = BluetoothController::GetDiscoveredDevices();
 	int actualIndex = 0;
 	for (int i = 0; i < discoveredDevices.size(); i++) {
 		if (discoveredDevices.at(i).identifier().length() != 0) {
-			/*RelativeDrawing::DrawTextRelEx(
-				fontType, 
-				TextFormat("Device: %s, %s", discoveredDevices.at(i).identifier().c_str(), discoveredDevices.at(i).address().c_str()), 
-				raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + 32 * actualIndex), 
-				RelativeDrawing::TopLeft, 
-				RelativeDrawing::TopLeft, 
-				24, 
-				1.5, 
-				BLACK
-			);*/
 
 			int height = DrawDiscoveredBluetoothDevice(
 				discoveredDevices.at(i),
@@ -79,11 +68,9 @@ int MainMenuScene::DrawCall()
 		}
 	}
 	panelContentRec.height = panelInnerHeight != panelContentRec.height ? panelInnerHeight : panelContentRec.height;
-	//panelContentRec.height = actualIndex * 32 != panelContentRec.height ? actualIndex * 32 : panelContentRec.height;
 
 	EndScissorMode();
 
-	//if (showContentArea) DrawRectangle(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y, panelContentRec.width, panelContentRec.height, Fade(RED, 0.1));
 
 	// Scroll Area End ----------------------------------------------------------------------------
 
@@ -128,7 +115,6 @@ int MainMenuScene::DrawDiscoveredBluetoothDevice(SimpleBLE::Peripheral device, V
 		raylib::ConstructVector2(width, 2),
 		RelativeDrawing::TopLeft,
 		RelativeDrawing::TopLeft,
-		//raylib::ConstructColor(0, 206, 206)
 		raylib::ConstructColor(206, 206, 206)
 	);
 
@@ -184,17 +170,6 @@ int MainMenuScene::DrawDiscoveredBluetoothDevice(SimpleBLE::Peripheral device, V
 		1.5,
 		BLACK
 	);
-
-	/*RelativeDrawing::DrawTextRelEx(
-		fontType,
-		TextFormat("Device: %s, %s", device.identifier().c_str(), device.address().c_str()),
-		position,
-		RelativeDrawing::TopLeft,
-		RelativeDrawing::TopLeft,
-		24,
-		1.5,
-		BLACK
-	);*/
 
 	return 66;
 }
