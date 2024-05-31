@@ -134,8 +134,14 @@ int MainMenuScene::DrawDiscoveredBluetoothDevice(SimpleBLE::Peripheral device, V
 
 	std::vector<SimpleBLE::Service> deviceServices = device.services();
 	std::stringstream ss;
+	bool containsUnknwon = false || deviceServices.size() == 0;
 	for (int i = 0; i < deviceServices.size(); i++) {
-		ss << BleUtils::ToString(BleUtils::GetServiceType(deviceServices.at(i).uuid()));
+		BleUtils::ServiceType type = BleUtils::GetServiceType(deviceServices.at(i).uuid());
+		if (type == BleUtils::UNKNOWN) {
+			containsUnknwon = true;
+		}
+
+		ss << BleUtils::ToString(type);
 		if (i + 1 < deviceServices.size()) {
 			ss << ", ";
 		}
@@ -151,6 +157,22 @@ int MainMenuScene::DrawDiscoveredBluetoothDevice(SimpleBLE::Peripheral device, V
 		1.5,
 		BLACK
 	);
+
+	if (!containsUnknwon) {
+		int clicked = RelativeDrawing::GuiButtonRelative(
+			"Connect",
+			raylib::ConstructVector2(position.x + width - 10 - 128, position.y + 16),
+			raylib::ConstructVector2(128, 32),
+			RelativeDrawing::TopLeft,
+			RelativeDrawing::TopLeft,
+			24
+		);
+
+		if (clicked) {
+			TraceLog(LOG_INFO, "Menu Button Clicked");
+		}
+	}
+	
 
 	RelativeDrawing::DrawTextRelEx(
 		fontType,
