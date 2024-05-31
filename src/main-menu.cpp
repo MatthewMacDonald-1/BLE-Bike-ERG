@@ -89,11 +89,22 @@ int MainMenuScene::DrawCall()
 				hasdrawnHeading = true;
 			}
 
-			panelInnerHeight += DrawDiscoveredBluetoothDevice(
-				discoveredDevices.at(i),
-				raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight),
-				panelContentRec.width
-			);
+			// Check that this device is not already connected too.
+			bool unconnected = true;
+			for (int j = 0; j < pairedDevices.size(); j++) {
+				if (discoveredDevices.at(i).address() == pairedDevices.at(j).address()) {
+					unconnected = false;
+					break;
+				}
+			}
+
+			if (unconnected) {
+				panelInnerHeight += DrawDiscoveredBluetoothDevice(
+					discoveredDevices.at(i),
+					raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight),
+					panelContentRec.width
+				);
+			}
 		}
 	}
 	panelContentRec.height = panelInnerHeight != panelContentRec.height ? panelInnerHeight : panelContentRec.height;
@@ -216,7 +227,10 @@ int MainMenuScene::DrawPairedBluetoothDevice(SimpleBLE::Peripheral device, Vecto
 	);
 
 	if (clicked) {
-		TraceLog(LOG_INFO, "Menu Button Clicked");
+		//TraceLog(LOG_INFO, "Menu Button Clicked");
+		std::thread disconnectThread(BluetoothController::DisconnectFromDevice, device);
+
+		disconnectThread.detach();
 	}
 
 	RelativeDrawing::DrawTextRelEx(
@@ -289,8 +303,10 @@ int MainMenuScene::DrawDiscoveredBluetoothDevice(SimpleBLE::Peripheral device, V
 		);
 
 		if (clicked) {
-			TraceLog(LOG_INFO, "Menu Button Clicked");
-			BluetoothController::ConnectToDevice(device);
+
+			std::thread connectThread(BluetoothController::ConnectToDevice, device);
+			connectThread.detach(); // Runs the thread detached
+			//BluetoothController::ConnectToDevice(device);
 		}
 	}
 	

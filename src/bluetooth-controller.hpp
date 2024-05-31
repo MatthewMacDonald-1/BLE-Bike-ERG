@@ -26,6 +26,8 @@ public:
 
 	static void ConnectToDevice(SimpleBLE::Peripheral device);
 
+	static void DisconnectFromDevice(SimpleBLE::Peripheral device);
+
 private:
 	static bool initialized;
 	static SimpleBLE::Adapter activeAdapter;

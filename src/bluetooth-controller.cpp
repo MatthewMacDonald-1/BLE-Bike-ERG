@@ -98,5 +98,26 @@ void BluetoothController::ConnectToDevice(SimpleBLE::Peripheral device)
 	catch (...) {
 		TraceLog(LOG_INFO, "BLE: Failed to connected to device: %s, %s", device.identifier().c_str(), device.address().c_str());
 	}
-	
+}
+
+void BluetoothController::DisconnectFromDevice(SimpleBLE::Peripheral device)
+{
+	TraceLog(LOG_INFO, "BLE: Disconnecting from device: %s, %s", device.identifier().c_str(), device.address().c_str());
+	try {
+		device.disconnect();
+		TraceLog(LOG_INFO, "BLE: Sucessfully disconnected from device: %s, %s", device.identifier().c_str(), device.address().c_str());
+		
+
+		// Search for then remove the connected device from connected list.
+		for (int i = 0; i < connectedDevices.size(); i++) {
+			if (connectedDevices.at(i).address() == device.address()) {
+				// remove device
+				connectedDevices.erase(std::next(connectedDevices.begin(), i));
+				break;
+			}
+		}
+	}
+	catch (...) {
+		TraceLog(LOG_INFO, "BLE: Failed to disconnect from device: %s, %s", device.identifier().c_str(), device.address().c_str());
+	}
 }
