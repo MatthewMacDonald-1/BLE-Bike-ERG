@@ -22,5 +22,7 @@ private:
 	Vector2 panelScroll = { 0 };
 	bool showContentArea = true;
 
+	int DrawBluetoothDeviceListHeading(std::string heading, Vector2 position, int width);
+
 	int DrawDiscoveredBluetoothDevice(SimpleBLE::Peripheral device, Vector2 position, int width);
 };

@@ -52,10 +52,21 @@ int MainMenuScene::DrawCall()
 	BeginScissorMode(panelView.x, panelView.y, panelView.width, panelView.height);
 	int panelInnerHeight = 0;
 
+	// Draw discovered devices
 	std::vector<SimpleBLE::Peripheral> discoveredDevices = BluetoothController::GetDiscoveredDevices();
-	int actualIndex = 0;
+	bool hasdrawnHeading = false;
+
 	for (int i = 0; i < discoveredDevices.size(); i++) {
 		if (discoveredDevices.at(i).identifier().length() != 0) {
+			if (!hasdrawnHeading) {
+				panelInnerHeight += DrawBluetoothDeviceListHeading(
+					"Discovered Devices", 
+					raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight),
+					panelRec.width
+				);
+
+				hasdrawnHeading = true;
+			}
 
 			int height = DrawDiscoveredBluetoothDevice(
 				discoveredDevices.at(i),
@@ -64,7 +75,6 @@ int MainMenuScene::DrawCall()
 			);
 
 			panelInnerHeight += height;
-			actualIndex++;
 		}
 	}
 	panelContentRec.height = panelInnerHeight != panelContentRec.height ? panelInnerHeight : panelContentRec.height;
@@ -97,6 +107,39 @@ int MainMenuScene::DrawCall()
 
 
 	return EXIT_SUCCESS;
+}
+
+int MainMenuScene::DrawBluetoothDeviceListHeading(std::string heading, Vector2 position, int width)
+{
+	Font fontType = FontSettings::GetMainFont();
+
+	RelativeDrawing::DrawRectangle(
+		position,
+		raylib::ConstructVector2(width, 44),
+		RelativeDrawing::TopLeft,
+		RelativeDrawing::TopLeft,
+		raylib::ConstructColor(255, 255, 255)
+	);
+	RelativeDrawing::DrawRectangle(
+		raylib::ConstructVector2(position.x, position.y + 44),
+		raylib::ConstructVector2(width, 2),
+		RelativeDrawing::TopLeft,
+		RelativeDrawing::TopLeft,
+		raylib::ConstructColor(206, 206, 206)
+	);
+
+	RelativeDrawing::DrawTextRelEx(
+		fontType,
+		heading.c_str(),
+		raylib::ConstructVector2(position.x + 10, position.y + 10),
+		RelativeDrawing::TopLeft,
+		RelativeDrawing::TopLeft,
+		24,
+		1.5,
+		BLACK
+	);
+
+	return 46;
 }
 
 int MainMenuScene::DrawDiscoveredBluetoothDevice(SimpleBLE::Peripheral device, Vector2 position, int width)
