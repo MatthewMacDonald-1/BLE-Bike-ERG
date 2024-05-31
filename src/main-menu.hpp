@@ -3,6 +3,7 @@
 #include "scene.hpp"
 
 #include "raylib.h"
+#include <simpleble/SimpleBLE.h>
 
 class MainMenuScene : public Scene {
 public:
@@ -20,4 +21,6 @@ private:
 	Rectangle panelView = { 0 };
 	Vector2 panelScroll = { 0 };
 	bool showContentArea = true;
+
+	int DrawDiscoveredBluetoothDevice(SimpleBLE::Peripheral device, Vector2 position, int width);
 };
