@@ -22,11 +22,16 @@ public:
 	/// </summary>
 	static std::vector<SimpleBLE::Peripheral> GetDiscoveredDevices();
 
+	static std::vector<SimpleBLE::Peripheral> GetConnectedDevices();
+
+	static void ConnectToDevice(SimpleBLE::Peripheral device);
+
 private:
 	static bool initialized;
 	static SimpleBLE::Adapter activeAdapter;
 
 	/// Devices found in scan.
 	static std::vector<SimpleBLE::Peripheral> foundDevices;
+	static std::vector<SimpleBLE::Peripheral> connectedDevices;
 
 };

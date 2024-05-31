@@ -10,6 +10,9 @@ SimpleBLE::Adapter BluetoothController::activeAdapter;
 /// Devices found in scan.
 std::vector<SimpleBLE::Peripheral> BluetoothController::foundDevices;
 
+std::vector<SimpleBLE::Peripheral> BluetoothController::connectedDevices;
+
+
 bool BluetoothController::BluetoothSupported()
 {
 	return SimpleBLE::Adapter::bluetooth_enabled();
@@ -51,7 +54,7 @@ int BluetoothController::InitializeBluetooth()
 	// Set the callback to be called when a peripheral property has changed
 	activeAdapter.set_callback_on_scan_updated([](SimpleBLE::Peripheral peripheral) {
 		if (peripheral.identifier().length() != 0) { // Suppress update messages for unnamed devices
-			TraceLog(LOG_INFO, "BLE: Peripheral updated: %s, %s", peripheral.identifier().c_str(), peripheral.address().c_str());
+			//TraceLog(LOG_INFO, "BLE: Peripheral updated: %s, %s", peripheral.identifier().c_str(), peripheral.address().c_str());
 		}
 	});
 
@@ -77,4 +80,23 @@ void BluetoothController::StopScan()
 std::vector<SimpleBLE::Peripheral> BluetoothController::GetDiscoveredDevices()
 {
 	return foundDevices;
+}
+
+std::vector<SimpleBLE::Peripheral> BluetoothController::GetConnectedDevices()
+{
+	return connectedDevices;
+}
+
+void BluetoothController::ConnectToDevice(SimpleBLE::Peripheral device)
+{
+	TraceLog(LOG_INFO, "BLE: Connecting to device: %s, %s", device.identifier().c_str(), device.address().c_str());
+	try {
+		device.connect();
+		TraceLog(LOG_INFO, "BLE: Sucessfully connected to device: %s, %s", device.identifier().c_str(), device.address().c_str());
+		connectedDevices.push_back(device);
+	}
+	catch (...) {
+		TraceLog(LOG_INFO, "BLE: Failed to connected to device: %s, %s", device.identifier().c_str(), device.address().c_str());
+	}
+	
 }

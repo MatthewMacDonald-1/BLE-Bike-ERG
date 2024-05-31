@@ -6,6 +6,7 @@
 #include "raymath.h"
 #include <string>
 #include <sstream>
+#include <thread>
 
 #include "bluetooth-controller.hpp"
 #include "bluetooth-utils.hpp"
@@ -52,6 +53,26 @@ int MainMenuScene::DrawCall()
 	BeginScissorMode(panelView.x, panelView.y, panelView.width, panelView.height);
 	int panelInnerHeight = 0;
 
+	std::vector<SimpleBLE::Peripheral> pairedDevices = BluetoothController::GetConnectedDevices();
+	if (pairedDevices.size() > 0) {
+		panelInnerHeight += DrawBluetoothDeviceListHeading(
+			"Connected Devices",
+			raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight),
+			panelRec.width
+		);
+	}
+	for (int i = 0; i < pairedDevices.size(); i++) {
+		if (pairedDevices.at(i).identifier().length() != 0) {
+
+			panelInnerHeight += DrawPairedBluetoothDevice(
+				pairedDevices.at(i),
+				raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight),
+				panelContentRec.width
+			);
+		}
+	}
+
+
 	// Draw discovered devices
 	std::vector<SimpleBLE::Peripheral> discoveredDevices = BluetoothController::GetDiscoveredDevices();
 	bool hasdrawnHeading = false;
@@ -68,13 +89,11 @@ int MainMenuScene::DrawCall()
 				hasdrawnHeading = true;
 			}
 
-			int height = DrawDiscoveredBluetoothDevice(
+			panelInnerHeight += DrawDiscoveredBluetoothDevice(
 				discoveredDevices.at(i),
 				raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight),
 				panelContentRec.width
 			);
-
-			panelInnerHeight += height;
 		}
 	}
 	panelContentRec.height = panelInnerHeight != panelContentRec.height ? panelInnerHeight : panelContentRec.height;
@@ -142,6 +161,78 @@ int MainMenuScene::DrawBluetoothDeviceListHeading(std::string heading, Vector2 p
 	return 46;
 }
 
+int MainMenuScene::DrawPairedBluetoothDevice(SimpleBLE::Peripheral device, Vector2 position, int width)
+{
+	Font fontType = FontSettings::GetMainFont();
+
+	RelativeDrawing::DrawRectangle(
+		position,
+		raylib::ConstructVector2(width, 64),
+		RelativeDrawing::TopLeft,
+		RelativeDrawing::TopLeft,
+		raylib::ConstructColor(255, 255, 255)
+	);
+	RelativeDrawing::DrawRectangle(
+		raylib::ConstructVector2(position.x, position.y + 64),
+		raylib::ConstructVector2(width, 2),
+		RelativeDrawing::TopLeft,
+		RelativeDrawing::TopLeft,
+		raylib::ConstructColor(206, 206, 206)
+	);
+
+	std::vector<SimpleBLE::Service> deviceServices = device.services();
+	std::stringstream ss;
+	bool containsUnknwon = false || deviceServices.size() == 0;
+	for (int i = 0; i < deviceServices.size(); i++) {
+		BleUtils::ServiceType type = BleUtils::GetServiceType(deviceServices.at(i).uuid());
+		if (type == BleUtils::UNKNOWN) {
+			containsUnknwon = true;
+		}
+
+		ss << BleUtils::ToString(type);
+		if (i + 1 < deviceServices.size()) {
+			ss << ", ";
+		}
+	}
+
+	RelativeDrawing::DrawTextRelEx(
+		fontType,
+		TextFormat("%s - %s", device.identifier().c_str(), ss.str().c_str()),
+		raylib::ConstructVector2(position.x + 10, position.y + 10),
+		RelativeDrawing::TopLeft,
+		RelativeDrawing::TopLeft,
+		24,
+		1.5,
+		BLACK
+	);
+
+	int clicked = RelativeDrawing::GuiButtonRelative(
+		"Disconnect",
+		raylib::ConstructVector2(position.x + width - 10 - 128, position.y + 16),
+		raylib::ConstructVector2(128, 32),
+		RelativeDrawing::TopLeft,
+		RelativeDrawing::TopLeft,
+		24
+	);
+
+	if (clicked) {
+		TraceLog(LOG_INFO, "Menu Button Clicked");
+	}
+
+	RelativeDrawing::DrawTextRelEx(
+		fontType,
+		TextFormat("%s", device.address().c_str()),
+		raylib::ConstructVector2(position.x + 10, position.y + 10 + 24),
+		RelativeDrawing::TopLeft,
+		RelativeDrawing::TopLeft,
+		16,
+		1.5,
+		BLACK
+	);
+
+	return 66;
+}
+
 int MainMenuScene::DrawDiscoveredBluetoothDevice(SimpleBLE::Peripheral device, Vector2 position, int width)
 {
 	Font fontType = FontSettings::GetMainFont();
@@ -199,6 +290,7 @@ int MainMenuScene::DrawDiscoveredBluetoothDevice(SimpleBLE::Peripheral device, V
 
 		if (clicked) {
 			TraceLog(LOG_INFO, "Menu Button Clicked");
+			BluetoothController::ConnectToDevice(device);
 		}
 	}
 	
