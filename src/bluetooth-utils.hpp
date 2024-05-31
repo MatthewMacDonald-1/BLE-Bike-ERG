@@ -11,7 +11,8 @@ namespace BleUtils {
 		UNKNOWN,
 		HEART_RATE,
 		CYCLING_POWER,
-		Cycling_Speed_Cadence
+		Cycling_Speed_Cadence,
+		Fitness_Machine
 	};
 
 	ServiceType GetServiceType(SimpleBLE::BluetoothUUID uuid);
