@@ -42,7 +42,9 @@ int BluetoothController::InitializeBluetooth()
 
 	// Set the callback to be called when a peripheral property has changed
 	activeAdapter.set_callback_on_scan_updated([](SimpleBLE::Peripheral peripheral) {
-		TraceLog(LOG_INFO, "BLE: Peripheral updated: %s, %s", peripheral.identifier().c_str(), peripheral.address().c_str());
+		if (peripheral.identifier().length() != 0) { // Suppress update messages for unnamed devices
+			TraceLog(LOG_INFO, "BLE: Peripheral updated: %s, %s", peripheral.identifier().c_str(), peripheral.address().c_str());
+		}
 	});
 
 
