@@ -52,7 +52,16 @@ int MainMenuScene::DrawCall()
 	int actualIndex = 0;
 	for (int i = 0; i < discoveredDevices.size(); i++) {
 		if (discoveredDevices.at(i).identifier().length() != 0) {
-			RelativeDrawing::DrawTextRelEx(fontType, TextFormat("Device: %s, %s", discoveredDevices.at(i).identifier().c_str(), discoveredDevices.at(i).address().c_str()), raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + 32 * actualIndex), RelativeDrawing::TopLeft, RelativeDrawing::TopLeft, 24, 1.5, BLACK);
+			RelativeDrawing::DrawTextRelEx(
+				fontType, 
+				TextFormat("Device: %s, %s", discoveredDevices.at(i).identifier().c_str(), discoveredDevices.at(i).address().c_str()), 
+				raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + 32 * actualIndex), 
+				RelativeDrawing::TopLeft, 
+				RelativeDrawing::TopLeft, 
+				24, 
+				1.5, 
+				BLACK
+			);
 			actualIndex++;
 		}
 	}
