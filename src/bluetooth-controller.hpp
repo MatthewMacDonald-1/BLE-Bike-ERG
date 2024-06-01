@@ -7,6 +7,8 @@ public:
 
 	static int InitializeBluetooth();
 
+	static void DeinitializeBluetooth();
+
 	/// <summary>
 	/// Scan for bluetooth devices
 	/// </summary>

@@ -95,6 +95,7 @@ int main(void) {
 
     // UnloadFonts
     FontSettings::DeinitializeFontSettings();
+    BluetoothController::DeinitializeBluetooth();
 
     CloseWindow();
 

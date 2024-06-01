@@ -63,6 +63,15 @@ int BluetoothController::InitializeBluetooth()
 	return EXIT_SUCCESS;
 }
 
+void BluetoothController::DeinitializeBluetooth()
+{
+	BluetoothController::StopScan();
+
+	// Any other future actions at program close
+
+	return;
+}
+
 void BluetoothController::StartScan()
 {
 	if (!activeAdapter.scan_is_active()) {
