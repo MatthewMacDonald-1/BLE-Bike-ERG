@@ -28,6 +28,8 @@ set(MAIN_SRC
     src/scene.hpp
     src/main-menu.cpp
     src/main-menu.hpp
+    src/settings-menu.cpp
+    src/settings-menu.hpp
 
     src/MattsUtils/relative-drawing.cpp
     src/MattsUtils/relative-drawing.hpp

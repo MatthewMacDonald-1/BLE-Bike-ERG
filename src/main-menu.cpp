@@ -13,6 +13,7 @@
 #include "font-settings.hpp"
 #include "MattsUtils/relative-drawing.hpp"
 #include "MattsUtils/raylib-structs.hpp"
+#include "settings-menu.hpp"
 
 using namespace MattsUtils;
 
@@ -36,7 +37,26 @@ int MainMenuScene::DrawCall()
 {
 	Font fontType = FontSettings::GetMainFont();
 
+	Vector2 buttonSize = raylib::ConstructVector2(128, 32);
+	Vector2 offsetDstBL = raylib::ConstructVector2(24, -24);
+	Vector2 offsetDstBC = raylib::ConstructVector2(0, -24);
+	Vector2 offsetDstBR = raylib::ConstructVector2(-24, -24);
+
 	DrawTextureEx(menuBackground, raylib::ConstructVector2(0, 0), 0, (float)GetScreenWidth() / (float)menuBackground.width, WHITE);
+
+	if (menuOpen) {
+		//DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), raylib::ConstructColor(0, 0, 0, 100));
+		int res = SettingsMenu::DrawSettingsMenu();
+		if (res == SIGNAL_SETTINGS_MENU_CLOSE) {
+			menuOpen = false;
+			return EXIT_SUCCESS;
+		}
+		else {
+			return res;
+		}
+	}
+
+	
 
 	RelativeDrawing::DrawTextRelEx(fontType, "Bike ERG", raylib::ConstructVector2(0, 0), RelativeDrawing::TopCenter, RelativeDrawing::TopCenter, 128, 1.5, BLACK);
 
@@ -118,21 +138,12 @@ int MainMenuScene::DrawCall()
 	// Buttons Start ------------------------------------------------------------------------------
 	GuiSetFont(fontType);
 
-	Vector2 buttonSize = raylib::ConstructVector2(128, 32);
-	Vector2 offsetDstBL = raylib::ConstructVector2(24, -24);
-	Vector2 offsetDstBC = raylib::ConstructVector2(0, -24);
-	Vector2 offsetDstBR = raylib::ConstructVector2(-24, -24);
-
-	bool skipRes = RelativeDrawing::GuiButtonRelative("Next", offsetDstBR, buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
-
-	bool quitRes = RelativeDrawing::GuiButtonRelative("Quit", offsetDstBC, buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
-	if (quitRes) {
-		BluetoothController::StopScan();
-		return SIGNAL_WINDOW_CLOSE;
-	}
+	bool nextSceneRes = RelativeDrawing::GuiButtonRelative("Next", offsetDstBR, buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
 
 	bool settingRes = RelativeDrawing::GuiButtonRelative("Settings", offsetDstBL, buttonSize, RelativeDrawing::BottomLeft, RelativeDrawing::BottomLeft, 24);
-
+	if (settingRes) {
+		menuOpen = true;
+	}
 	// Buttons End --------------------------------------------------------------------------------
 
 

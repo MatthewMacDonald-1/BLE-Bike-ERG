@@ -11,6 +11,7 @@
 #include "bluetooth-controller.hpp"
 #include "scene.hpp"
 #include "main-menu.hpp"
+#include "settings-menu.hpp"
 
 #include "MattsUtils/relative-drawing.hpp"
 #include "MattsUtils/raylib-structs.hpp"
@@ -59,6 +60,8 @@ int main(void) {
         bleSupported = true;
     }
 
+    SettingsMenu::InitializeSettingsMenu();
+
     /// Window Start time in ms.
     long long windowStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     long frameNum = 0;
@@ -94,6 +97,7 @@ int main(void) {
     }
 
     // UnloadFonts
+    SettingsMenu::DeinitializeSettingsMenu();
     FontSettings::DeinitializeFontSettings();
     BluetoothController::DeinitializeBluetooth();
 
