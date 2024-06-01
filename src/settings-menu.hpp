@@ -14,5 +14,8 @@ public:
 private:
 	static bool initialized;
 	static Texture settingsBackground;
+
+	static int activeFPS;
+	static bool editingActiveFPS;
 };
 

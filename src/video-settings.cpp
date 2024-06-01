@@ -49,9 +49,14 @@ int VideoSettings::ReadVideoSettingsConfigFile()
 				LoadDefaultVideoSettings();
 				return EXIT_FAILURE;
 			}
-
-
-
+			else {
+				if (key == "FPS_Limit") {
+					currentFPSLimit = (FPS_Limit)MattsUtils::Number::parseInt(value);
+				} else if (key == "FPS_Limit") {
+					currentMSAALevel = (MSAA_Level)MattsUtils::Number::parseInt(value);
+					actualMSAALevel = (MSAA_Level)MattsUtils::Number::parseInt(value);
+				}
+			}
 
 		}
 
@@ -123,6 +128,11 @@ void VideoSettings::UpdateFPSLimit(FPS_Limit newLimit)
 VideoSettings::FPS_Limit VideoSettings::GetCurrentFPSLimit()
 {
 	return currentFPSLimit;
+}
+
+std::string VideoSettings::GetFPSDropdownText()
+{
+	return "None;VSYNC;30;60;90;120;144;240;360;480";
 }
 
 void VideoSettings::ChangeFPSLimit()

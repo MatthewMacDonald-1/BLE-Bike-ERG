@@ -1,6 +1,7 @@
 #pragma once
 
 #include "raylib.h"
+#include <string>
 
 class VideoSettings {
 public:
@@ -42,6 +43,7 @@ public:
 
 	static void UpdateFPSLimit(FPS_Limit newLimit);
 	static FPS_Limit GetCurrentFPSLimit();
+	static std::string GetFPSDropdownText();
 
 private:
 	static MSAA_Level currentMSAALevel;

@@ -4,10 +4,14 @@
 #include "MattsUtils/raylib-structs.hpp"
 #include "raygui.h"
 #include "font-settings.hpp"
+#include "video-settings.hpp"
 #include "config.hpp"
 
 bool SettingsMenu::initialized = false;
 Texture SettingsMenu::settingsBackground;
+
+int SettingsMenu::activeFPS = 0;
+bool SettingsMenu::editingActiveFPS = false;
 
 int SettingsMenu::InitializeSettingsMenu()
 {
@@ -40,20 +44,51 @@ int SettingsMenu::DrawSettingsMenu()
 	GuiSetFont(fontType);
 
 	Vector2 buttonSize = raylib::ConstructVector2(128, 32);
+	Vector2 dropdownSize = raylib::ConstructVector2(256, 32);
 	Vector2 offsetDstBL = raylib::ConstructVector2(24, -24);
 	Vector2 offsetDstBC = raylib::ConstructVector2(0, -24);
 	Vector2 offsetDstBR = raylib::ConstructVector2(-24, -24);
+
+	int offsetIndex = 0;
+	int offsetAmount = 32;
+	int menuItemsStart = 128;
 
 	DrawTextureEx(settingsBackground, raylib::ConstructVector2(0, 0), 0, (float)GetScreenWidth() / (float)settingsBackground.width, WHITE);
 
 	RelativeDrawing::DrawTextRelEx(fontType, "Settings", raylib::ConstructVector2(0, 16), RelativeDrawing::TopCenter, RelativeDrawing::TopCenter, 64, 1.5, BLACK);
 
+	// Exit buttons
+
 	bool quitRes = RelativeDrawing::GuiButtonRelative("Quit", offsetDstBC, buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
+
+	bool settingCloseRes = RelativeDrawing::GuiButtonRelative("Back", offsetDstBL, buttonSize, RelativeDrawing::BottomLeft, RelativeDrawing::BottomLeft, 24);
+
+	// Settings items
+	GuiUnlock();
+	RelativeDrawing::DrawTextRelEx(fontType, "FPS Limit", raylib::ConstructVector2(0, menuItemsStart + offsetAmount * offsetIndex), RelativeDrawing::TopCenter, RelativeDrawing::TopCenter, 24, 1.5, BLACK); offsetIndex++;
+
+	activeFPS = (int)VideoSettings::GetCurrentFPSLimit();
+	bool res = RelativeDrawing::GuiDropdownBoxRelative((char*)VideoSettings::GetFPSDropdownText().c_str(), &activeFPS, editingActiveFPS, raylib::ConstructVector2(0, menuItemsStart + offsetAmount * offsetIndex), dropdownSize, RelativeDrawing::TopCenter, RelativeDrawing::TopCenter, 24); offsetIndex++;
+	if (res != 0) {
+		if (editingActiveFPS) {
+			// Change the fps state
+
+			VideoSettings::FPS_Limit newLimit = (VideoSettings::FPS_Limit)activeFPS;
+			VideoSettings::UpdateFPSLimit(newLimit);
+
+			VideoSettings::WriteVideoSettingsConfigFile();
+		}
+		editingActiveFPS = !editingActiveFPS;
+	}
+	
+
+	if (editingActiveFPS) GuiLock();
+	
+	// Exit buttons responses
 	if (quitRes) {
 		return SIGNAL_WINDOW_CLOSE;
 	}
 
-	bool settingCloseRes = RelativeDrawing::GuiButtonRelative("Back", offsetDstBL, buttonSize, RelativeDrawing::BottomLeft, RelativeDrawing::BottomLeft, 24);
 	if (settingCloseRes) {
 		return SIGNAL_SETTINGS_MENU_CLOSE;
 	}
