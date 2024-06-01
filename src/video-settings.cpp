@@ -52,7 +52,7 @@ int VideoSettings::ReadVideoSettingsConfigFile()
 			else {
 				if (key == "FPS_Limit") {
 					currentFPSLimit = (FPS_Limit)MattsUtils::Number::parseInt(value);
-				} else if (key == "FPS_Limit") {
+				} else if (key == "MSAA_Level") {
 					currentMSAALevel = (MSAA_Level)MattsUtils::Number::parseInt(value);
 					actualMSAALevel = (MSAA_Level)MattsUtils::Number::parseInt(value);
 				}
@@ -107,6 +107,7 @@ void VideoSettings::PostWindowCreatedFlags()
 
 void VideoSettings::UpdateMSAALevel(MSAA_Level newMSAALevel)
 {
+	currentMSAALevel = newMSAALevel;
 }
 
 VideoSettings::MSAA_Level VideoSettings::GetCurrentMSAALevel()
@@ -117,6 +118,11 @@ VideoSettings::MSAA_Level VideoSettings::GetCurrentMSAALevel()
 VideoSettings::MSAA_Level VideoSettings::GetActualMSAALevel()
 {
 	return actualMSAALevel;
+}
+
+std::string VideoSettings::GetMSAALevelDropdownText()
+{
+	return "x1;x4";
 }
 
 void VideoSettings::UpdateFPSLimit(FPS_Limit newLimit)

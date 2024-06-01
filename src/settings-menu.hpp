@@ -17,5 +17,8 @@ private:
 
 	static int activeFPS;
 	static bool editingActiveFPS;
+
+	static int activeMSAALevel;
+	static bool editingActiveMSAALevel;
 };
 

@@ -40,6 +40,7 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	static MSAA_Level GetActualMSAALevel();
+	static std::string GetMSAALevelDropdownText();
 
 	static void UpdateFPSLimit(FPS_Limit newLimit);
 	static FPS_Limit GetCurrentFPSLimit();

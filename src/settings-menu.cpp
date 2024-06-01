@@ -13,6 +13,9 @@ Texture SettingsMenu::settingsBackground;
 int SettingsMenu::activeFPS = 0;
 bool SettingsMenu::editingActiveFPS = false;
 
+int SettingsMenu::activeMSAALevel = 0;
+bool SettingsMenu::editingActiveMSAALevel = false;
+
 int SettingsMenu::InitializeSettingsMenu()
 {
 	if (initialized) {
@@ -64,7 +67,7 @@ int SettingsMenu::DrawSettingsMenu()
 	bool settingCloseRes = RelativeDrawing::GuiButtonRelative("Back", offsetDstBL, buttonSize, RelativeDrawing::BottomLeft, RelativeDrawing::BottomLeft, 24);
 
 	// Settings items
-	GuiUnlock();
+	if (editingActiveFPS) GuiUnlock();
 	RelativeDrawing::DrawTextRelEx(fontType, "FPS Limit", raylib::ConstructVector2(0, menuItemsStart + offsetAmount * offsetIndex), RelativeDrawing::TopCenter, RelativeDrawing::TopCenter, 24, 1.5, BLACK); offsetIndex++;
 
 	activeFPS = (int)VideoSettings::GetCurrentFPSLimit();
@@ -80,9 +83,29 @@ int SettingsMenu::DrawSettingsMenu()
 		}
 		editingActiveFPS = !editingActiveFPS;
 	}
-	
 
 	if (editingActiveFPS) GuiLock();
+
+	if (editingActiveMSAALevel) GuiUnlock();
+
+	RelativeDrawing::DrawTextRelEx(fontType, "MSAA Level", raylib::ConstructVector2(0, menuItemsStart + offsetAmount * offsetIndex), RelativeDrawing::TopCenter, RelativeDrawing::TopCenter, 24, 1.5, BLACK); offsetIndex++;
+
+	activeMSAALevel = (int)VideoSettings::GetCurrentMSAALevel();
+	bool resMSAALevel = RelativeDrawing::GuiDropdownBoxRelative((char*)VideoSettings::GetMSAALevelDropdownText().c_str(), &activeMSAALevel, editingActiveMSAALevel, raylib::ConstructVector2(0, menuItemsStart + offsetAmount * offsetIndex), dropdownSize, RelativeDrawing::TopCenter, RelativeDrawing::TopCenter, 24); offsetIndex++;
+	if (resMSAALevel != 0) {
+		if (editingActiveMSAALevel) {
+			// Change the fps state
+
+			VideoSettings::MSAA_Level newLevel = (VideoSettings::MSAA_Level)activeMSAALevel;
+			VideoSettings::UpdateMSAALevel(newLevel);
+
+			VideoSettings::WriteVideoSettingsConfigFile();
+		}
+		editingActiveMSAALevel = !editingActiveMSAALevel;
+	}
+	
+
+	if (editingActiveFPS || editingActiveMSAALevel) GuiLock();
 	
 	// Exit buttons responses
 	if (quitRes) {
