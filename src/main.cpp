@@ -10,8 +10,10 @@
 #include "video-settings.hpp"
 #include "bluetooth-controller.hpp"
 #include "scene.hpp"
+#include "scene-manager.hpp"
 #include "main-menu.hpp"
 #include "settings-menu.hpp"
+#include "workout-selection-scene.hpp"
 
 #include "MattsUtils/relative-drawing.hpp"
 #include "MattsUtils/raylib-structs.hpp"
@@ -60,6 +62,15 @@ int main(void) {
         bleSupported = true;
     }
 
+    // Initialize Scene Manager
+    std::vector<std::pair<std::string, Scene*>> sceneList;
+    sceneList.push_back(std::pair(std::string("MainMenu"), new MainMenuScene()));
+    sceneList.push_back(std::pair(std::string("WorkoutSelectionMenu"), new WorkoutSelectionMenuScene()));
+
+    SceneManager::InitializeSceneManager(sceneList);
+    SceneManager::LoadScene("MainMenu");
+
+    // initialize Settings Menu
     SettingsMenu::InitializeSettingsMenu();
 
     /// Window Start time in ms.
@@ -69,6 +80,7 @@ int main(void) {
     Scene* currentScene = new MainMenuScene();
 
     while (!WindowShouldClose()) { // Render loop
+        currentScene = SceneManager::GetCurrentScene();
 
         // Do logic here
         if (IsKeyPressed(KEY_F3)) {

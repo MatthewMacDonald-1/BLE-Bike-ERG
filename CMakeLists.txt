@@ -26,10 +26,14 @@ set(MAIN_SRC
     src/bluetooth-utils.hpp
     src/scene.cpp
     src/scene.hpp
+    src/scene-manager.cpp
+    src/scene-manager.hpp
     src/main-menu.cpp
     src/main-menu.hpp
     src/settings-menu.cpp
     src/settings-menu.hpp
+    src/workout-selection-scene.cpp
+    src/workout-selection-scene.hpp
 
     src/MattsUtils/relative-drawing.cpp
     src/MattsUtils/relative-drawing.hpp
