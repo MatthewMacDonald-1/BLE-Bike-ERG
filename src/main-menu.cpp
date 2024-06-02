@@ -14,6 +14,7 @@
 #include "MattsUtils/relative-drawing.hpp"
 #include "MattsUtils/raylib-structs.hpp"
 #include "settings-menu.hpp"
+#include "scene-manager.hpp"
 
 using namespace MattsUtils;
 
@@ -45,7 +46,6 @@ int MainMenuScene::DrawCall()
 	DrawTextureEx(menuBackground, raylib::ConstructVector2(0, 0), 0, (float)GetScreenWidth() / (float)menuBackground.width, WHITE);
 
 	if (menuOpen) {
-		//DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), raylib::ConstructColor(0, 0, 0, 100));
 		int res = SettingsMenu::DrawSettingsMenu();
 		if (res == SIGNAL_SETTINGS_MENU_CLOSE) {
 			menuOpen = false;
@@ -56,9 +56,7 @@ int MainMenuScene::DrawCall()
 		}
 	}
 
-	
-
-	RelativeDrawing::DrawTextRelEx(fontType, "Bike ERG", raylib::ConstructVector2(0, 0), RelativeDrawing::TopCenter, RelativeDrawing::TopCenter, 128, 1.5, BLACK);
+	RelativeDrawing::DrawTextRelEx(fontType, "Bike ERG", raylib::ConstructVector2(0, 16), RelativeDrawing::TopCenter, RelativeDrawing::TopCenter, 64, 1.5, BLACK);
 
 	// Scroll Area Start --------------------------------------------------------------------------
 
@@ -139,6 +137,10 @@ int MainMenuScene::DrawCall()
 	GuiSetFont(fontType);
 
 	bool nextSceneRes = RelativeDrawing::GuiButtonRelative("Next", offsetDstBR, buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
+	if (nextSceneRes) {
+		SceneManager::LoadScene("WorkoutSelectionMenu");
+	}
+
 
 	bool settingRes = RelativeDrawing::GuiButtonRelative("Settings", offsetDstBL, buttonSize, RelativeDrawing::BottomLeft, RelativeDrawing::BottomLeft, 24);
 	if (settingRes) {

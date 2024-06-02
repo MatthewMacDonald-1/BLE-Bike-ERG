@@ -15,4 +15,5 @@ public:
 
 private:
 	Texture menuBackground;
+	bool menuOpen = false;
 };
