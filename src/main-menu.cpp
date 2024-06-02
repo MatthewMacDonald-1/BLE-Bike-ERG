@@ -188,6 +188,7 @@ int MainMenuScene::DrawBluetoothDeviceListHeading(std::string heading, Vector2 p
 int MainMenuScene::DrawPairedBluetoothDevice(SimpleBLE::Peripheral device, Vector2 position, int width)
 {
 	Font fontType = FontSettings::GetMainFont();
+	int returnSize = 66;
 
 	RelativeDrawing::DrawRectangle(
 		position,
@@ -205,30 +206,63 @@ int MainMenuScene::DrawPairedBluetoothDevice(SimpleBLE::Peripheral device, Vecto
 	);
 
 	std::vector<SimpleBLE::Service> deviceServices = device.services();
-	std::stringstream ss;
-	bool containsUnknwon = false || deviceServices.size() == 0;
-	for (int i = 0; i < deviceServices.size(); i++) {
-		BleUtils::ServiceType type = BleUtils::GetServiceType(deviceServices.at(i).uuid());
-		if (type == BleUtils::UNKNOWN) {
-			containsUnknwon = true;
+	if (false) {
+		std::stringstream ss;
+		bool containsUnknwon = false || deviceServices.size() == 0;
+		for (int i = 0; i < deviceServices.size(); i++) {
+			BleUtils::ServiceType type = BleUtils::GetServiceType(deviceServices.at(i).uuid());
+			if (type == BleUtils::UNKNOWN) {
+				containsUnknwon = true;
+			}
+
+			ss << BleUtils::ToString(type);
+			if (i + 1 < deviceServices.size()) {
+				ss << ", ";
+			}
 		}
 
-		ss << BleUtils::ToString(type);
-		if (i + 1 < deviceServices.size()) {
-			ss << ", ";
+		RelativeDrawing::DrawTextRelEx(
+			fontType,
+			TextFormat("%s - %s", device.identifier().c_str(), ss.str().c_str()),
+			raylib::ConstructVector2(position.x + 10, position.y + 10),
+			RelativeDrawing::TopLeft,
+			RelativeDrawing::TopLeft,
+			24,
+			1.5,
+			BLACK
+		);
+	}
+	else {
+		RelativeDrawing::DrawTextRelEx(
+			fontType,
+			TextFormat("%s", device.identifier().c_str()),
+			raylib::ConstructVector2(position.x + 10, position.y + 10),
+			RelativeDrawing::TopLeft,
+			RelativeDrawing::TopLeft,
+			24,
+			1.5,
+			BLACK
+		);
+
+		for (int i = 0; i < deviceServices.size(); i++) {
+			BleUtils::ServiceType type = BleUtils::GetServiceType(deviceServices.at(i).uuid());
+
+			RelativeDrawing::DrawTextRelEx(
+				fontType,
+				TextFormat("%s, %s", BleUtils::ToString(type).c_str(), deviceServices.at(i).uuid().c_str()),
+				raylib::ConstructVector2(position.x + 10 + 256, position.y + 10 + 28 * i),
+				RelativeDrawing::TopLeft,
+				RelativeDrawing::TopLeft,
+				24,
+				1.5,
+				BLACK
+			);
+			if (i > 1) {
+				returnSize += 28;
+			}
 		}
 	}
-
-	RelativeDrawing::DrawTextRelEx(
-		fontType,
-		TextFormat("%s - %s", device.identifier().c_str(), ss.str().c_str()),
-		raylib::ConstructVector2(position.x + 10, position.y + 10),
-		RelativeDrawing::TopLeft,
-		RelativeDrawing::TopLeft,
-		24,
-		1.5,
-		BLACK
-	);
+	
 
 	int clicked = RelativeDrawing::GuiButtonRelative(
 		"Disconnect",
@@ -257,7 +291,7 @@ int MainMenuScene::DrawPairedBluetoothDevice(SimpleBLE::Peripheral device, Vecto
 		BLACK
 	);
 
-	return 66;
+	return returnSize;
 }
 
 int MainMenuScene::DrawDiscoveredBluetoothDevice(SimpleBLE::Peripheral device, Vector2 position, int width)
