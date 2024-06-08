@@ -33,6 +33,17 @@ std::string MattsUtils::String::trim(const std::string& str, const std::string& 
     return str.substr(strBegin, strRange);
 }
 
+bool MattsUtils::String::containsChar(const std::string& value, const char ch)
+{
+    for (int i = 0; i < value.size(); i++) {
+        if (value.at(i) == ch) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool MattsUtils::String::in_array(const std::string& value, const std::vector<std::string>& array)
 {
     return std::find(array.begin(), array.end(), value) != array.end();

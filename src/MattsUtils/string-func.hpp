@@ -17,6 +17,8 @@ namespace MattsUtils::String {
 	/// @return 
 	std::string trim(const std::string& str, const std::string& whitespace = " \t");
 
+	bool containsChar(const std::string& value, const char ch);
+
 	/// <summary>
 	/// Returns true if the value is in the array.
 	/// </summary>

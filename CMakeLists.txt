@@ -34,6 +34,8 @@ set(MAIN_SRC
     src/settings-menu.hpp
     src/workout-selection-scene.cpp
     src/workout-selection-scene.hpp
+    src/workout-definition.cpp
+    src/workout-definition.hpp
 
     src/MattsUtils/relative-drawing.cpp
     src/MattsUtils/relative-drawing.hpp
