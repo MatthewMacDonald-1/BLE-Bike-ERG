@@ -12,6 +12,8 @@ public:
 		FTP
 	};
 
+	WorkoutDefinition(std::string fileName);
+
 	WorkoutDefinition(std::vector<std::string> fromFile);
 
 	/// <summary>
@@ -53,4 +55,6 @@ private:
 	TargetType workoutType;
 
 	std::vector<std::pair<int, std::pair<int, int>>> segments; // Time, Start Power, End Power
+
+	void ReadWorkout(std::vector<std::string> fromFile);
 };

@@ -4,8 +4,63 @@
 #include "MattsUtils/number.hpp"
 #include "raylib.h"
 #include <set>
+#include <fstream>
+
+WorkoutDefinition::WorkoutDefinition(std::string fileName)
+{
+	std::vector<std::string> lines;
+
+	std::ifstream file(fileName);
+	std::string temp;
+	while (std::getline(file, temp)) {
+		// Output the text from the file
+		lines.push_back(temp);
+	}
+
+	file.close();
+
+	ReadWorkout(lines);
+
+}
 
 WorkoutDefinition::WorkoutDefinition(std::vector<std::string> fromFile)
+{
+	workoutType = RAW_POWER;
+	ReadWorkout(fromFile);
+}
+
+bool WorkoutDefinition::IsValid()
+{
+	return isValid;
+}
+
+std::string WorkoutDefinition::GetName()
+{
+	return name;
+}
+
+int WorkoutDefinition::GetWorkoutLength()
+{
+	int sum = 0;
+
+	for (int i = 0; i < segments.size(); i++) {
+		sum += segments.at(i).first;
+	}
+
+	return sum;
+}
+
+WorkoutDefinition::TargetType WorkoutDefinition::GetTargetType()
+{
+	return workoutType;
+}
+
+double WorkoutDefinition::EvaluateWorkoutAt(int time)
+{
+	return 0.0;
+}
+
+void WorkoutDefinition::ReadWorkout(std::vector<std::string> fromFile)
 {
 	name = "Default Name";
 	if (fromFile.size() < 3) {
@@ -26,14 +81,15 @@ WorkoutDefinition::WorkoutDefinition(std::vector<std::string> fromFile)
 
 		if (i == 0) {
 			name = temp;
-		} 
+		}
 		else if (i == 1) {
 			workoutType = RAW_POWER;
 			std::vector<std::string> rawHeaders;
-			MattsUtils::String::split(temp, rawHeaders, ' ');
+			MattsUtils::String::split(temp, rawHeaders, ',');
 
 			for (int j = 0; j < rawHeaders.size(); j++) {
 				std::string headerValue = MattsUtils::String::trim(rawHeaders.at(j));
+				std::cout << "Header Value: " << headerValue << std::endl;
 				std::pair<std::set<std::string>::iterator, bool> res = headers.insert(headerValue);
 				if (!res.second) {
 					isValid = false;
@@ -80,7 +136,7 @@ WorkoutDefinition::WorkoutDefinition(std::vector<std::string> fromFile)
 
 			if (columns.size() < columnType.size()) {
 				isValid = false;
-				TraceLog(LOG_ERROR, "Workout Reader: Invalid workout. Line: %d. Less columns then defined in header (Line 2).", (i+1));
+				TraceLog(LOG_ERROR, "Workout Reader: Invalid workout. Line: %d. Less columns then defined in header (Line 2).", (i + 1));
 				return;
 			}
 			else if (columns.size() > columnType.size()) {
@@ -97,7 +153,7 @@ WorkoutDefinition::WorkoutDefinition(std::vector<std::string> fromFile)
 						segment.first = MattsUtils::Number::parseInt(MattsUtils::String::trim(columns.at(j)));
 					}
 					else if (columnType.at(j) == "target_ftp" || columnType.at(j) == "target_power") {
-						
+
 						if (MattsUtils::String::containsChar(columns.at(j), '_')) {
 							std::vector<std::string> rampValues;
 							MattsUtils::String::split(columns.at(j), rampValues, '_');
@@ -129,37 +185,4 @@ WorkoutDefinition::WorkoutDefinition(std::vector<std::string> fromFile)
 
 		}
 	}
-
-
-}
-
-bool WorkoutDefinition::IsValid()
-{
-	return isValid;
-}
-
-std::string WorkoutDefinition::GetName()
-{
-	return name;
-}
-
-int WorkoutDefinition::GetWorkoutLength()
-{
-	int sum = 0;
-
-	for (int i = 0; i < segments.size(); i++) {
-		sum += segments.at(i).first;
-	}
-
-	return sum;
-}
-
-WorkoutDefinition::TargetType WorkoutDefinition::GetTargetType()
-{
-	return workoutType;
-}
-
-double WorkoutDefinition::EvaluateWorkoutAt(int time)
-{
-	return 0.0;
 }

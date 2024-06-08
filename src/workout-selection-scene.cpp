@@ -17,6 +17,8 @@ using namespace MattsUtils;
 WorkoutSelectionMenuScene::WorkoutSelectionMenuScene()
 {
 	menuBackground = LoadTexture("./resources/images/test-background.png");
+
+	workouts.push_back(new WorkoutDefinition("./resources/workouts/test.workout"));
 }
 
 WorkoutSelectionMenuScene::~WorkoutSelectionMenuScene()
@@ -52,6 +54,10 @@ int WorkoutSelectionMenuScene::DrawCall()
 	}
 
 	RelativeDrawing::DrawTextRelEx(fontType, "Workout Selection", raylib::ConstructVector2(0, 16), RelativeDrawing::TopCenter, RelativeDrawing::TopCenter, 64, 1.5, BLACK);
+
+
+	std::string workoutName = workouts.at(0)->GetName();
+	RelativeDrawing::DrawTextRelEx(fontType, TextFormat("%s - Length: %d sec", workoutName.c_str(), workouts.at(0)->GetWorkoutLength()), raylib::ConstructVector2(0, 256), RelativeDrawing::TopCenter, RelativeDrawing::TopCenter, 32, 1.5, BLACK);
 
 	// Buttons Start ------------------------------------------------------------------------------
 	GuiSetFont(fontType);
