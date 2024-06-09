@@ -42,6 +42,8 @@ public:
 	/// <returns></returns>
 	int GetWorkoutLength();
 
+	std::string GetWorkoutLegthStr();
+
 	/// <summary>
 	/// The target type of the workout. Used to interprete the evaluate workout function.
 	/// </summary>

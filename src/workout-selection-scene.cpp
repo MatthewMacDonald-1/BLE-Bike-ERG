@@ -178,7 +178,7 @@ int WorkoutSelectionMenuScene::DrawWorkoutButton(WorkoutDefinition* workout, Vec
 
 	RelativeDrawing::DrawTextRelEx(
 		fontType,
-		TextFormat("%s - %s", workout->GetName().c_str(), duration.str().c_str()),
+		TextFormat("%s - %s", workout->GetName().c_str(), workout->GetWorkoutLegthStr().c_str()),
 		raylib::ConstructVector2(position.x + 10, position.y + 10),
 		RelativeDrawing::TopLeft,
 		RelativeDrawing::TopLeft,
