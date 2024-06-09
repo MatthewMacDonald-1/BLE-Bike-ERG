@@ -18,7 +18,8 @@ WorkoutSelectionMenuScene::WorkoutSelectionMenuScene()
 {
 	menuBackground = LoadTexture("./resources/images/test-background.png");
 
-	workouts.push_back(new WorkoutDefinition("./resources/workouts/test.workout"));
+	//workouts.push_back(new WorkoutDefinition("./resources/workouts/test.workout"));
+	workouts = WorkoutDefinition::LoadFromDirectory("./resources/workouts/");
 }
 
 WorkoutSelectionMenuScene::~WorkoutSelectionMenuScene()

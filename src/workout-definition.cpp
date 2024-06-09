@@ -2,7 +2,7 @@
 
 #include "MattsUtils/string-func.hpp"
 #include "MattsUtils/number.hpp"
-#include "raylib.h"
+#include "MattsUtils/relative-drawing.hpp"
 #include <set>
 #include <fstream>
 
@@ -27,6 +27,32 @@ WorkoutDefinition::WorkoutDefinition(std::vector<std::string> fromFile)
 {
 	workoutType = RAW_POWER;
 	ReadWorkout(fromFile);
+}
+
+std::vector<WorkoutDefinition*> WorkoutDefinition::LoadFromDirectory(std::string dir)
+{
+	std::vector<WorkoutDefinition*> workoutDefinitions;
+	std::vector<std::string> workoutSources;
+
+	std::ifstream manifest(dir + "Manifest.txt");
+	std::string temp;
+	while (std::getline(manifest, temp)) {
+		// Output the text from the file
+		temp = MattsUtils::String::trim(temp);
+		if (temp.length() > 0) {
+			workoutSources.push_back(temp);
+		}
+	}
+
+	manifest.close();
+
+	for (int i = 0; i < workoutSources.size(); i++) {
+		std::string src = "";
+
+		workoutDefinitions.push_back(new WorkoutDefinition(dir + workoutSources.at(i)));
+	}
+
+	return workoutDefinitions;
 }
 
 bool WorkoutDefinition::IsValid()
@@ -58,6 +84,10 @@ WorkoutDefinition::TargetType WorkoutDefinition::GetTargetType()
 double WorkoutDefinition::EvaluateWorkoutAt(int time)
 {
 	return 0.0;
+}
+
+void WorkoutDefinition::DrawWorkout(Vector2 position, int width, int height, int ftp)
+{
 }
 
 void WorkoutDefinition::ReadWorkout(std::vector<std::string> fromFile)
