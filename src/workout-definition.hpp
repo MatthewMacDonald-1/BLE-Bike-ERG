@@ -48,6 +48,8 @@ public:
 	/// <returns></returns>
 	TargetType GetTargetType();
 
+	std::string GetTargetTypeStr();
+
 	/// <summary>
 	/// The target power at specified time.
 	/// </summary>

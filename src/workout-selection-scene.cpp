@@ -5,6 +5,7 @@
 #include "raymath.h"
 #include <string>
 #include <iostream>
+#include <sstream>
 
 #include "font-settings.hpp"
 #include "MattsUtils/relative-drawing.hpp"
@@ -60,6 +61,43 @@ int WorkoutSelectionMenuScene::DrawCall()
 	std::string workoutName = workouts.at(0)->GetName();
 	RelativeDrawing::DrawTextRelEx(fontType, TextFormat("%s - Length: %d sec", workoutName.c_str(), workouts.at(0)->GetWorkoutLength()), raylib::ConstructVector2(0, 256), RelativeDrawing::TopCenter, RelativeDrawing::TopCenter, 32, 1.5, BLACK);
 
+	// Scroll Area Start --------------------------------------------------------------------------
+
+	Vector2 topCorner = raylib::ConstructVector2(120, 148);
+	Vector2 panelDimensions = raylib::ConstructVector2(GetScreenWidth() - 240, GetScreenHeight() - 240);
+	panelRec = raylib::ConstructRectangle(topCorner.x, topCorner.y, panelDimensions.x, panelDimensions.y);
+	panelContentRec.width = panelRec.width - (GuiGetStyle(SCROLLBAR, SLIDER_WIDTH) + 8);
+
+
+	GuiScrollPanel(panelRec, NULL, panelContentRec, &panelScroll, &panelView);
+
+	BeginScissorMode(panelView.x, panelView.y, panelView.width, panelView.height);
+	int panelInnerHeight = 0;
+
+	panelInnerHeight += DrawWorkoutListHeading(
+		"Workouts",
+		raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight),
+		panelRec.width
+	);
+
+	for (int i = 0; i < workouts.size(); i++) {
+
+		panelInnerHeight += DrawWorkoutButton(
+			workouts.at(i),
+			raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight),
+			panelRec.width
+		);
+
+		
+	}
+
+	panelContentRec.height = panelInnerHeight != panelContentRec.height ? panelInnerHeight : panelContentRec.height;
+
+	EndScissorMode();
+
+
+	// Scroll Area End ----------------------------------------------------------------------------
+
 	// Buttons Start ------------------------------------------------------------------------------
 	GuiSetFont(fontType);
 
@@ -81,4 +119,98 @@ int WorkoutSelectionMenuScene::DrawCall()
 	// Buttons End --------------------------------------------------------------------------------
 
 	return EXIT_SUCCESS;
+}
+
+int WorkoutSelectionMenuScene::DrawWorkoutListHeading(std::string heading, Vector2 position, int width)
+{
+	Font fontType = FontSettings::GetMainFont();
+
+	RelativeDrawing::DrawRectangle(
+		position,
+		raylib::ConstructVector2(width, 44),
+		RelativeDrawing::TopLeft,
+		RelativeDrawing::TopLeft,
+		raylib::ConstructColor(255, 255, 255)
+	);
+	RelativeDrawing::DrawRectangle(
+		raylib::ConstructVector2(position.x, position.y + 44),
+		raylib::ConstructVector2(width, 2),
+		RelativeDrawing::TopLeft,
+		RelativeDrawing::TopLeft,
+		raylib::ConstructColor(206, 206, 206)
+	);
+
+	RelativeDrawing::DrawTextRelEx(
+		fontType,
+		heading.c_str(),
+		raylib::ConstructVector2(position.x + 10, position.y + 10),
+		RelativeDrawing::TopLeft,
+		RelativeDrawing::TopLeft,
+		24,
+		1.5,
+		BLACK
+	);
+
+	return 46;
+}
+
+int WorkoutSelectionMenuScene::DrawWorkoutButton(WorkoutDefinition* workout, Vector2 position, int width)
+{
+	Font fontType = FontSettings::GetMainFont();
+
+	RelativeDrawing::DrawRectangle(
+		position,
+		raylib::ConstructVector2(width, 64),
+		RelativeDrawing::TopLeft,
+		RelativeDrawing::TopLeft,
+		raylib::ConstructColor(255, 255, 255)
+	);
+	RelativeDrawing::DrawRectangle(
+		raylib::ConstructVector2(position.x, position.y + 64),
+		raylib::ConstructVector2(width, 2),
+		RelativeDrawing::TopLeft,
+		RelativeDrawing::TopLeft,
+		raylib::ConstructColor(206, 206, 206)
+	);
+
+	std::stringstream duration;
+	duration << "Duration";
+
+	RelativeDrawing::DrawTextRelEx(
+		fontType,
+		TextFormat("%s - %s", workout->GetName().c_str(), duration.str().c_str()),
+		raylib::ConstructVector2(position.x + 10, position.y + 10),
+		RelativeDrawing::TopLeft,
+		RelativeDrawing::TopLeft,
+		24,
+		1.5,
+		BLACK
+	);
+
+	int clicked = RelativeDrawing::GuiButtonRelative(
+		"Ride",
+		raylib::ConstructVector2(position.x + width - 10 - 128, position.y + 16),
+		raylib::ConstructVector2(128, 32),
+		RelativeDrawing::TopLeft,
+		RelativeDrawing::TopLeft,
+		24
+	);
+
+	if (clicked) {
+		// Clicked
+	}
+
+
+	RelativeDrawing::DrawTextRelEx(
+		fontType,
+		TextFormat("%s", workout->GetTargetTypeStr().c_str()),
+		raylib::ConstructVector2(position.x + 10, position.y + 10 + 24),
+		RelativeDrawing::TopLeft,
+		RelativeDrawing::TopLeft,
+		16,
+		1.5,
+		BLACK
+	);
+
+	return 66;
 }

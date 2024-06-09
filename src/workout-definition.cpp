@@ -81,6 +81,11 @@ WorkoutDefinition::TargetType WorkoutDefinition::GetTargetType()
 	return workoutType;
 }
 
+std::string WorkoutDefinition::GetTargetTypeStr()
+{
+	return GetTargetType() == FTP ? "FTP" : "Raw Power";
+}
+
 double WorkoutDefinition::EvaluateWorkoutAt(int time)
 {
 	return 0.0;
