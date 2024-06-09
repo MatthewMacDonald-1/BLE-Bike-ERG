@@ -77,7 +77,7 @@ int WorkoutSelectionMenuScene::DrawCall()
 	panelInnerHeight += DrawWorkoutListHeading(
 		"Workouts",
 		raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight),
-		panelRec.width
+		panelContentRec.width
 	);
 
 	for (int i = 0; i < workouts.size(); i++) {
@@ -85,7 +85,7 @@ int WorkoutSelectionMenuScene::DrawCall()
 		panelInnerHeight += DrawWorkoutButton(
 			workouts.at(i),
 			raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight),
-			panelRec.width
+			panelContentRec.width
 		);
 
 		
@@ -194,6 +194,12 @@ int WorkoutSelectionMenuScene::DrawWorkoutButton(WorkoutDefinition* workout, Vec
 		RelativeDrawing::TopLeft,
 		RelativeDrawing::TopLeft,
 		24
+	);
+
+	workout->DrawWorkout(
+		raylib::ConstructVector2(position.x + width - 10 * 2 - 128 * 2, position.y + 16),
+		128,
+		32
 	);
 
 	if (clicked) {

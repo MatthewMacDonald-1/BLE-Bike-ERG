@@ -76,7 +76,7 @@ int MainMenuScene::DrawCall()
 		panelInnerHeight += DrawBluetoothDeviceListHeading(
 			"Connected Devices",
 			raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight),
-			panelRec.width
+			panelContentRec.width
 		);
 	}
 	for (int i = 0; i < pairedDevices.size(); i++) {

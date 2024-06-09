@@ -3,6 +3,7 @@
 #include "MattsUtils/string-func.hpp"
 #include "MattsUtils/number.hpp"
 #include "MattsUtils/relative-drawing.hpp"
+#include "MattsUtils/raylib-structs.hpp"
 #include <set>
 #include <fstream>
 
@@ -93,6 +94,41 @@ double WorkoutDefinition::EvaluateWorkoutAt(int time)
 
 void WorkoutDefinition::DrawWorkout(Vector2 position, int width, int height, int ftp)
 {
+	DrawRectangle(position.x, position.y, width, height, DARKGRAY);
+
+	Color segmentColor = MattsUtils::raylib::ConstructColor(0, 200, 200);
+
+	double segmentSizeH = (double)width / (double)GetWorkoutLength();
+	double segmentSizeV = (double)height / (double)GetHighestTarget();
+
+	int currentDrawX = position.x;
+
+	for (int i = 0; i < segments.size(); i++) {
+		int segWidth = std::ceil((double)segments.at(i).first * segmentSizeH);
+		int segHeight1 = std::ceil((double)segments.at(i).second.first * segmentSizeV);
+		int segHeight2 = std::ceil((double)segments.at(i).second.first * segmentSizeV);
+
+		if (segHeight1 != segHeight2) { // Sloped
+			int smallestHeight = std::min(segHeight1, segHeight2);
+			int tallestHeight = std::max(segHeight1, segHeight2);
+
+			DrawRectangle(currentDrawX, position.y, segWidth, segHeight1, segmentColor);
+
+			Vector2 v1, v2, v3;
+			v1 = MattsUtils::raylib::ConstructVector2(currentDrawX, position.y + smallestHeight);
+			v2 = MattsUtils::raylib::ConstructVector2(currentDrawX + segWidth, position.y + smallestHeight);
+
+			v3 = MattsUtils::raylib::ConstructVector2(currentDrawX + (segHeight1 > segHeight2 ? 0 : segWidth), position.y + tallestHeight);
+
+			DrawTriangle(v1, v2, v3, segmentColor);
+		}
+		else {
+			DrawRectangle(currentDrawX, position.y, segWidth, segHeight1, segmentColor);
+		}
+
+		currentDrawX += segWidth;
+	}
+
 }
 
 void WorkoutDefinition::ReadWorkout(std::vector<std::string> fromFile)
@@ -220,4 +256,20 @@ void WorkoutDefinition::ReadWorkout(std::vector<std::string> fromFile)
 
 		}
 	}
+}
+
+int WorkoutDefinition::GetHighestTarget()
+{
+	int largest = 0;
+
+	for (int i = 0; i < segments.size(); i++) {
+		if (segments.at(i).second.first > largest) {
+			largest = segments.at(i).second.first;
+		}
+		if (segments.at(i).second.second > largest) {
+			largest = segments.at(i).second.second;
+		}
+	}
+
+	return largest;
 }
