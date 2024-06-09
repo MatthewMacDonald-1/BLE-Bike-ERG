@@ -1,2 +1,4 @@
 ramp.workout
 test.workout
+2x20_FTP_Intervals.workout
+High_Intensity_Recovery.workout

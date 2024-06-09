@@ -199,7 +199,8 @@ int WorkoutSelectionMenuScene::DrawWorkoutButton(WorkoutDefinition* workout, Vec
 	workout->DrawWorkout(
 		raylib::ConstructVector2(position.x + width - 10 * 2 - 128 * 2, position.y + 16),
 		128,
-		32
+		32,
+		5
 	);
 
 	if (clicked) {

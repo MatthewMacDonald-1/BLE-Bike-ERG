@@ -92,38 +92,43 @@ double WorkoutDefinition::EvaluateWorkoutAt(int time)
 	return 0.0;
 }
 
-void WorkoutDefinition::DrawWorkout(Vector2 position, int width, int height, int ftp)
+void WorkoutDefinition::DrawWorkout(Vector2 position, int width, int height, int topMargin)
 {
 	DrawRectangle(position.x, position.y, width, height, DARKGRAY);
 
 	Color segmentColor = MattsUtils::raylib::ConstructColor(0, 200, 200);
 
 	double segmentSizeH = (double)width / (double)GetWorkoutLength();
-	double segmentSizeV = (double)height / (double)GetHighestTarget();
+	double segmentSizeV = (double)(height - topMargin) / (double)GetHighestTarget();
 
 	int currentDrawX = position.x;
 
 	for (int i = 0; i < segments.size(); i++) {
-		int segWidth = std::ceil((double)segments.at(i).first * segmentSizeH);
+		int segWidth = std::floor((double)segments.at(i).first * segmentSizeH);
+
+		if (i == segments.size() - 1) {
+			segWidth = width + position.x - currentDrawX;
+		}
+
 		int segHeight1 = std::ceil((double)segments.at(i).second.first * segmentSizeV);
-		int segHeight2 = std::ceil((double)segments.at(i).second.first * segmentSizeV);
+		int segHeight2 = std::ceil((double)segments.at(i).second.second * segmentSizeV);
 
 		if (segHeight1 != segHeight2) { // Sloped
 			int smallestHeight = std::min(segHeight1, segHeight2);
 			int tallestHeight = std::max(segHeight1, segHeight2);
 
-			DrawRectangle(currentDrawX, position.y, segWidth, segHeight1, segmentColor);
+			DrawRectangle(currentDrawX, position.y + ((height + 0) - smallestHeight), segWidth, smallestHeight, segmentColor);
 
 			Vector2 v1, v2, v3;
-			v1 = MattsUtils::raylib::ConstructVector2(currentDrawX, position.y + smallestHeight);
-			v2 = MattsUtils::raylib::ConstructVector2(currentDrawX + segWidth, position.y + smallestHeight);
+			v1 = MattsUtils::raylib::ConstructVector2(currentDrawX, position.y + ((height + 0) - smallestHeight));
+			v2 = MattsUtils::raylib::ConstructVector2(currentDrawX + segWidth, position.y + ((height + 0) - smallestHeight));
 
-			v3 = MattsUtils::raylib::ConstructVector2(currentDrawX + (segHeight1 > segHeight2 ? 0 : segWidth), position.y + tallestHeight);
+			v3 = MattsUtils::raylib::ConstructVector2(currentDrawX + (segHeight1 > segHeight2 ? 0 : segWidth), position.y + ((height + 0) - tallestHeight));
 
 			DrawTriangle(v1, v2, v3, segmentColor);
 		}
 		else {
-			DrawRectangle(currentDrawX, position.y, segWidth, segHeight1, segmentColor);
+			DrawRectangle(currentDrawX, position.y + ((height + 0) - segHeight1), segWidth, segHeight1, segmentColor);
 		}
 
 		currentDrawX += segWidth;

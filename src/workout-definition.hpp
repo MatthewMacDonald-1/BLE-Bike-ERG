@@ -63,7 +63,7 @@ public:
 	/// <param name="position">Top Left Corner</param>
 	/// <param name="width">Graph container width</param>
 	/// <param name="height">Graph container height</param>
-	void DrawWorkout(Vector2 position, int width, int height, int ftp = 100);
+	void DrawWorkout(Vector2 position, int width, int height, int topMargin = 0);
 
 private:
 	bool isValid = false;
