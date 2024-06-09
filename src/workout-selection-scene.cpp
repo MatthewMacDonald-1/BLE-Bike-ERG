@@ -101,12 +101,7 @@ int WorkoutSelectionMenuScene::DrawCall()
 	// Buttons Start ------------------------------------------------------------------------------
 	GuiSetFont(fontType);
 
-	bool nextSceneRes = RelativeDrawing::GuiButtonRelative("Start", offsetDstBR, buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
-	if (nextSceneRes) {
-		//SceneManager::LoadScene("WorkoutSelectionMenu");
-	}
-
-	bool backToStartMenuSceneRes = RelativeDrawing::GuiButtonRelative("Back", Vector2Add(offsetDstBR, raylib::ConstructVector2(-(buttonSize.x + 32), 0)), buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
+	bool backToStartMenuSceneRes = RelativeDrawing::GuiButtonRelative("Back", offsetDstBR, buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
 	if (backToStartMenuSceneRes) {
 		SceneManager::LoadScene("MainMenu");
 	}
@@ -200,7 +195,7 @@ int WorkoutSelectionMenuScene::DrawWorkoutButton(WorkoutDefinition* workout, Vec
 		raylib::ConstructVector2(position.x + width - 10 * 2 - 128 * 2, position.y + 16),
 		128,
 		32,
-		5
+		4
 	);
 
 	if (clicked) {
