@@ -203,6 +203,8 @@ void MainMenuScene::DrawDeviceConnectionBox(Vector2 position, Vector2 dimensions
 				BLACK
 			);
 
+			int selectButtonWidth = 80;
+
 			bool checked = (ofTypeIdx == selectedIndex);
 			if (checked) {
 				RelativeDrawing::GuiCheckBoxRelative(
@@ -214,13 +216,27 @@ void MainMenuScene::DrawDeviceConnectionBox(Vector2 position, Vector2 dimensions
 					RelativeDrawing::TopLeft,
 					16
 				);
+				if (CheckCollisionPointRec(GetMousePosition(), MattsUtils::raylib::ConstructRectangle(buttonPosition.x, buttonPosition.y, buttonWidth, 64))) {
+					bool res = RelativeDrawing::GuiButtonRelative(
+						"Deselect",
+						raylib::ConstructVector2(buttonPosition.x + buttonWidth - 10 - selectButtonWidth, buttonPosition.y + 16),
+						raylib::ConstructVector2(selectButtonWidth, 32),
+						RelativeDrawing::TopLeft,
+						RelativeDrawing::TopLeft,
+						20
+					);
+
+					if (res) {
+						selectedIndex = -1;
+					}
+				}
 			}
 			else {
 				if (CheckCollisionPointRec(GetMousePosition(), MattsUtils::raylib::ConstructRectangle(buttonPosition.x, buttonPosition.y, buttonWidth, 64))) {
 					bool res = RelativeDrawing::GuiButtonRelative(
 						"Select",
-						raylib::ConstructVector2(buttonPosition.x + buttonWidth - 10 - 64, buttonPosition.y + 16),
-						raylib::ConstructVector2(64, 32),
+						raylib::ConstructVector2(buttonPosition.x + buttonWidth - 10 - selectButtonWidth, buttonPosition.y + 16),
+						raylib::ConstructVector2(selectButtonWidth, 32),
 						RelativeDrawing::TopLeft,
 						RelativeDrawing::TopLeft,
 						20

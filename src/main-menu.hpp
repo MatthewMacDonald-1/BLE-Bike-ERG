@@ -47,7 +47,7 @@ private:
 	int powerSelected = 0;
 
 	bool menuOpen = false;
-	bool connectingScreen = true;
+	bool connectingScreen = false;
 
 	void DrawDeviceConnectionBox(Vector2 position, Vector2 dimensions, Texture icon, int iconWidth, BleUtils::ServiceType type, Rectangle& panelContentRec, Rectangle& panelView, Vector2& panelScroll, int& selectedIndex);
 
