@@ -65,6 +65,24 @@ int MainMenuScene::DrawCall()
 		}
 	}
 
+	if (connectingScreen) {
+		// Dot animation with sin waves
+		std::stringstream dots;
+		int numDots = (
+			std::cos(2 * GetTime() + PI / 2) < 0 ? 
+			(int)std::round(std::abs(std::sin(GetTime())) * 3) : 
+			(int)std::round(std::abs(std::cos(GetTime())) * 3)
+		);
+		for (int i = 0; i < numDots; i++) {
+			dots << '.';
+		}
+
+		RelativeDrawing::DrawTextRelEx(fontType, "Connecting", raylib::ConstructVector2(0, 0), RelativeDrawing::Center, RelativeDrawing::Center, 64, 1.5, BLACK);
+		RelativeDrawing::DrawTextRelEx(fontType, dots.str().c_str(), raylib::ConstructVector2(144, 0), RelativeDrawing::Center, RelativeDrawing::MiddleLeft, 64, 1.5, BLACK); // Draw the dot animation
+
+		return EXIT_SUCCESS;
+	}
+
 	RelativeDrawing::DrawTextRelEx(fontType, "Bike ERG", raylib::ConstructVector2(0, 16), RelativeDrawing::TopCenter, RelativeDrawing::TopCenter, 64, 1.5, BLACK);
 
 	int boxSpacing = 6;
@@ -74,9 +92,11 @@ int MainMenuScene::DrawCall()
 	
 
 	DrawDeviceConnectionBox(Vector2Add(center, MattsUtils::raylib::ConstructVector2(-boxSpacing + -connectionBoxDimensions.x, -boxSpacing + -connectionBoxDimensions.y)), connectionBoxDimensions, hrIcon, 128, BleUtils::HEART_RATE, hrPanelContentRec, hrPanelView, hrPanelScroll, hrSelected);
+
 	DrawDeviceConnectionBox(Vector2Add(center, MattsUtils::raylib::ConstructVector2(-boxSpacing + -connectionBoxDimensions.x, boxSpacing)), connectionBoxDimensions, cadenceIcon, 128, BleUtils::CYCLING_SPEED_CADENCE, cadencePanelContentRec, cadencePanelView, cadencePanelScroll, cadenceSelected);
 
 	DrawDeviceConnectionBox(Vector2Add(center, MattsUtils::raylib::ConstructVector2(boxSpacing, -boxSpacing + -connectionBoxDimensions.y)), connectionBoxDimensions, trainerIcon, 128, BleUtils::FITNESS_MACHINE, trainerPanelContentRec, trainerPanelView, trainerPanelScroll, trainerSelected);
+
 	DrawDeviceConnectionBox(Vector2Add(center, MattsUtils::raylib::ConstructVector2(boxSpacing, boxSpacing)), connectionBoxDimensions, powerIcon, 128, BleUtils::CYCLING_POWER, powerPanelContentRec, powerPanelView, powerPanelScroll, powerSelected);
 
 
