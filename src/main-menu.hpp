@@ -21,11 +21,6 @@ private:
 	Texture trainerIcon;
 	Texture powerIcon;
 
-	//Rectangle panelRec = { 20, 40, 200, 150 };
-	//Rectangle panelContentRec = { 0, 0, 0, 0 };
-	/*Rectangle panelView = { 0 };
-	Vector2 panelScroll = { 0 };*/
-
 	Rectangle hrPanelContentRec = { 0, 0, 0, 0 };
 	Rectangle hrPanelView = { 0 };
 	Vector2 hrPanelScroll = { 0 };

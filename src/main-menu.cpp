@@ -67,6 +67,8 @@ int MainMenuScene::DrawCall()
 
 	if (connectingScreen) {
 		// Dot animation with sin waves
+		DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), raylib::ConstructColor(200, 200, 200, 155));
+
 		std::stringstream dots;
 		int numDots = (
 			std::cos(2 * GetTime() + PI / 2) < 0 ? 
@@ -77,8 +79,19 @@ int MainMenuScene::DrawCall()
 			dots << '.';
 		}
 
-		RelativeDrawing::DrawTextRelEx(fontType, "Connecting", raylib::ConstructVector2(0, 0), RelativeDrawing::Center, RelativeDrawing::Center, 64, 1.5, BLACK);
-		RelativeDrawing::DrawTextRelEx(fontType, dots.str().c_str(), raylib::ConstructVector2(144, 0), RelativeDrawing::Center, RelativeDrawing::MiddleLeft, 64, 1.5, BLACK); // Draw the dot animation
+		RelativeDrawing::DrawTextRelEx(fontType, "Connecting", raylib::ConstructVector2(0, -24), RelativeDrawing::Center, RelativeDrawing::Center, 64, 1.5, BLACK);
+		RelativeDrawing::DrawTextRelEx(fontType, dots.str().c_str(), raylib::ConstructVector2(144, -24), RelativeDrawing::Center, RelativeDrawing::MiddleLeft, 64, 1.5, BLACK); // Draw the dot animation
+
+		RelativeDrawing::DrawTextRelEx(fontType, "Device 1", raylib::ConstructVector2(0, 24), RelativeDrawing::Center, RelativeDrawing::Center, 24, 1.5, DARKGRAY);
+		RelativeDrawing::DrawTextRelEx(fontType, "Device 2", raylib::ConstructVector2(0, 24 * 2), RelativeDrawing::Center, RelativeDrawing::Center, 24, 1.5, DARKGRAY);
+		RelativeDrawing::DrawTextRelEx(fontType, "Device 3", raylib::ConstructVector2(0, 24 * 3), RelativeDrawing::Center, RelativeDrawing::Center, 24, 1.5, DARKGRAY);
+		RelativeDrawing::DrawTextRelEx(fontType, "Device 4", raylib::ConstructVector2(0, 24 * 4), RelativeDrawing::Center, RelativeDrawing::Center, 24, 1.5, DARKGRAY);
+
+
+		bool cancelRes = RelativeDrawing::GuiButtonRelative("Cancel", offsetDstBC, buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
+		if (cancelRes) {
+			connectingScreen = false;
+		}
 
 		return EXIT_SUCCESS;
 	}
@@ -103,10 +116,16 @@ int MainMenuScene::DrawCall()
 	// Buttons Start ------------------------------------------------------------------------------
 	GuiSetFont(fontType);
 
-	bool nextSceneRes = RelativeDrawing::GuiButtonRelative("Next", offsetDstBR, buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
+	/*bool nextSceneRes = RelativeDrawing::GuiButtonRelative("Next", offsetDstBR, buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
 	if (nextSceneRes) {
 		BluetoothController::StopScan();
 		SceneManager::LoadScene("WorkoutSelectionMenu");
+	}*/
+
+	bool nextSceneRes = RelativeDrawing::GuiButtonRelative("Continue", offsetDstBR, buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
+	if (nextSceneRes) {
+		BluetoothController::StopScan();
+		connectingScreen = true;
 	}
 
 
