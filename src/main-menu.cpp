@@ -43,6 +43,8 @@ int MainMenuScene::UpdateLogic()
 
 int MainMenuScene::DrawCall()
 {
+	BluetoothController::StartScan();
+
 	Font fontType = FontSettings::GetMainFont();
 
 	Vector2 buttonSize = raylib::ConstructVector2(128, 32);
@@ -71,11 +73,11 @@ int MainMenuScene::DrawCall()
 	Vector2 center = MattsUtils::raylib::ConstructVector2(GetScreenWidth() / 2, GetScreenHeight() / 2);
 	
 
-	DrawDeviceConnectionBox(Vector2Add(center, MattsUtils::raylib::ConstructVector2(-boxSpacing + -connectionBoxDimensions.x, -boxSpacing + -connectionBoxDimensions.y)), connectionBoxDimensions, hrIcon, 128, BleUtils::HEART_RATE, hrPanelContentRec, hrPanelView, hrPanelScroll);
-	DrawDeviceConnectionBox(Vector2Add(center, MattsUtils::raylib::ConstructVector2(-boxSpacing + -connectionBoxDimensions.x, boxSpacing)), connectionBoxDimensions, cadenceIcon, 128, BleUtils::CYCLING_SPEED_CADENCE, cadencePanelContentRec, cadencePanelView, cadencePanelScroll);
+	DrawDeviceConnectionBox(Vector2Add(center, MattsUtils::raylib::ConstructVector2(-boxSpacing + -connectionBoxDimensions.x, -boxSpacing + -connectionBoxDimensions.y)), connectionBoxDimensions, hrIcon, 128, BleUtils::HEART_RATE, hrPanelContentRec, hrPanelView, hrPanelScroll, hrSelected);
+	DrawDeviceConnectionBox(Vector2Add(center, MattsUtils::raylib::ConstructVector2(-boxSpacing + -connectionBoxDimensions.x, boxSpacing)), connectionBoxDimensions, cadenceIcon, 128, BleUtils::CYCLING_SPEED_CADENCE, cadencePanelContentRec, cadencePanelView, cadencePanelScroll, cadenceSelected);
 
-	DrawDeviceConnectionBox(Vector2Add(center, MattsUtils::raylib::ConstructVector2(boxSpacing, -boxSpacing + -connectionBoxDimensions.y)), connectionBoxDimensions, trainerIcon, 128, BleUtils::FITNESS_MACHINE, trainerPanelContentRec, trainerPanelView, trainerPanelScroll);
-	DrawDeviceConnectionBox(Vector2Add(center, MattsUtils::raylib::ConstructVector2(boxSpacing, boxSpacing)), connectionBoxDimensions, powerIcon, 128, BleUtils::CYCLING_POWER, powerPanelContentRec, powerPanelView, powerPanelScroll);
+	DrawDeviceConnectionBox(Vector2Add(center, MattsUtils::raylib::ConstructVector2(boxSpacing, -boxSpacing + -connectionBoxDimensions.y)), connectionBoxDimensions, trainerIcon, 128, BleUtils::FITNESS_MACHINE, trainerPanelContentRec, trainerPanelView, trainerPanelScroll, trainerSelected);
+	DrawDeviceConnectionBox(Vector2Add(center, MattsUtils::raylib::ConstructVector2(boxSpacing, boxSpacing)), connectionBoxDimensions, powerIcon, 128, BleUtils::CYCLING_POWER, powerPanelContentRec, powerPanelView, powerPanelScroll, powerSelected);
 
 
 	// Scroll Area Start --------------------------------------------------------------------------
@@ -158,6 +160,7 @@ int MainMenuScene::DrawCall()
 
 	bool nextSceneRes = RelativeDrawing::GuiButtonRelative("Next", offsetDstBR, buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
 	if (nextSceneRes) {
+		BluetoothController::StopScan();
 		SceneManager::LoadScene("WorkoutSelectionMenu");
 	}
 
@@ -178,7 +181,7 @@ int MainMenuScene::DrawCall()
 	return EXIT_SUCCESS;
 }
 
-void MainMenuScene::DrawDeviceConnectionBox(Vector2 position, Vector2 dimensions, Texture icon, int iconWidth, BleUtils::ServiceType type, Rectangle& panelContentRec, Rectangle& panelView, Vector2& panelScroll)
+void MainMenuScene::DrawDeviceConnectionBox(Vector2 position, Vector2 dimensions, Texture icon, int iconWidth, BleUtils::ServiceType type, Rectangle& panelContentRec, Rectangle& panelView, Vector2& panelScroll, int &selectedIndex)
 {
 	Font fontType = FontSettings::GetMainFont();
 
@@ -205,6 +208,7 @@ void MainMenuScene::DrawDeviceConnectionBox(Vector2 position, Vector2 dimensions
 	int buttonWidth = panelContentRec.width;
 	std::vector<SimpleBLE::Peripheral> discoveredDevices = BluetoothController::GetDiscoveredDevices();
 
+	int ofTypeIdx = 0;
 	for (int i = 0; i < discoveredDevices.size(); i++) {
 		Vector2 buttonPosition = raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight);
 		std::vector<SimpleBLE::Service> services = discoveredDevices.at(i).services();
@@ -254,7 +258,25 @@ void MainMenuScene::DrawDeviceConnectionBox(Vector2 position, Vector2 dimensions
 				BLACK
 			);
 
+			bool checked = (ofTypeIdx == selectedIndex);
+
+			int res = RelativeDrawing::GuiCheckBoxRelative(
+				"",
+				&checked,
+				raylib::ConstructVector2(buttonPosition.x + buttonWidth - 10 - 24, buttonPosition.y + 20),
+				raylib::ConstructVector2(24, 24),
+				RelativeDrawing::TopLeft,
+				RelativeDrawing::TopLeft,
+				16
+			);
+
+			if (res) {
+				TraceLog(LOG_INFO, "Clicked");
+				selectedIndex = ofTypeIdx;
+			}
+
 			panelInnerHeight += 66;
+			ofTypeIdx++;
 		}
 	}
 
