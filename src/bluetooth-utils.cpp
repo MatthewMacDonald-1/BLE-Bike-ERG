@@ -10,10 +10,10 @@ BleUtils::ServiceType BleUtils::GetServiceType(SimpleBLE::BluetoothUUID uuid)
 		return BleUtils::CYCLING_POWER;
 	}
 	else if (uuid == "00001816-0000-1000-8000-00805f9b34fb") {
-		return BleUtils::Cycling_Speed_Cadence;
+		return BleUtils::CYCLING_SPEED_CADENCE;
 	}
 	else if (uuid == "00001826-0000-1000-8000-00805f9b34fb") {
-		return BleUtils::Fitness_Machine;
+		return BleUtils::FITNESS_MACHINE;
 	}
 	else {
 		return BleUtils::UNKNOWN;
@@ -33,10 +33,10 @@ std::string BleUtils::ToString(ServiceType type)
 	case BleUtils::CYCLING_POWER:
 		return "Cycling Power";
 		break;
-	case BleUtils::Cycling_Speed_Cadence:
+	case BleUtils::CYCLING_SPEED_CADENCE:
 		return "Cycling Speend and Cadence";
 		break;
-	case BleUtils::Fitness_Machine:
+	case BleUtils::FITNESS_MACHINE:
 		return "Fitness Machine";
 		break;
 	default:

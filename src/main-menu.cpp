@@ -9,7 +9,6 @@
 #include <thread>
 
 #include "bluetooth-controller.hpp"
-#include "bluetooth-utils.hpp"
 #include "font-settings.hpp"
 #include "MattsUtils/relative-drawing.hpp"
 #include "MattsUtils/raylib-structs.hpp"
@@ -20,13 +19,21 @@ using namespace MattsUtils;
 
 MainMenuScene::MainMenuScene()
 {
-    menuBackground = LoadTexture("./resources/images/test-background.png"); // Important Note: the file path is relative to the executable
+	menuBackground = LoadTexture("./resources/images/test-background.png"); // Important Note: the file path is relative to the executable
+	hrIcon = LoadTexture("./resources/icons/hr.png"); // Important Note: the file path is relative to the executable
+	cadenceIcon = LoadTexture("./resources/icons/cadence.png"); // Important Note: the file path is relative to the executable
+	trainerIcon = LoadTexture("./resources/icons/trainer.png"); // Important Note: the file path is relative to the executable
+	powerIcon = LoadTexture("./resources/icons/power.png"); // Important Note: the file path is relative to the executable
 	BluetoothController::StartScan();
 }
 
 MainMenuScene::~MainMenuScene()
 {
 	UnloadTexture(menuBackground);
+	UnloadTexture(hrIcon);
+	UnloadTexture(cadenceIcon);
+	UnloadTexture(trainerIcon);
+	UnloadTexture(powerIcon);
 }
 
 int MainMenuScene::UpdateLogic()
@@ -58,9 +65,20 @@ int MainMenuScene::DrawCall()
 
 	RelativeDrawing::DrawTextRelEx(fontType, "Bike ERG", raylib::ConstructVector2(0, 16), RelativeDrawing::TopCenter, RelativeDrawing::TopCenter, 64, 1.5, BLACK);
 
-	// Scroll Area Start --------------------------------------------------------------------------
+	Vector2 connectionBoxDimensions = MattsUtils::raylib::ConstructVector2(384, 192);
+	Vector2 center = MattsUtils::raylib::ConstructVector2(GetScreenWidth() / 2, GetScreenHeight() / 2);
+	int boxSpacing = 6;
 
-	Vector2 topCorner = raylib::ConstructVector2(120, 148);
+	DrawDeviceConnectionBox(Vector2Add(center, MattsUtils::raylib::ConstructVector2(-boxSpacing + -connectionBoxDimensions.x, -boxSpacing + -connectionBoxDimensions.y)), connectionBoxDimensions, hrIcon, 128, BleUtils::HEART_RATE, hrPanelContentRec, hrPanelView, hrPanelScroll);
+	DrawDeviceConnectionBox(Vector2Add(center, MattsUtils::raylib::ConstructVector2(-boxSpacing + -connectionBoxDimensions.x, boxSpacing)), connectionBoxDimensions, cadenceIcon, 128, BleUtils::CYCLING_SPEED_CADENCE, cadencePanelContentRec, cadencePanelView, cadencePanelScroll);
+
+	DrawDeviceConnectionBox(Vector2Add(center, MattsUtils::raylib::ConstructVector2(boxSpacing, -boxSpacing + -connectionBoxDimensions.y)), connectionBoxDimensions, trainerIcon, 128, BleUtils::FITNESS_MACHINE, trainerPanelContentRec, trainerPanelView, trainerPanelScroll);
+	DrawDeviceConnectionBox(Vector2Add(center, MattsUtils::raylib::ConstructVector2(boxSpacing, boxSpacing)), connectionBoxDimensions, powerIcon, 128, BleUtils::CYCLING_POWER, powerPanelContentRec, powerPanelView, powerPanelScroll);
+
+
+	// Scroll Area Start --------------------------------------------------------------------------
+	 
+	/*Vector2 topCorner = raylib::ConstructVector2(120, 148);
 	Vector2 panelDimensions = raylib::ConstructVector2(GetScreenWidth() - 240, GetScreenHeight() - 240);
 	panelRec = raylib::ConstructRectangle(topCorner.x, topCorner.y, panelDimensions.x, panelDimensions.y);
 	panelContentRec.width = panelRec.width - (GuiGetStyle(SCROLLBAR, SLIDER_WIDTH) + 8);
@@ -88,46 +106,46 @@ int MainMenuScene::DrawCall()
 				panelContentRec.width
 			);
 		}
-	}
+	}*/
 
 
 	// Draw discovered devices
-	std::vector<SimpleBLE::Peripheral> discoveredDevices = BluetoothController::GetDiscoveredDevices();
-	bool hasdrawnHeading = false;
+	//std::vector<SimpleBLE::Peripheral> discoveredDevices = BluetoothController::GetDiscoveredDevices();
+	//bool hasdrawnHeading = false;
 
-	for (int i = 0; i < discoveredDevices.size(); i++) {
-		if (discoveredDevices.at(i).identifier().length() != 0) {
-			if (!hasdrawnHeading) {
-				panelInnerHeight += DrawBluetoothDeviceListHeading(
-					"Discovered Devices", 
-					raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight),
-					panelRec.width
-				);
+	//for (int i = 0; i < discoveredDevices.size(); i++) {
+	//	if (discoveredDevices.at(i).identifier().length() != 0) {
+	//		if (!hasdrawnHeading) {
+	//			panelInnerHeight += DrawBluetoothDeviceListHeading(
+	//				"Discovered Devices", 
+	//				raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight),
+	//				panelRec.width
+	//			);
 
-				hasdrawnHeading = true;
-			}
+	//			hasdrawnHeading = true;
+	//		}
 
-			// Check that this device is not already connected too.
-			bool unconnected = true;
-			for (int j = 0; j < pairedDevices.size(); j++) {
-				if (discoveredDevices.at(i).address() == pairedDevices.at(j).address()) {
-					unconnected = false;
-					break;
-				}
-			}
+	//		// Check that this device is not already connected too.
+	//		bool unconnected = true;
+	//		for (int j = 0; j < pairedDevices.size(); j++) {
+	//			if (discoveredDevices.at(i).address() == pairedDevices.at(j).address()) {
+	//				unconnected = false;
+	//				break;
+	//			}
+	//		}
 
-			if (unconnected) {
-				panelInnerHeight += DrawDiscoveredBluetoothDevice(
-					discoveredDevices.at(i),
-					raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight),
-					panelContentRec.width
-				);
-			}
-		}
-	}
-	panelContentRec.height = panelInnerHeight != panelContentRec.height ? panelInnerHeight : panelContentRec.height;
+	//		if (unconnected) {
+	//			panelInnerHeight += DrawDiscoveredBluetoothDevice(
+	//				discoveredDevices.at(i),
+	//				raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight),
+	//				panelContentRec.width
+	//			);
+	//		}
+	//	}
+	//}
+	//panelContentRec.height = panelInnerHeight != panelContentRec.height ? panelInnerHeight : panelContentRec.height;
 
-	EndScissorMode();
+	//EndScissorMode();
 
 
 	// Scroll Area End ----------------------------------------------------------------------------
@@ -150,6 +168,91 @@ int MainMenuScene::DrawCall()
 
 
 	return EXIT_SUCCESS;
+}
+
+void MainMenuScene::DrawDeviceConnectionBox(Vector2 position, Vector2 dimensions, Texture icon, int iconWidth, BleUtils::ServiceType type, Rectangle& panelContentRec, Rectangle& panelView, Vector2& panelScroll)
+{
+	Font fontType = FontSettings::GetMainFont();
+
+	DrawRectangle(position.x, position.y, dimensions.x, dimensions.y, GRAY);
+
+	DrawRectangle(position.x, position.y, iconWidth, dimensions.y, WHITE);
+	double scale = 1;
+	scale = (double)iconWidth / (double)icon.width;
+	int vOffset = ((int)dimensions.y - (int)std::ceil((double)icon.height * scale)) / 2;
+	DrawTextureEx(icon, Vector2Add(position, MattsUtils::raylib::ConstructVector2(0, vOffset)), 0, (float)scale, WHITE);
+
+
+	// Scroll Area
+	Vector2 topCorner = raylib::ConstructVector2(position.x + iconWidth, position.y);
+	Vector2 panelDimensions = raylib::ConstructVector2(dimensions.x - iconWidth, dimensions.y);
+	Rectangle panelRec = raylib::ConstructRectangle(topCorner.x, topCorner.y, panelDimensions.x, panelDimensions.y);
+	panelContentRec.width = panelRec.width - (GuiGetStyle(SCROLLBAR, SLIDER_WIDTH) + 8);
+
+	GuiScrollPanel(panelRec, NULL, panelContentRec, &panelScroll, &panelView);
+
+	BeginScissorMode(panelView.x, panelView.y, panelView.width, panelView.height);
+	int panelInnerHeight = 0;
+
+	int buttonWidth = panelContentRec.width;
+	std::vector<SimpleBLE::Peripheral> discoveredDevices = BluetoothController::GetDiscoveredDevices();
+
+	for (int i = 0; i < discoveredDevices.size(); i++) {
+		Vector2 buttonPosition = raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight);
+		std::vector<SimpleBLE::Service> services = discoveredDevices.at(i).services();
+		bool containsMatch = false;
+		for (int j = 0; j < services.size(); j++) {
+			if (BleUtils::GetServiceType(services.at(j).uuid()) == type) {
+				containsMatch = true;
+				break;
+			}
+		}
+
+		if (containsMatch) {
+			RelativeDrawing::DrawRectangle(
+				buttonPosition,
+				raylib::ConstructVector2(buttonWidth, 64),
+				RelativeDrawing::TopLeft,
+				RelativeDrawing::TopLeft,
+				raylib::ConstructColor(255, 255, 255)
+			);
+			RelativeDrawing::DrawRectangle(
+				raylib::ConstructVector2(buttonPosition.x, buttonPosition.y + 64),
+				raylib::ConstructVector2(buttonWidth, 2),
+				RelativeDrawing::TopLeft,
+				RelativeDrawing::TopLeft,
+				raylib::ConstructColor(206, 206, 206)
+			);
+
+			RelativeDrawing::DrawTextRelEx(
+				fontType,
+				TextFormat("%s", discoveredDevices.at(i).identifier().c_str()),
+				raylib::ConstructVector2(buttonPosition.x + 10, buttonPosition.y + 10),
+				RelativeDrawing::TopLeft,
+				RelativeDrawing::TopLeft,
+				24,
+				1.5,
+				BLACK
+			);
+
+			RelativeDrawing::DrawTextRelEx(
+				fontType,
+				TextFormat("%s", discoveredDevices.at(i).address().c_str()),
+				raylib::ConstructVector2(buttonPosition.x + 10, buttonPosition.y + 10 + 24),
+				RelativeDrawing::TopLeft,
+				RelativeDrawing::TopLeft,
+				16,
+				1.5,
+				BLACK
+			);
+
+			panelInnerHeight += 66;
+		}
+	}
+
+	panelContentRec.height = panelInnerHeight != panelContentRec.height ? panelInnerHeight : panelContentRec.height;
+
+	EndScissorMode();
 }
 
 int MainMenuScene::DrawBluetoothDeviceListHeading(std::string heading, Vector2 position, int width)

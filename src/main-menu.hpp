@@ -4,6 +4,7 @@
 
 #include "raylib.h"
 #include <simpleble/SimpleBLE.h>
+#include "bluetooth-utils.hpp"
 
 class MainMenuScene : public Scene {
 public:
@@ -15,14 +16,35 @@ public:
 
 private:
 	Texture menuBackground;
+	Texture hrIcon;
+	Texture cadenceIcon;
+	Texture trainerIcon;
+	Texture powerIcon;
 
-	Rectangle panelRec = { 20, 40, 200, 150 };
-	Rectangle panelContentRec = { 0, 0, 0, 0 };
-	Rectangle panelView = { 0 };
-	Vector2 panelScroll = { 0 };
-	bool showContentArea = true;
+	//Rectangle panelRec = { 20, 40, 200, 150 };
+	//Rectangle panelContentRec = { 0, 0, 0, 0 };
+	/*Rectangle panelView = { 0 };
+	Vector2 panelScroll = { 0 };*/
+
+	Rectangle hrPanelContentRec = { 0, 0, 0, 0 };
+	Rectangle hrPanelView = { 0 };
+	Vector2 hrPanelScroll = { 0 };
+
+	Rectangle cadencePanelContentRec = { 0, 0, 0, 0 };
+	Rectangle cadencePanelView = { 0 };
+	Vector2 cadencePanelScroll = { 0 };
+
+	Rectangle trainerPanelContentRec = { 0, 0, 0, 0 };
+	Rectangle trainerPanelView = { 0 };
+	Vector2 trainerPanelScroll = { 0 };
+
+	Rectangle powerPanelContentRec = { 0, 0, 0, 0 };
+	Rectangle powerPanelView = { 0 };
+	Vector2 powerPanelScroll = { 0 };
 
 	bool menuOpen = false;
+
+	void DrawDeviceConnectionBox(Vector2 position, Vector2 dimensions, Texture icon, int iconWidth, BleUtils::ServiceType type, Rectangle& panelContentRec, Rectangle& panelView, Vector2& panelScroll);
 
 	int DrawBluetoothDeviceListHeading(std::string heading, Vector2 position, int width);
 
