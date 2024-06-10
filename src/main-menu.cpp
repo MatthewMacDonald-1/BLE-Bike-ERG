@@ -43,7 +43,10 @@ int MainMenuScene::UpdateLogic()
 
 int MainMenuScene::DrawCall()
 {
-	BluetoothController::StartScan();
+	if (!connectingScreen) {
+		BluetoothController::StartScan();
+	}
+	
 
 	Font fontType = FontSettings::GetMainFont();
 
@@ -91,6 +94,12 @@ int MainMenuScene::DrawCall()
 		bool cancelRes = RelativeDrawing::GuiButtonRelative("Cancel", offsetDstBC, buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
 		if (cancelRes) {
 			connectingScreen = false;
+		}
+
+		bool nextRes = RelativeDrawing::GuiButtonRelative("Next", offsetDstBR, buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
+		if (nextRes) {
+			BluetoothController::StopScan();
+			SceneManager::LoadScene("WorkoutSelectionMenu");
 		}
 
 		return EXIT_SUCCESS;

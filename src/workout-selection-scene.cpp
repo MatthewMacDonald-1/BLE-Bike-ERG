@@ -101,7 +101,7 @@ int WorkoutSelectionMenuScene::DrawCall()
 	// Buttons Start ------------------------------------------------------------------------------
 	GuiSetFont(fontType);
 
-	bool backToStartMenuSceneRes = RelativeDrawing::GuiButtonRelative("Back", offsetDstBR, buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
+	bool backToStartMenuSceneRes = RelativeDrawing::GuiButtonRelative("Back", offsetDstBC, buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
 	if (backToStartMenuSceneRes) {
 		SceneManager::LoadScene("MainMenu");
 	}
