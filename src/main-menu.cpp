@@ -259,20 +259,32 @@ void MainMenuScene::DrawDeviceConnectionBox(Vector2 position, Vector2 dimensions
 			);
 
 			bool checked = (ofTypeIdx == selectedIndex);
+			if (checked) {
+				RelativeDrawing::GuiCheckBoxRelative(
+					"",
+					&checked,
+					raylib::ConstructVector2(buttonPosition.x + buttonWidth - 10 - 24, buttonPosition.y + 20),
+					raylib::ConstructVector2(24, 24),
+					RelativeDrawing::TopLeft,
+					RelativeDrawing::TopLeft,
+					16
+				);
+			}
+			else {
+				if (CheckCollisionPointRec(GetMousePosition(), MattsUtils::raylib::ConstructRectangle(buttonPosition.x, buttonPosition.y, buttonWidth, 64))) {
+					bool res = RelativeDrawing::GuiButtonRelative(
+						"Select",
+						raylib::ConstructVector2(buttonPosition.x + buttonWidth - 10 - 64, buttonPosition.y + 16),
+						raylib::ConstructVector2(64, 32),
+						RelativeDrawing::TopLeft,
+						RelativeDrawing::TopLeft,
+						20
+					);
 
-			int res = RelativeDrawing::GuiCheckBoxRelative(
-				"",
-				&checked,
-				raylib::ConstructVector2(buttonPosition.x + buttonWidth - 10 - 24, buttonPosition.y + 20),
-				raylib::ConstructVector2(24, 24),
-				RelativeDrawing::TopLeft,
-				RelativeDrawing::TopLeft,
-				16
-			);
-
-			if (res) {
-				TraceLog(LOG_INFO, "Clicked");
-				selectedIndex = ofTypeIdx;
+					if (res) {
+						selectedIndex = ofTypeIdx;
+					}
+				}
 			}
 
 			panelInnerHeight += 66;
