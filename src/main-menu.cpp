@@ -65,9 +65,11 @@ int MainMenuScene::DrawCall()
 
 	RelativeDrawing::DrawTextRelEx(fontType, "Bike ERG", raylib::ConstructVector2(0, 16), RelativeDrawing::TopCenter, RelativeDrawing::TopCenter, 64, 1.5, BLACK);
 
-	Vector2 connectionBoxDimensions = MattsUtils::raylib::ConstructVector2(384, 192);
-	Vector2 center = MattsUtils::raylib::ConstructVector2(GetScreenWidth() / 2, GetScreenHeight() / 2);
 	int boxSpacing = 6;
+	//Vector2 connectionBoxDimensions = MattsUtils::raylib::ConstructVector2(384, 192);
+	Vector2 connectionBoxDimensions = MattsUtils::raylib::ConstructVector2((GetScreenWidth() / 2) - 24 - boxSpacing, 192);
+	Vector2 center = MattsUtils::raylib::ConstructVector2(GetScreenWidth() / 2, GetScreenHeight() / 2);
+	
 
 	DrawDeviceConnectionBox(Vector2Add(center, MattsUtils::raylib::ConstructVector2(-boxSpacing + -connectionBoxDimensions.x, -boxSpacing + -connectionBoxDimensions.y)), connectionBoxDimensions, hrIcon, 128, BleUtils::HEART_RATE, hrPanelContentRec, hrPanelView, hrPanelScroll);
 	DrawDeviceConnectionBox(Vector2Add(center, MattsUtils::raylib::ConstructVector2(-boxSpacing + -connectionBoxDimensions.x, boxSpacing)), connectionBoxDimensions, cadenceIcon, 128, BleUtils::CYCLING_SPEED_CADENCE, cadencePanelContentRec, cadencePanelView, cadencePanelScroll);
@@ -164,6 +166,12 @@ int MainMenuScene::DrawCall()
 	if (settingRes) {
 		menuOpen = true;
 	}
+
+	bool quitRes = RelativeDrawing::GuiButtonRelative("Quit", offsetDstBC, buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
+	if (quitRes) {
+		return SIGNAL_WINDOW_CLOSE;
+	}
+
 	// Buttons End --------------------------------------------------------------------------------
 
 

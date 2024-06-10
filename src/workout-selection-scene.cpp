@@ -63,8 +63,8 @@ int WorkoutSelectionMenuScene::DrawCall()
 
 	// Scroll Area Start --------------------------------------------------------------------------
 
-	Vector2 topCorner = raylib::ConstructVector2(120, 148);
-	Vector2 panelDimensions = raylib::ConstructVector2(GetScreenWidth() - 240, GetScreenHeight() - 240);
+	Vector2 topCorner = raylib::ConstructVector2(24, 148);
+	Vector2 panelDimensions = raylib::ConstructVector2(GetScreenWidth() - 24 * 2, GetScreenHeight() - 240);
 	panelRec = raylib::ConstructRectangle(topCorner.x, topCorner.y, panelDimensions.x, panelDimensions.y);
 	panelContentRec.width = panelRec.width - (GuiGetStyle(SCROLLBAR, SLIDER_WIDTH) + 8);
 
