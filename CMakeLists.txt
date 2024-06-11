@@ -32,6 +32,8 @@ set(MAIN_SRC
     src/main-menu.hpp
     src/settings-menu.cpp
     src/settings-menu.hpp
+    src/workout-scene.cpp
+    src/workout-scene.hpp
     src/workout-selection-scene.cpp
     src/workout-selection-scene.hpp
     src/workout-definition.cpp
