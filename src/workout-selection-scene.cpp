@@ -191,9 +191,10 @@ int WorkoutSelectionMenuScene::DrawWorkoutButton(WorkoutDefinition* workout, Vec
 		24
 	);
 
+	int workoutGraphWidth = 192;
 	workout->DrawWorkout(
-		raylib::ConstructVector2(position.x + width - 10 * 2 - 128 * 2, position.y + 16),
-		128,
+		raylib::ConstructVector2(position.x + width - 10 * 2 - 128 - workoutGraphWidth, position.y + 16),
+		workoutGraphWidth,
 		32,
 		4
 	);

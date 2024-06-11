@@ -136,7 +136,7 @@ void WorkoutDefinition::DrawWorkout(Vector2 position, int width, int height, int
 	int currentDrawX = position.x;
 
 	for (int i = 0; i < segments.size(); i++) {
-		int segWidth = std::floor((double)segments.at(i).first * segmentSizeH);
+		int segWidth = std::max(std::floor((double)segments.at(i).first * segmentSizeH), 1.0);
 
 		if (i == segments.size() - 1) {
 			segWidth = width + position.x - currentDrawX;
@@ -239,6 +239,10 @@ void WorkoutDefinition::ReadWorkout(std::vector<std::string> fromFile)
 			}
 		}
 		else {
+			if (temp.length() == 0) {
+				continue;
+			}
+
 			std::vector<std::string> columns;
 			MattsUtils::String::split(temp, columns, ',');
 
