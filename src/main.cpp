@@ -26,7 +26,7 @@ void DrawGUIDebug();
 int main(void) {
 
 #ifdef DEBUG
-    std::cout << "World Engines Version: " << STR_VERSION << std::endl;
+    std::cout << "BLE Bike ERG Version: " << STR_VERSION << std::endl;
 #endif // DEBUG
 
     // Read in video settings
@@ -43,7 +43,7 @@ int main(void) {
 
     VideoSettings::PreWindowCreationFlags();
 
-    InitWindow(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT, "World Engines");
+    InitWindow(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT, "BLE Bike ERG");
     SetWindowMinSize(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT);
     
     VideoSettings::PostWindowCreatedFlags();
