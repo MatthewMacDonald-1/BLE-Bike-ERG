@@ -36,6 +36,8 @@ public:
 	/// <returns></returns>
 	std::string GetName();
 
+	int GetId();
+
 	/// <summary>
 	/// Length of workout in seconds.
 	/// </summary>
@@ -68,9 +70,13 @@ public:
 	void DrawWorkout(Vector2 position, int width, int height, int topMargin = 0);
 
 private:
+	static int idGen;
+	static int GetNewId();
+
 	bool isValid = false;
 
 	std::string name;
+	int id;
 
 	TargetType workoutType;
 

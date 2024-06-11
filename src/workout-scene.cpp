@@ -13,8 +13,9 @@
 #include "settings-menu.hpp"
 #include "scene-manager.hpp"
 
-WorkoutScene::WorkoutScene()
+WorkoutScene::WorkoutScene(WorkoutDefinition* workoutSrc)
 {
+	workout = workoutSrc;
 }
 
 WorkoutScene::~WorkoutScene()
@@ -23,10 +24,26 @@ WorkoutScene::~WorkoutScene()
 
 int WorkoutScene::UpdateLogic()
 {
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int WorkoutScene::DrawCall()
 {
-	return 0;
+	using namespace MattsUtils;
+
+	Font fontType = FontSettings::GetMainFont();
+
+	Vector2 buttonSize = raylib::ConstructVector2(128, 32);
+	Vector2 offsetDstBL = raylib::ConstructVector2(24, -24);
+	Vector2 offsetDstBC = raylib::ConstructVector2(0, -24);
+	Vector2 offsetDstBR = raylib::ConstructVector2(-24, -24);
+
+	workout->DrawWorkout(raylib::ConstructVector2(24, 24), GetScreenWidth() - 24 * 2, GetScreenHeight() - 24 * 4, 128);
+
+	bool backRes = RelativeDrawing::GuiButtonRelative("Back", offsetDstBC, buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
+	if (backRes) {
+		SceneManager::LoadScene("WorkoutSelectionMenu");
+	}
+
+	return EXIT_SUCCESS;
 }

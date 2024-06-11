@@ -7,8 +7,11 @@
 #include <set>
 #include <fstream>
 
+int WorkoutDefinition::idGen = 0;
+
 WorkoutDefinition::WorkoutDefinition(std::string fileName)
 {
+	id = GetNewId();
 	std::vector<std::string> lines;
 
 	std::ifstream file(fileName);
@@ -26,6 +29,7 @@ WorkoutDefinition::WorkoutDefinition(std::string fileName)
 
 WorkoutDefinition::WorkoutDefinition(std::vector<std::string> fromFile)
 {
+	id = GetNewId();
 	workoutType = RAW_POWER;
 	ReadWorkout(fromFile);
 }
@@ -64,6 +68,11 @@ bool WorkoutDefinition::IsValid()
 std::string WorkoutDefinition::GetName()
 {
 	return name;
+}
+
+int WorkoutDefinition::GetId()
+{
+	return id;
 }
 
 int WorkoutDefinition::GetWorkoutLength()
@@ -166,6 +175,13 @@ void WorkoutDefinition::DrawWorkout(Vector2 position, int width, int height, int
 		currentDrawX += segWidth;
 	}
 
+}
+
+int WorkoutDefinition::GetNewId()
+{
+	int thisId = idGen;
+	idGen++;
+	return thisId;
 }
 
 void WorkoutDefinition::ReadWorkout(std::vector<std::string> fromFile)

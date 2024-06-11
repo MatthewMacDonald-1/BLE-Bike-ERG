@@ -19,6 +19,11 @@ void SceneManager::DeinitializeSceneManager()
 {
 }
 
+void SceneManager::AddScene(std::string name, Scene* scene)
+{
+	scenes[name] = scene;
+}
+
 Scene* SceneManager::GetCurrentScene()
 {
 	return currentScene;

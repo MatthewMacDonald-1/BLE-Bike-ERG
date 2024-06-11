@@ -14,6 +14,8 @@ public:
 
 	static void DeinitializeSceneManager();
 
+	static void AddScene(std::string name, Scene* scene);
+
 	static Scene* GetCurrentScene();
 	static void LoadScene(std::string sceneName);
 

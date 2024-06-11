@@ -12,6 +12,7 @@
 #include "MattsUtils/raylib-structs.hpp"
 #include "settings-menu.hpp"
 #include "scene-manager.hpp"
+#include "workout-scene.hpp"
 
 using namespace MattsUtils;
 
@@ -21,6 +22,12 @@ WorkoutSelectionMenuScene::WorkoutSelectionMenuScene()
 
 	//workouts.push_back(new WorkoutDefinition("./resources/workouts/test.workout"));
 	workouts = WorkoutDefinition::LoadFromDirectory("./resources/workouts/");
+
+	for (int i = 0; i < workouts.size(); i++) {
+		std::stringstream ss;
+		ss << "Workout_" << workouts.at(i)->GetId();
+		SceneManager::AddScene(ss.str(), new WorkoutScene(workouts.at(i)));
+	}
 }
 
 WorkoutSelectionMenuScene::~WorkoutSelectionMenuScene()
@@ -201,6 +208,9 @@ int WorkoutSelectionMenuScene::DrawWorkoutButton(WorkoutDefinition* workout, Vec
 
 	if (clicked) {
 		// Clicked
+		std::stringstream ss;
+		ss << "Workout_" << workout->GetId();
+		SceneManager::LoadScene(ss.str());
 	}
 
 

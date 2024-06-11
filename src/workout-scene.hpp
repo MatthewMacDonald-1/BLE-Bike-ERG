@@ -8,11 +8,12 @@
 
 class WorkoutScene : public Scene {
 public:
-	WorkoutScene();
+	WorkoutScene(WorkoutDefinition* workoutSrc);
 	~WorkoutScene();
 
 	int UpdateLogic();
 	int DrawCall();
 
 private:
+	WorkoutDefinition* workout;
 };
