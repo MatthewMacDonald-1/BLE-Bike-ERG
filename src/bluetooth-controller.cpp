@@ -463,10 +463,10 @@ void BluetoothController::CadenceCallback(SimpleBLE::ByteArray bytes)
 	bool hasWheelData = flags._0 == 1;
 	bool hasCrankData = flags._1 == 1;
 
-	/*std::cout << "Cadence Data: ";
+	std::cout << "Cadence Data: ";
 	for (auto b : bytes) {
 		std::cout << std::hex << std::setfill('0') << std::setw(2) << (uint32_t)((uint8_t)b) << " ";
-	}*/
+	}
 
 	int crankRevolutions = 0;
 	int crankEventTime = 0;
@@ -486,12 +486,12 @@ void BluetoothController::CadenceCallback(SimpleBLE::ByteArray bytes)
 		cadenceValue = (int)(((double)std::abs(lastCrankRevolutions - crankRevolutions) / (double)divisor) * 1024 * 60);
 	}
 
-	/*std::cout << " Has Wheel: " << hasWheelData;
+	std::cout << " Has Wheel: " << hasWheelData;
 	std::cout << " Has Crank: " << hasCrankData;
 	std::cout << " Cadence: " << std::to_string(cadenceValue);
 	std::cout << " Revs: " << std::to_string(crankRevolutions);
 	std::cout << " Time: " << std::to_string(crankEventTime);
-	std::cout << std::endl;*/
+	std::cout << std::endl;
 
 	*cyclingCadenceValue = cadenceValue;
 
