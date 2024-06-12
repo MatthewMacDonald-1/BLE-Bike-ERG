@@ -47,6 +47,9 @@ int WorkoutScene::DrawCall()
 
 	Color graphScaleLines = raylib::ConstructColor(120, 120, 120);
 	Color graphScaleLineFTP100 = raylib::ConstructColor(255, 255, 255);
+
+	Color graphHeartRateRecordLineColor = raylib::ConstructColor(255, 39, 0);
+	Color graphCadenceRecordLineColor = raylib::ConstructColor(255, 255, 255);
 	Color graphProgressLineColor = raylib::ConstructColor(255, 199, 0);
 	Color graphProgressCompletedColor = raylib::ConstructColor(255, 199, 0, 50);
 	
@@ -67,6 +70,15 @@ int WorkoutScene::DrawCall()
 	int ftp = workout->GetTargetType() == WorkoutDefinition::RAW_POWER ? 100 : actualFTP;
 
 	int targetPower = (int)std::round(((double)workout->EvaluateWorkoutAt((int)workoutTime) / 100.0) * (double)ftp);
+
+	if ((int)workoutTime != previousFrameIntTime) {
+		powerRecord.push_back(currentPower);
+		heartRateRecord.push_back(currentHeartRate);
+		cadenceRecord.push_back(currentCadence);
+
+		previousFrameIntTime = (int)workoutTime;
+	}
+	
 
 	std::pair<int, int> intervalTimeData = workout->GetIntervalTime((int)workoutTime);
 	int intervalElapsedTime = (int)workoutTime - intervalTimeData.first;
@@ -197,6 +209,45 @@ int WorkoutScene::DrawCall()
 	int x_pos = (int)std::round((double)GetScreenWidth() * ((double)(int)workoutTime / (double)workout->GetWorkoutLength()));
 
 	DrawRectangle(0, dataDisplayHeight, x_pos, graphAreaHeight, graphProgressCompletedColor);
+
+	// Draw Power Record
+	int rec_yp, rec_xp;
+	for (int i = 0; i < cadenceRecord.size(); i++) {
+		int rec_y = dataDisplayHeight + (graphAreaHeight - (oneWattDist * std::max(cadenceRecord.at(i), 0)));
+		int rec_x = (int)std::round((double)GetScreenWidth() * ((double)i / (double)workout->GetWorkoutLength()));
+
+		if (i != 0) {
+			DrawLine(rec_xp, rec_yp, rec_x, rec_y, graphCadenceRecordLineColor);
+		}
+
+		rec_xp = rec_x;
+		rec_yp = rec_y;
+	}
+
+	for (int i = 0; i < heartRateRecord.size(); i++) {
+		int rec_y = dataDisplayHeight + (graphAreaHeight - (oneWattDist * std::max(heartRateRecord.at(i), 0)));
+		int rec_x = (int)std::round((double)GetScreenWidth() * ((double)i / (double)workout->GetWorkoutLength()));
+
+		if (i != 0) {
+			DrawLine(rec_xp, rec_yp, rec_x, rec_y, graphHeartRateRecordLineColor);
+		}
+
+		rec_xp = rec_x;
+		rec_yp = rec_y;
+	}
+
+	for (int i = 0; i < powerRecord.size(); i++) {
+		int rec_y = dataDisplayHeight + (graphAreaHeight - (oneWattDist * std::max(powerRecord.at(i), 0)));
+		int rec_x = (int)std::round((double)GetScreenWidth() * ((double)i / (double)workout->GetWorkoutLength()));
+
+		if (i != 0) {
+			DrawLine(rec_xp, rec_yp, rec_x, rec_y, graphProgressLineColor);
+		}
+
+		rec_xp = rec_x;
+		rec_yp = rec_y;
+	}
+
 	DrawLine(x_pos, dataDisplayHeight, x_pos, dataDisplayHeight + graphAreaHeight, graphProgressLineColor);
 
 	// Graph Time axis
@@ -266,8 +317,17 @@ int WorkoutScene::DrawCall()
 			paused = true;
 			workoutTime = 0;
 
+			powerRecord.clear();
+			heartRateRecord.clear();
+			cadenceRecord.clear();
+
+			currentPower = -1;
 			currentHeartRate = -1;
+			currentCadence = -1;
+
+			BluetoothController::SubscribeToCyclingPower(&currentPower);
 			BluetoothController::SubscribeToHeartRate(&currentHeartRate);
+			
 			
 			// Set up data logging.
 

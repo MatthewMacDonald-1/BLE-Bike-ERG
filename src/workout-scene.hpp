@@ -30,6 +30,12 @@ private:
 	int currentHeartRate = -1;
 	int currentCadence = -1;
 
+	int previousFrameIntTime = -1;
+
+	std::vector<int> powerRecord;
+	std::vector<int> heartRateRecord;
+	std::vector<int> cadenceRecord;
+
 	/// <summary>
 	/// 
 	/// </summary>
