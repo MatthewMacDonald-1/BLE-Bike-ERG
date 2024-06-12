@@ -10,6 +10,7 @@
 #include "font-settings.hpp"
 #include "MattsUtils/relative-drawing.hpp"
 #include "MattsUtils/raylib-structs.hpp"
+#include "MattsUtils/time.hpp"
 #include "settings-menu.hpp"
 #include "scene-manager.hpp"
 
@@ -49,8 +50,57 @@ int WorkoutScene::DrawCall()
 	DrawRectangle(0, dataDisplayHeight, GetScreenWidth(), graphAreaHeight, graphAreaBackground);
 	DrawRectangle(0, GetScreenHeight() - 32, GetScreenWidth(), 32, dataDisplayBackground);
 
+	// Data
 
-	// Graph Stuff
+	int targetPower = workout->EvaluateWorkoutAt((int)workoutTime);
+	int* currentPower = NULL;
+	int* currentHeartRate = NULL;
+	int* currentCadence = NULL;
+
+	DrawDataValue(
+		fontType, 
+		"Elapsed Time", 
+		MattsUtils::Time::ToString(workoutTime),
+		raylib::ConstructVector2(0, 10)
+	);
+
+	DrawDataValue(
+		fontType,
+		"Interval Time",
+		MattsUtils::Time::ToString(0),
+		raylib::ConstructVector2(0, 70)
+	);
+
+	DrawDataValue(
+		fontType,
+		"Power",
+		std::string(TextFormat("%s", (currentPower == NULL ? "--" : TextFormat("%d", *currentPower)))),
+		raylib::ConstructVector2(-GetScreenWidth() / 4, 10)
+	);
+
+	DrawDataValue(
+		fontType,
+		"Target Power",
+		std::string(TextFormat("%d", targetPower)),
+		raylib::ConstructVector2(-GetScreenWidth() / 4, 70)
+	);
+
+	DrawDataValue(
+		fontType,
+		"Cadence",
+		std::string(TextFormat("%s", (currentCadence == NULL ? "--" : TextFormat("%d", *currentCadence)))),
+		raylib::ConstructVector2(GetScreenWidth() / 4, 10)
+	);
+
+	DrawDataValue(
+		fontType,
+		"Heart Rate",
+		std::string(TextFormat("%s", (currentHeartRate == NULL ? "--" : TextFormat("%d", *currentHeartRate)))),
+		raylib::ConstructVector2(GetScreenWidth() / 4, 70)
+	);
+
+
+	// Graph Stuff Start
 	Color graphScaleLines = raylib::ConstructColor(120, 120, 120);
 	Color graphScaleLineFTP100 = raylib::ConstructColor(255, 255, 255);
 
@@ -89,6 +139,7 @@ int WorkoutScene::DrawCall()
 		1.0,
 		graphScaleLineFTP100
 	);
+	// Graph Stuff end
 
 	bool pauseRes = RelativeDrawing::GuiButtonRelative((!paused ? "Pause" : "Play"), raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
 	if (pauseRes) {
@@ -111,13 +162,13 @@ int WorkoutScene::DrawCall()
 			RelativeDrawing::Center,
 			64,
 			1.5,
-			BLACK
+			WHITE
 		);
 
 		bool startRes = RelativeDrawing::GuiButtonRelative("Start", raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::Center, RelativeDrawing::Center, 24);
 		if (startRes) {
 			started = true;
-
+			workoutTime = 0;
 			// Set up data logging.
 
 		}
@@ -127,5 +178,40 @@ int WorkoutScene::DrawCall()
 		}
 	}
 
+	if (started && !paused) {
+		workoutTime += GetFrameTime();
+	}
+
 	return EXIT_SUCCESS;
+}
+
+bool WorkoutScene::DrawDataValue(Font font, std::string heading, std::string value, Vector2 position)
+{
+	using namespace MattsUtils;
+
+	Color valueNameColor = raylib::ConstructColor(200, 200, 200);
+	Color valueColor = raylib::ConstructColor(255, 255, 255);
+	int valueNameFontSize = 16;
+	int valueFontSize = 32;
+
+	RelativeDrawing::DrawTextRelEx(
+		font,
+		heading.c_str(),
+		position,
+		RelativeDrawing::TopCenter,
+		RelativeDrawing::TopCenter,
+		valueNameFontSize,
+		1,
+		valueNameColor
+	);
+	RelativeDrawing::DrawTextRelEx(
+		font,
+		value.c_str(),
+		raylib::ConstructVector2(position.x, position.y + 16),
+		RelativeDrawing::TopCenter,
+		RelativeDrawing::TopCenter,
+		valueFontSize,
+		1,
+		valueColor
+	);
 }

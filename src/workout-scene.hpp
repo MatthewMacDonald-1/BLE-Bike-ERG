@@ -5,6 +5,7 @@
 
 #include "raylib.h"
 #include <simpleble/SimpleBLE.h>
+#include <string>
 
 class WorkoutScene : public Scene {
 public:
@@ -19,4 +20,16 @@ private:
 
 	bool started = false;
 	bool paused = true;
+
+	float workoutTime = 0;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="font"></param>
+	/// <param name="heading"></param>
+	/// <param name="value"></param>
+	/// <param name="position"></param>
+	/// <returns>Value clicked</returns>
+	bool DrawDataValue(Font font, std::string heading, std::string value, Vector2 position);
 };
