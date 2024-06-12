@@ -7,6 +7,11 @@
 bool BluetoothController::initialized = false;
 SimpleBLE::Adapter BluetoothController::activeAdapter;
 
+std::atomic<int> BluetoothController::activeConnectionThreads = 0;
+std::mutex BluetoothController::connectedDevicesMtx;
+
+std::unordered_map<BluetoothController::ServiceType, SimpleBLE::BluetoothAddress> BluetoothController::serviceDeviceMap;
+
 /// Devices found in scan.
 std::vector<SimpleBLE::Peripheral> BluetoothController::foundDevices;
 
@@ -98,15 +103,30 @@ std::vector<SimpleBLE::Peripheral> BluetoothController::GetConnectedDevices()
 
 void BluetoothController::ConnectToDevice(SimpleBLE::Peripheral device)
 {
+	activeConnectionThreads++;
 	TraceLog(LOG_INFO, "BLE: Connecting to device: %s, %s", device.identifier().c_str(), device.address().c_str());
 	try {
 		device.connect();
 		TraceLog(LOG_INFO, "BLE: Sucessfully connected to device: %s, %s", device.identifier().c_str(), device.address().c_str());
-		connectedDevices.push_back(device);
+
+		connectedDevicesMtx.lock();
+		try {
+			connectedDevices.push_back(device);
+		}
+		catch (...) {
+
+		}
+		connectedDevicesMtx.unlock();
 	}
 	catch (...) {
 		TraceLog(LOG_INFO, "BLE: Failed to connected to device: %s, %s", device.identifier().c_str(), device.address().c_str());
 	}
+	activeConnectionThreads--;
+}
+
+int BluetoothController::GetActiveConnectionThreads()
+{
+	return activeConnectionThreads;
 }
 
 void BluetoothController::DisconnectFromDevice(SimpleBLE::Peripheral device)
@@ -116,17 +136,72 @@ void BluetoothController::DisconnectFromDevice(SimpleBLE::Peripheral device)
 		device.disconnect();
 		TraceLog(LOG_INFO, "BLE: Sucessfully disconnected from device: %s, %s", device.identifier().c_str(), device.address().c_str());
 		
-
-		// Search for then remove the connected device from connected list.
-		for (int i = 0; i < connectedDevices.size(); i++) {
-			if (connectedDevices.at(i).address() == device.address()) {
-				// remove device
-				connectedDevices.erase(std::next(connectedDevices.begin(), i));
-				break;
+		connectedDevicesMtx.lock();
+		try {
+			// Search for then remove the connected device from connected list.
+			for (int i = 0; i < connectedDevices.size(); i++) {
+				if (connectedDevices.at(i).address() == device.address()) {
+					// remove device
+					connectedDevices.erase(std::next(connectedDevices.begin(), i));
+					break;
+				}
 			}
 		}
+		catch (...) {
+
+		}
+		connectedDevicesMtx.unlock();
 	}
 	catch (...) {
 		TraceLog(LOG_INFO, "BLE: Failed to disconnect from device: %s, %s", device.identifier().c_str(), device.address().c_str());
+	}
+}
+
+void BluetoothController::SetServiceDeviceMap(ServiceType type, SimpleBLE::BluetoothAddress address)
+{
+	serviceDeviceMap[type] = address;
+}
+
+BluetoothController::ServiceType BluetoothController::GetServiceType(SimpleBLE::BluetoothUUID uuid)
+{
+	if (uuid == "0000180d-0000-1000-8000-00805f9b34fb") {
+		return BluetoothController::HEART_RATE;
+	}
+	else if (uuid == "00001818-0000-1000-8000-00805f9b34fb") {
+		return BluetoothController::CYCLING_POWER;
+	}
+	else if (uuid == "00001816-0000-1000-8000-00805f9b34fb") {
+		return BluetoothController::CYCLING_SPEED_CADENCE;
+	}
+	else if (uuid == "00001826-0000-1000-8000-00805f9b34fb") {
+		return BluetoothController::FITNESS_MACHINE;
+	}
+	else {
+		return BluetoothController::UNKNOWN;
+	}
+}
+
+std::string BluetoothController::ToString(ServiceType type)
+{
+	switch (type)
+	{
+	case BluetoothController::UNKNOWN:
+		return "Uknown";
+		break;
+	case BluetoothController::HEART_RATE:
+		return "Heart Rate";
+		break;
+	case BluetoothController::CYCLING_POWER:
+		return "Cycling Power";
+		break;
+	case BluetoothController::CYCLING_SPEED_CADENCE:
+		return "Cycling Speend and Cadence";
+		break;
+	case BluetoothController::FITNESS_MACHINE:
+		return "Fitness Machine";
+		break;
+	default:
+		return "Uknown";
+		break;
 	}
 }

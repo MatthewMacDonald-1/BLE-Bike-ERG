@@ -48,7 +48,7 @@ private:
 
 	int DrawBluetoothDeviceListHeading(std::string heading, Vector2 position, int width);
 
-	int DrawPairedBluetoothDevice(SimpleBLE::Peripheral device, Vector2 position, int width);
+	//int DrawPairedBluetoothDevice(SimpleBLE::Peripheral device, Vector2 position, int width);
 
-	int DrawDiscoveredBluetoothDevice(SimpleBLE::Peripheral device, Vector2 position, int width);
+	//int DrawDiscoveredBluetoothDevice(SimpleBLE::Peripheral device, Vector2 position, int width);
 };

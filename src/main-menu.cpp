@@ -7,6 +7,8 @@
 #include <string>
 #include <sstream>
 #include <thread>
+#include <set>
+#include <vector>
 
 #include "bluetooth-controller.hpp"
 #include "font-settings.hpp"
@@ -69,6 +71,12 @@ int MainMenuScene::DrawCall()
 	}
 
 	if (connectingScreen) {
+		if (BluetoothController::GetActiveConnectionThreads() == 0) {
+			BluetoothController::StopScan();
+			SceneManager::LoadScene("WorkoutSelectionMenu");
+			connectingScreen = false;
+		}
+
 		// Dot animation with sin waves
 		DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), raylib::ConstructColor(200, 200, 200, 155));
 
@@ -85,22 +93,24 @@ int MainMenuScene::DrawCall()
 		RelativeDrawing::DrawTextRelEx(fontType, "Connecting", raylib::ConstructVector2(0, -24), RelativeDrawing::Center, RelativeDrawing::Center, 64, 1.5, BLACK);
 		RelativeDrawing::DrawTextRelEx(fontType, dots.str().c_str(), raylib::ConstructVector2(144, -24), RelativeDrawing::Center, RelativeDrawing::MiddleLeft, 64, 1.5, BLACK); // Draw the dot animation
 
-		RelativeDrawing::DrawTextRelEx(fontType, "Device 1", raylib::ConstructVector2(0, 24), RelativeDrawing::Center, RelativeDrawing::Center, 24, 1.5, DARKGRAY);
+		/*RelativeDrawing::DrawTextRelEx(fontType, "Device 1", raylib::ConstructVector2(0, 24), RelativeDrawing::Center, RelativeDrawing::Center, 24, 1.5, DARKGRAY);
 		RelativeDrawing::DrawTextRelEx(fontType, "Device 2", raylib::ConstructVector2(0, 24 * 2), RelativeDrawing::Center, RelativeDrawing::Center, 24, 1.5, DARKGRAY);
 		RelativeDrawing::DrawTextRelEx(fontType, "Device 3", raylib::ConstructVector2(0, 24 * 3), RelativeDrawing::Center, RelativeDrawing::Center, 24, 1.5, DARKGRAY);
-		RelativeDrawing::DrawTextRelEx(fontType, "Device 4", raylib::ConstructVector2(0, 24 * 4), RelativeDrawing::Center, RelativeDrawing::Center, 24, 1.5, DARKGRAY);
+		RelativeDrawing::DrawTextRelEx(fontType, "Device 4", raylib::ConstructVector2(0, 24 * 4), RelativeDrawing::Center, RelativeDrawing::Center, 24, 1.5, DARKGRAY);*/
+
+		RelativeDrawing::DrawTextRelEx(fontType, TextFormat("Waiting on %d devices.", BluetoothController::GetActiveConnectionThreads()), raylib::ConstructVector2(0, 24), RelativeDrawing::Center, RelativeDrawing::Center, 24, 1.5, DARKGRAY);
 
 
-		bool cancelRes = RelativeDrawing::GuiButtonRelative("Cancel", offsetDstBC, buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
+		/*bool cancelRes = RelativeDrawing::GuiButtonRelative("Cancel", offsetDstBC, buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
 		if (cancelRes) {
 			connectingScreen = false;
-		}
+		}*/
 
-		bool nextRes = RelativeDrawing::GuiButtonRelative("Next", offsetDstBR, buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
+		/*bool nextRes = RelativeDrawing::GuiButtonRelative("Next", offsetDstBR, buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
 		if (nextRes) {
 			BluetoothController::StopScan();
 			SceneManager::LoadScene("WorkoutSelectionMenu");
-		}
+		}*/
 
 		return EXIT_SUCCESS;
 	}
@@ -125,15 +135,106 @@ int MainMenuScene::DrawCall()
 	// Buttons Start ------------------------------------------------------------------------------
 	GuiSetFont(fontType);
 
-	/*bool nextSceneRes = RelativeDrawing::GuiButtonRelative("Next", offsetDstBR, buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
-	if (nextSceneRes) {
-		BluetoothController::StopScan();
-		SceneManager::LoadScene("WorkoutSelectionMenu");
-	}*/
-
 	bool nextSceneRes = RelativeDrawing::GuiButtonRelative("Continue", offsetDstBR, buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
 	if (nextSceneRes) {
 		BluetoothController::StopScan();
+		
+		// Create list of bluetooth devices for connection
+		std::vector<SimpleBLE::Peripheral> discoveredDevices = BluetoothController::GetDiscoveredDevices();
+		std::set<SimpleBLE::BluetoothAddress> selectedDevicesAddressSet;
+		std::vector<SimpleBLE::Peripheral> selectedDevicesList;
+		
+
+		int hrIdx = 0;
+		int powerIdx = 0;
+		int cadenceIdx = 0;
+		int trainerIdx = 0;
+
+		for (int i = 0; i < discoveredDevices.size(); i++) {
+			bool containsHR = false;
+			bool containsPower = false;
+			bool containsCadence = false;
+			bool containsTrainer = false;
+
+			std::vector<SimpleBLE::Service> services;
+			try {
+				services = discoveredDevices.at(i).services();
+			}
+			catch (...) {
+				continue;
+			}
+
+			for (int j = 0; j < services.size(); j++) {
+				BluetoothController::ServiceType serviceType = BluetoothController::GetServiceType(services.at(j).uuid());
+
+				switch (serviceType)
+				{
+				case BluetoothController::UNKNOWN:
+					break;
+				case BluetoothController::HEART_RATE:
+					containsHR = true;
+					break;
+				case BluetoothController::CYCLING_POWER:
+					containsPower = true;
+					break;
+				case BluetoothController::CYCLING_SPEED_CADENCE:
+					containsCadence = true;
+					break;
+				case BluetoothController::FITNESS_MACHINE:
+					containsTrainer = true;
+					break;
+				default:
+					break;
+				}
+			}
+
+			if (containsHR && hrSelected == hrIdx) {
+				std::pair<std::set<SimpleBLE::BluetoothAddress>::iterator, bool> res = selectedDevicesAddressSet.insert(discoveredDevices.at(i).address());
+				if (res.second) {
+					selectedDevicesList.push_back(discoveredDevices.at(i));
+				}
+
+				BluetoothController::SetServiceDeviceMap(BluetoothController::HEART_RATE, discoveredDevices.at(i).address());
+			}
+			if (containsPower && powerSelected == powerIdx) {
+				std::pair<std::set<SimpleBLE::BluetoothAddress>::iterator, bool> res = selectedDevicesAddressSet.insert(discoveredDevices.at(i).address());
+				if (res.second) {
+					selectedDevicesList.push_back(discoveredDevices.at(i));
+				}
+
+				BluetoothController::SetServiceDeviceMap(BluetoothController::CYCLING_POWER, discoveredDevices.at(i).address());
+			}
+			if (containsCadence && cadenceSelected == cadenceIdx) {
+				std::pair<std::set<SimpleBLE::BluetoothAddress>::iterator, bool> res = selectedDevicesAddressSet.insert(discoveredDevices.at(i).address());
+				if (res.second) {
+					selectedDevicesList.push_back(discoveredDevices.at(i));
+				}
+
+				BluetoothController::SetServiceDeviceMap(BluetoothController::CYCLING_SPEED_CADENCE, discoveredDevices.at(i).address());
+			}
+			if (containsTrainer && trainerSelected == trainerIdx) {
+				std::pair<std::set<SimpleBLE::BluetoothAddress>::iterator, bool> res = selectedDevicesAddressSet.insert(discoveredDevices.at(i).address());
+				if (res.second) {
+					selectedDevicesList.push_back(discoveredDevices.at(i));
+				}
+
+				BluetoothController::SetServiceDeviceMap(BluetoothController::FITNESS_MACHINE, discoveredDevices.at(i).address());
+			}
+
+			if (containsHR) hrIdx++;
+			if (containsPower) powerIdx++;
+			if (containsCadence) cadenceIdx++;
+			if (containsTrainer) trainerIdx++;
+
+		}
+
+		// Initiate connections with the selected devices
+		for (int i = 0; i < selectedDevicesList.size(); i++) {
+			std::thread connectThread(BluetoothController::ConnectToDevice, selectedDevicesList.at(i));
+			connectThread.detach(); // Runs the thread detached
+		}
+		
+		
 		connectingScreen = true;
 	}
 
@@ -184,7 +285,15 @@ void MainMenuScene::DrawDeviceConnectionBox(Vector2 position, Vector2 dimensions
 	int ofTypeIdx = 0;
 	for (int i = 0; i < discoveredDevices.size(); i++) {
 		Vector2 buttonPosition = raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight);
-		std::vector<SimpleBLE::Service> services = discoveredDevices.at(i).services();
+		std::vector<SimpleBLE::Service> services;
+
+		try {
+			services = discoveredDevices.at(i).services();
+		}
+		catch (...) {
+			continue;
+		}
+
 		bool containsMatch = false;
 		for (int j = 0; j < services.size(); j++) {
 			if (BleUtils::GetServiceType(services.at(j).uuid()) == type) {
@@ -319,204 +428,204 @@ int MainMenuScene::DrawBluetoothDeviceListHeading(std::string heading, Vector2 p
 	return 46;
 }
 
-int MainMenuScene::DrawPairedBluetoothDevice(SimpleBLE::Peripheral device, Vector2 position, int width)
-{
-	Font fontType = FontSettings::GetMainFont();
-	int returnSize = 66;
-
-	RelativeDrawing::DrawRectangle(
-		position,
-		raylib::ConstructVector2(width, 64),
-		RelativeDrawing::TopLeft,
-		RelativeDrawing::TopLeft,
-		raylib::ConstructColor(255, 255, 255)
-	);
-	RelativeDrawing::DrawRectangle(
-		raylib::ConstructVector2(position.x, position.y + 64),
-		raylib::ConstructVector2(width, 2),
-		RelativeDrawing::TopLeft,
-		RelativeDrawing::TopLeft,
-		raylib::ConstructColor(206, 206, 206)
-	);
-
-	std::vector<SimpleBLE::Service> deviceServices = device.services();
-	if (false) {
-		std::stringstream ss;
-		bool containsUnknwon = false || deviceServices.size() == 0;
-		for (int i = 0; i < deviceServices.size(); i++) {
-			BleUtils::ServiceType type = BleUtils::GetServiceType(deviceServices.at(i).uuid());
-			if (type == BleUtils::UNKNOWN) {
-				containsUnknwon = true;
-			}
-
-			ss << BleUtils::ToString(type);
-			if (i + 1 < deviceServices.size()) {
-				ss << ", ";
-			}
-		}
-
-		RelativeDrawing::DrawTextRelEx(
-			fontType,
-			TextFormat("%s - %s", device.identifier().c_str(), ss.str().c_str()),
-			raylib::ConstructVector2(position.x + 10, position.y + 10),
-			RelativeDrawing::TopLeft,
-			RelativeDrawing::TopLeft,
-			24,
-			1.5,
-			BLACK
-		);
-	}
-	else {
-		RelativeDrawing::DrawTextRelEx(
-			fontType,
-			TextFormat("%s", device.identifier().c_str()),
-			raylib::ConstructVector2(position.x + 10, position.y + 10),
-			RelativeDrawing::TopLeft,
-			RelativeDrawing::TopLeft,
-			24,
-			1.5,
-			BLACK
-		);
-
-		for (int i = 0; i < deviceServices.size(); i++) {
-			BleUtils::ServiceType type = BleUtils::GetServiceType(deviceServices.at(i).uuid());
-
-			RelativeDrawing::DrawTextRelEx(
-				fontType,
-				TextFormat("%s, %s", BleUtils::ToString(type).c_str(), deviceServices.at(i).uuid().c_str()),
-				raylib::ConstructVector2(position.x + 10 + 256, position.y + 10 + 28 * i),
-				RelativeDrawing::TopLeft,
-				RelativeDrawing::TopLeft,
-				24,
-				1.5,
-				BLACK
-			);
-			if (i > 1) {
-				returnSize += 28;
-			}
-		}
-	}
-	
-
-	int clicked = RelativeDrawing::GuiButtonRelative(
-		"Disconnect",
-		raylib::ConstructVector2(position.x + width - 10 - 128, position.y + 16),
-		raylib::ConstructVector2(128, 32),
-		RelativeDrawing::TopLeft,
-		RelativeDrawing::TopLeft,
-		24
-	);
-
-	if (clicked) {
-		//TraceLog(LOG_INFO, "Menu Button Clicked");
-		std::thread disconnectThread(BluetoothController::DisconnectFromDevice, device);
-
-		disconnectThread.detach();
-	}
-
-	RelativeDrawing::DrawTextRelEx(
-		fontType,
-		TextFormat("%s", device.address().c_str()),
-		raylib::ConstructVector2(position.x + 10, position.y + 10 + 24),
-		RelativeDrawing::TopLeft,
-		RelativeDrawing::TopLeft,
-		16,
-		1.5,
-		BLACK
-	);
-
-	return returnSize;
-}
-
-int MainMenuScene::DrawDiscoveredBluetoothDevice(SimpleBLE::Peripheral device, Vector2 position, int width)
-{
-	Font fontType = FontSettings::GetMainFont();
-
-	std::vector<SimpleBLE::Service> deviceServices = device.services();
-	std::stringstream ss;
-	bool containsUnknwon = false || deviceServices.size() == 0;
-	bool containsKnown = false;
-	for (int i = 0; i < deviceServices.size(); i++) {
-		BleUtils::ServiceType type = BleUtils::GetServiceType(deviceServices.at(i).uuid());
-		if (type == BleUtils::UNKNOWN) {
-			containsUnknwon = true;
-		}
-		if (type != BleUtils::UNKNOWN) {
-			containsKnown = true;
-		}
-
-		ss << BleUtils::ToString(type);
-		if (i + 1 < deviceServices.size()) {
-			ss << ", ";
-		}
-	}
-
-#ifdef HIDE_UNKNOWN_BLE_DEVICES
-	if (containsUnknwon) {
-		return 0;
-	}
-#endif // HIDE_UNKNOWN_BLE_DEVICES
-
-	
-
-	RelativeDrawing::DrawRectangle(
-		position,
-		raylib::ConstructVector2(width, 64),
-		RelativeDrawing::TopLeft,
-		RelativeDrawing::TopLeft,
-		raylib::ConstructColor(255, 255, 255)
-	);
-	RelativeDrawing::DrawRectangle(
-		raylib::ConstructVector2(position.x, position.y + 64),
-		raylib::ConstructVector2(width, 2),
-		RelativeDrawing::TopLeft,
-		RelativeDrawing::TopLeft,
-		raylib::ConstructColor(206, 206, 206)
-	);
-
-	
-
-	RelativeDrawing::DrawTextRelEx(
-		fontType,
-		TextFormat("%s - %s", device.identifier().c_str(), ss.str().c_str()),
-		raylib::ConstructVector2(position.x + 10, position.y + 10),
-		RelativeDrawing::TopLeft,
-		RelativeDrawing::TopLeft,
-		24,
-		1.5,
-		BLACK
-	);
-
-	//if (!containsUnknwon) {
-	if (containsKnown) {
-		int clicked = RelativeDrawing::GuiButtonRelative(
-			"Connect",
-			raylib::ConstructVector2(position.x + width - 10 - 128, position.y + 16),
-			raylib::ConstructVector2(128, 32),
-			RelativeDrawing::TopLeft,
-			RelativeDrawing::TopLeft,
-			24
-		);
-
-		if (clicked) {
-
-			std::thread connectThread(BluetoothController::ConnectToDevice, device);
-			connectThread.detach(); // Runs the thread detached
-			//BluetoothController::ConnectToDevice(device);
-		}
-	}
-	
-
-	RelativeDrawing::DrawTextRelEx(
-		fontType,
-		TextFormat("%s", device.address().c_str()),
-		raylib::ConstructVector2(position.x + 10, position.y + 10 + 24),
-		RelativeDrawing::TopLeft,
-		RelativeDrawing::TopLeft,
-		16,
-		1.5,
-		BLACK
-	);
-
-	return 66;
-}
+//int MainMenuScene::DrawPairedBluetoothDevice(SimpleBLE::Peripheral device, Vector2 position, int width)
+//{
+//	Font fontType = FontSettings::GetMainFont();
+//	int returnSize = 66;
+//
+//	RelativeDrawing::DrawRectangle(
+//		position,
+//		raylib::ConstructVector2(width, 64),
+//		RelativeDrawing::TopLeft,
+//		RelativeDrawing::TopLeft,
+//		raylib::ConstructColor(255, 255, 255)
+//	);
+//	RelativeDrawing::DrawRectangle(
+//		raylib::ConstructVector2(position.x, position.y + 64),
+//		raylib::ConstructVector2(width, 2),
+//		RelativeDrawing::TopLeft,
+//		RelativeDrawing::TopLeft,
+//		raylib::ConstructColor(206, 206, 206)
+//	);
+//
+//	std::vector<SimpleBLE::Service> deviceServices = device.services();
+//	if (false) {
+//		std::stringstream ss;
+//		bool containsUnknwon = false || deviceServices.size() == 0;
+//		for (int i = 0; i < deviceServices.size(); i++) {
+//			BleUtils::ServiceType type = BleUtils::GetServiceType(deviceServices.at(i).uuid());
+//			if (type == BleUtils::UNKNOWN) {
+//				containsUnknwon = true;
+//			}
+//
+//			ss << BleUtils::ToString(type);
+//			if (i + 1 < deviceServices.size()) {
+//				ss << ", ";
+//			}
+//		}
+//
+//		RelativeDrawing::DrawTextRelEx(
+//			fontType,
+//			TextFormat("%s - %s", device.identifier().c_str(), ss.str().c_str()),
+//			raylib::ConstructVector2(position.x + 10, position.y + 10),
+//			RelativeDrawing::TopLeft,
+//			RelativeDrawing::TopLeft,
+//			24,
+//			1.5,
+//			BLACK
+//		);
+//	}
+//	else {
+//		RelativeDrawing::DrawTextRelEx(
+//			fontType,
+//			TextFormat("%s", device.identifier().c_str()),
+//			raylib::ConstructVector2(position.x + 10, position.y + 10),
+//			RelativeDrawing::TopLeft,
+//			RelativeDrawing::TopLeft,
+//			24,
+//			1.5,
+//			BLACK
+//		);
+//
+//		for (int i = 0; i < deviceServices.size(); i++) {
+//			BleUtils::ServiceType type = BleUtils::GetServiceType(deviceServices.at(i).uuid());
+//
+//			RelativeDrawing::DrawTextRelEx(
+//				fontType,
+//				TextFormat("%s, %s", BleUtils::ToString(type).c_str(), deviceServices.at(i).uuid().c_str()),
+//				raylib::ConstructVector2(position.x + 10 + 256, position.y + 10 + 28 * i),
+//				RelativeDrawing::TopLeft,
+//				RelativeDrawing::TopLeft,
+//				24,
+//				1.5,
+//				BLACK
+//			);
+//			if (i > 1) {
+//				returnSize += 28;
+//			}
+//		}
+//	}
+//	
+//
+//	int clicked = RelativeDrawing::GuiButtonRelative(
+//		"Disconnect",
+//		raylib::ConstructVector2(position.x + width - 10 - 128, position.y + 16),
+//		raylib::ConstructVector2(128, 32),
+//		RelativeDrawing::TopLeft,
+//		RelativeDrawing::TopLeft,
+//		24
+//	);
+//
+//	if (clicked) {
+//		//TraceLog(LOG_INFO, "Menu Button Clicked");
+//		std::thread disconnectThread(BluetoothController::DisconnectFromDevice, device);
+//
+//		disconnectThread.detach();
+//	}
+//
+//	RelativeDrawing::DrawTextRelEx(
+//		fontType,
+//		TextFormat("%s", device.address().c_str()),
+//		raylib::ConstructVector2(position.x + 10, position.y + 10 + 24),
+//		RelativeDrawing::TopLeft,
+//		RelativeDrawing::TopLeft,
+//		16,
+//		1.5,
+//		BLACK
+//	);
+//
+//	return returnSize;
+//}
+//
+//int MainMenuScene::DrawDiscoveredBluetoothDevice(SimpleBLE::Peripheral device, Vector2 position, int width)
+//{
+//	Font fontType = FontSettings::GetMainFont();
+//
+//	std::vector<SimpleBLE::Service> deviceServices = device.services();
+//	std::stringstream ss;
+//	bool containsUnknwon = false || deviceServices.size() == 0;
+//	bool containsKnown = false;
+//	for (int i = 0; i < deviceServices.size(); i++) {
+//		BleUtils::ServiceType type = BleUtils::GetServiceType(deviceServices.at(i).uuid());
+//		if (type == BleUtils::UNKNOWN) {
+//			containsUnknwon = true;
+//		}
+//		if (type != BleUtils::UNKNOWN) {
+//			containsKnown = true;
+//		}
+//
+//		ss << BleUtils::ToString(type);
+//		if (i + 1 < deviceServices.size()) {
+//			ss << ", ";
+//		}
+//	}
+//
+//#ifdef HIDE_UNKNOWN_BLE_DEVICES
+//	if (containsUnknwon) {
+//		return 0;
+//	}
+//#endif // HIDE_UNKNOWN_BLE_DEVICES
+//
+//	
+//
+//	RelativeDrawing::DrawRectangle(
+//		position,
+//		raylib::ConstructVector2(width, 64),
+//		RelativeDrawing::TopLeft,
+//		RelativeDrawing::TopLeft,
+//		raylib::ConstructColor(255, 255, 255)
+//	);
+//	RelativeDrawing::DrawRectangle(
+//		raylib::ConstructVector2(position.x, position.y + 64),
+//		raylib::ConstructVector2(width, 2),
+//		RelativeDrawing::TopLeft,
+//		RelativeDrawing::TopLeft,
+//		raylib::ConstructColor(206, 206, 206)
+//	);
+//
+//	
+//
+//	RelativeDrawing::DrawTextRelEx(
+//		fontType,
+//		TextFormat("%s - %s", device.identifier().c_str(), ss.str().c_str()),
+//		raylib::ConstructVector2(position.x + 10, position.y + 10),
+//		RelativeDrawing::TopLeft,
+//		RelativeDrawing::TopLeft,
+//		24,
+//		1.5,
+//		BLACK
+//	);
+//
+//	//if (!containsUnknwon) {
+//	if (containsKnown) {
+//		int clicked = RelativeDrawing::GuiButtonRelative(
+//			"Connect",
+//			raylib::ConstructVector2(position.x + width - 10 - 128, position.y + 16),
+//			raylib::ConstructVector2(128, 32),
+//			RelativeDrawing::TopLeft,
+//			RelativeDrawing::TopLeft,
+//			24
+//		);
+//
+//		if (clicked) {
+//
+//			std::thread connectThread(BluetoothController::ConnectToDeviceOld, device);
+//			connectThread.detach(); // Runs the thread detached
+//			//BluetoothController::ConnectToDeviceOld(device);
+//		}
+//	}
+//	
+//
+//	RelativeDrawing::DrawTextRelEx(
+//		fontType,
+//		TextFormat("%s", device.address().c_str()),
+//		raylib::ConstructVector2(position.x + 10, position.y + 10 + 24),
+//		RelativeDrawing::TopLeft,
+//		RelativeDrawing::TopLeft,
+//		16,
+//		1.5,
+//		BLACK
+//	);
+//
+//	return 66;
+//}
