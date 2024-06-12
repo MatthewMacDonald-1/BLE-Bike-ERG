@@ -28,6 +28,9 @@ int* BluetoothController::heartRateValue = NULL;
 int* BluetoothController::cyclingPowerValue = NULL;
 int* BluetoothController::cyclingCadenceValue = NULL;
 
+int BluetoothController::lastCrankRevolutions = 0;
+int BluetoothController::lastCrankEventTime = 0;
+
 
 bool BluetoothController::BluetoothSupported()
 {
@@ -583,16 +586,37 @@ void BluetoothController::CadenceCallback(SimpleBLE::ByteArray bytes)
 	for (auto b : bytes) {
 		std::cout << std::hex << std::setfill('0') << std::setw(2) << (uint32_t)((uint8_t)b) << " ";
 	}
-	std::cout << " Has Wheel: " << hasWheelData;
-	std::cout << " Has Crank: " << hasCrankData;
-	std::cout << std::endl;
 
-	int crankValue = 0;
+	int crankRevolutions = 0;
+	int crankEventTime = 0;
+	int cadenceValue = 0;
 
 	if (hasWheelData && hasCrankData) {
-
+		crankRevolutions = Get16BitValue(bytes.at(7), bytes.at(8));
+		crankEventTime = Get16BitValue(bytes.at(9), bytes.at(10));
 	}
 	else if (!hasWheelData && hasCrankData) {
-		
+		crankRevolutions = Get16BitValue(bytes.at(1), bytes.at(2));
+		crankEventTime = Get16BitValue(bytes.at(3), bytes.at(4));
 	}
+	
+	int divisor = std::abs(lastCrankEventTime - crankEventTime);
+	if (divisor != 0) {
+		cadenceValue = (int)(((double)std::abs(lastCrankRevolutions - crankRevolutions) / (double)divisor) * 1024 * 60);
+	}
+	
+	
+	
+
+	std::cout << " Has Wheel: " << hasWheelData;
+	std::cout << " Has Crank: " << hasCrankData;
+	std::cout << " Cadence: " << cadenceValue;
+	std::cout << " Revs: " << std::to_string(crankRevolutions);
+	std::cout << " Time: " << std::to_string(crankEventTime);
+	std::cout << std::endl;
+
+	*cyclingCadenceValue = cadenceValue;
+
+	lastCrankRevolutions = crankRevolutions;
+	lastCrankEventTime = crankEventTime;
 }

@@ -106,6 +106,9 @@ private:
 	static int* cyclingPowerValue;
 	static int* cyclingCadenceValue;
 
+	static int lastCrankRevolutions;
+	static int lastCrankEventTime;
+
 	static int Get8BitValue(char byte);
 	static int Get16BitValue(char byte_1, char byte_2);
 
