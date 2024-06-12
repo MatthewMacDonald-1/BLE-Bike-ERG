@@ -170,6 +170,7 @@ void DrawGUIDebug()
     std::string aliveTime = hour == 0 ? TextFormat("%s%d:%s%d.%s%d", (min < 10 ? "0" : ""), min, (sec < 10 ? "0" : ""), sec, (ms < 10 ? "0" : ""), ms) : TextFormat("%s%d:%s%d:%s%d.%s%d", (hour < 10 ? "0" : ""), hour, (min < 10 ? "0" : ""), min, (sec < 10 ? "0" : ""), sec, (ms < 10 ? "0" : ""), ms);
     DrawTextRelEx(fontType, TextFormat("Alive Time: %s", aliveTime.c_str()), Vector2Add(origin, Vector2Scale(spacing, rowIdx)), pane1Location, pane1Location, fontSize, fontSpacing, fontColor); rowIdx++;
     DrawTextRelEx(fontType, TextFormat("BLE Support: %s", (bleSupported ? "Yes" : "No")), Vector2Add(origin, Vector2Scale(spacing, rowIdx)), pane1Location, pane1Location, fontSize, fontSpacing, fontColor); rowIdx++;
+    DrawTextRelEx(fontType, TextFormat("BLE Connected: %d", BluetoothController::GetConnectedDevices().size()), Vector2Add(origin, Vector2Scale(spacing, rowIdx)), pane1Location, pane1Location, fontSize, fontSpacing, fontColor); rowIdx++;
 
     // Pane 1 End ---------------------------------------------------------------------------------
 
