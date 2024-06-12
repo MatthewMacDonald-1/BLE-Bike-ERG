@@ -13,6 +13,7 @@
 #include "MattsUtils/time.hpp"
 #include "settings-menu.hpp"
 #include "scene-manager.hpp"
+#include "bluetooth-controller.hpp"
 
 WorkoutScene::WorkoutScene(WorkoutDefinition* workoutSrc)
 {
@@ -66,9 +67,6 @@ int WorkoutScene::DrawCall()
 	int ftp = workout->GetTargetType() == WorkoutDefinition::RAW_POWER ? 100 : actualFTP;
 
 	int targetPower = (int)std::round(((double)workout->EvaluateWorkoutAt((int)workoutTime) / 100.0) * (double)ftp);
-	int* currentPower = NULL;
-	int* currentHeartRate = NULL;
-	int* currentCadence = NULL;
 
 	std::pair<int, int> intervalTimeData = workout->GetIntervalTime((int)workoutTime);
 	int intervalElapsedTime = (int)workoutTime - intervalTimeData.first;
@@ -133,7 +131,7 @@ int WorkoutScene::DrawCall()
 	DrawDataValue(
 		fontType,
 		"Power",
-		std::string(TextFormat("%s", (currentPower == NULL ? "--" : TextFormat("%d", *currentPower)))),
+		std::string(TextFormat("%s", (currentPower == -1 ? "--" : TextFormat("%d", currentPower)))),
 		raylib::ConstructVector2(-GetScreenWidth() / 4, 10)
 	);
 
@@ -147,14 +145,14 @@ int WorkoutScene::DrawCall()
 	DrawDataValue(
 		fontType,
 		"Cadence",
-		std::string(TextFormat("%s", (currentCadence == NULL ? "--" : TextFormat("%d", *currentCadence)))),
+		std::string(TextFormat("%s", (currentCadence == -1 ? "--" : TextFormat("%d", currentCadence)))),
 		raylib::ConstructVector2(GetScreenWidth() / 4, 10)
 	);
 
 	DrawDataValue(
 		fontType,
 		"Heart Rate",
-		std::string(TextFormat("%s", (currentHeartRate == NULL ? "--" : TextFormat("%d", *currentHeartRate)))),
+		std::string(TextFormat("%s", (currentHeartRate == -1 ? "--" : TextFormat("%d", currentHeartRate)))),
 		raylib::ConstructVector2(GetScreenWidth() / 4, 70)
 	);
 
@@ -241,7 +239,10 @@ int WorkoutScene::DrawCall()
 	}
 
 	bool finishRes = RelativeDrawing::GuiButtonRelative("Finish", raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
-	
+	if (finishRes) {
+		started = false;
+		SceneManager::LoadScene("WorkoutSelectionMenu");
+	}
 
 	GuiUnlock();
 
@@ -262,7 +263,12 @@ int WorkoutScene::DrawCall()
 		bool startRes = RelativeDrawing::GuiButtonRelative("Start", raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::Center, RelativeDrawing::Center, 24);
 		if (startRes) {
 			started = true;
+			paused = true;
 			workoutTime = 0;
+
+			currentHeartRate = -1;
+			BluetoothController::SubscribeToHeartRate(&currentHeartRate);
+			
 			// Set up data logging.
 
 		}

@@ -26,6 +26,10 @@ private:
 
 	float workoutTime = 0;
 
+	int currentPower = -1;
+	int currentHeartRate = -1;
+	int currentCadence = -1;
+
 	/// <summary>
 	/// 
 	/// </summary>

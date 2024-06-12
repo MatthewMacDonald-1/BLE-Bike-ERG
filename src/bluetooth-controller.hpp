@@ -71,7 +71,11 @@ public:
 
 	static void SetServiceDeviceMap(ServiceType type, SimpleBLE::BluetoothAddress address);
 
+	static int SubscribeToHeartRate(int* heartRateReference);
+
 	static ServiceType GetServiceType(SimpleBLE::BluetoothUUID uuid);
+
+	static std::string GetServiceUuid(ServiceType type);
 
 	static std::string ToString(ServiceType type);
 
@@ -85,9 +89,15 @@ private:
 
 	static std::unordered_map<ServiceType, SimpleBLE::BluetoothAddress> serviceDeviceMap;
 
+	static std::string heartRateMeasurementCharacteristic;
+
 
 	/// Devices found in scan.
 	static std::vector<SimpleBLE::Peripheral> foundDevices;
 	static std::vector<SimpleBLE::Peripheral> connectedDevices;
+
+	static int* heartRateValue;
+
+	static void HeartRateCallback(SimpleBLE::ByteArray bytes);
 
 };
