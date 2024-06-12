@@ -50,8 +50,45 @@ int WorkoutScene::DrawCall()
 	DrawRectangle(0, GetScreenHeight() - 32, GetScreenWidth(), 32, dataDisplayBackground);
 
 
+	// Graph Stuff
+	Color graphScaleLines = raylib::ConstructColor(120, 120, 120);
+	Color graphScaleLineFTP100 = raylib::ConstructColor(255, 255, 255);
 
-	workout->DrawWorkout(raylib::ConstructVector2(0, dataDisplayHeight), GetScreenWidth(), graphAreaHeight, raylib::ConstructColor(0, 178, 255, 255), 0);
+	int actualFTP = 243;
+	int ftp = workout->GetTargetType() == WorkoutDefinition::RAW_POWER ? 100 : actualFTP;
+	int highestTarget = (int)(((double)workout->GetHighestTarget() / 100.0) * (double)ftp);
+	int highestGraphPoint = (int)std::ceil((double)highestTarget / 100.0) * 100;
+
+	int workoutDrawHeight = (int)(((double)highestTarget / (double)highestGraphPoint) * (double)graphAreaHeight);
+
+	double oneWattDist = (double)graphAreaHeight / (double)highestGraphPoint;
+
+	for (int i = 100; i < highestGraphPoint; i += 100) {
+		int y = dataDisplayHeight + (graphAreaHeight - (oneWattDist * i));
+		DrawLine(0, y, GetScreenWidth(), y, graphScaleLines);
+		RelativeDrawing::DrawTextRelEx(fontType, TextFormat("%d", i),
+			raylib::ConstructVector2(3, y - 1),
+			RelativeDrawing::TopLeft,
+			RelativeDrawing::BottomLeft,
+			16,
+			1.0,
+			graphScaleLines
+		);
+	}
+
+	workout->DrawWorkout(raylib::ConstructVector2(0, dataDisplayHeight + (graphAreaHeight - workoutDrawHeight)), GetScreenWidth(), workoutDrawHeight, raylib::ConstructColor(0, 178, 255, 255), 0);
+
+	int ftp_y = dataDisplayHeight + (graphAreaHeight - (oneWattDist * actualFTP));
+	DrawLine(0, ftp_y, GetScreenWidth(), ftp_y, graphScaleLineFTP100);
+
+	RelativeDrawing::DrawTextRelEx(fontType, TextFormat("FTP %d", actualFTP),
+		raylib::ConstructVector2(-3, ftp_y - 1),
+		RelativeDrawing::TopRight,
+		RelativeDrawing::BottomRight,
+		16,
+		1.0,
+		graphScaleLineFTP100
+	);
 
 	bool pauseRes = RelativeDrawing::GuiButtonRelative((!paused ? "Pause" : "Play"), raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
 	if (pauseRes) {
