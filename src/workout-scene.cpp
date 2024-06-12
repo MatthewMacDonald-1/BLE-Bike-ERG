@@ -40,12 +40,26 @@ int WorkoutScene::DrawCall()
 	Vector2 offsetDstBC = raylib::ConstructVector2(0, -24);
 	Vector2 offsetDstBR = raylib::ConstructVector2(-24, -24);
 
-	workout->DrawWorkout(raylib::ConstructVector2(24, 24), GetScreenWidth() - 24 * 2, GetScreenHeight() - 24 * 4, raylib::ConstructColor(0, 178, 255, 255), 128);
+	Color dataDisplayBackground = raylib::ConstructColor(64, 64, 64);
+	Color graphAreaBackground = raylib::ConstructColor(32, 32, 32);
+	
+	int dataDisplayHeight = 128;
+	int graphAreaHeight = GetScreenHeight() - dataDisplayHeight - 32;
+	DrawRectangle(0, 0, GetScreenWidth(), dataDisplayHeight, dataDisplayBackground);
+	DrawRectangle(0, dataDisplayHeight, GetScreenWidth(), graphAreaHeight, graphAreaBackground);
+	DrawRectangle(0, GetScreenHeight() - 32, GetScreenWidth(), 32, dataDisplayBackground);
 
-	bool pauseRes = RelativeDrawing::GuiButtonRelative((!paused ? "Pause" : "Play"), offsetDstBC, buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
+
+
+	workout->DrawWorkout(raylib::ConstructVector2(0, dataDisplayHeight), GetScreenWidth(), graphAreaHeight, raylib::ConstructColor(0, 178, 255, 255), 0);
+
+	bool pauseRes = RelativeDrawing::GuiButtonRelative((!paused ? "Pause" : "Play"), raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
 	if (pauseRes) {
 		paused = !paused;
 	}
+
+	bool finishRes = RelativeDrawing::GuiButtonRelative("Finish", raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
+	
 
 	GuiUnlock();
 
