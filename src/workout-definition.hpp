@@ -67,7 +67,7 @@ public:
 	/// <param name="position">Top Left Corner</param>
 	/// <param name="width">Graph container width</param>
 	/// <param name="height">Graph container height</param>
-	void DrawWorkout(Vector2 position, int width, int height, int topMargin = 0);
+	void DrawWorkout(Vector2 position, int width, int height, Color segmentColor, int topMargin = 0);
 
 private:
 	static int idGen;

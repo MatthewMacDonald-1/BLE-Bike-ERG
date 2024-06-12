@@ -210,10 +210,12 @@ int WorkoutSelectionMenuScene::DrawWorkoutButton(WorkoutDefinition* workout, Vec
 	);
 
 	int workoutGraphWidth = 192;
+	DrawRectangle(position.x + width - 10 * 2 - 128 - workoutGraphWidth, position.y + 16, workoutGraphWidth, 32, DARKGRAY);
 	workout->DrawWorkout(
 		raylib::ConstructVector2(position.x + width - 10 * 2 - 128 - workoutGraphWidth, position.y + 16),
 		workoutGraphWidth,
 		32,
+		raylib::ConstructColor(0, 178, 255, 255),
 		4
 	);
 

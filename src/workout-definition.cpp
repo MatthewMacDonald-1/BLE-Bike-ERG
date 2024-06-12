@@ -133,11 +133,11 @@ double WorkoutDefinition::EvaluateWorkoutAt(int time)
 	return 0.0;
 }
 
-void WorkoutDefinition::DrawWorkout(Vector2 position, int width, int height, int topMargin)
+void WorkoutDefinition::DrawWorkout(Vector2 position, int width, int height, Color segmentColor, int topMargin)
 {
-	DrawRectangle(position.x, position.y, width, height, DARKGRAY);
+	/*DrawRectangle(position.x, position.y, width, height, DARKGRAY);
 
-	Color segmentColor = MattsUtils::raylib::ConstructColor(0, 200, 200);
+	Color segmentColor = MattsUtils::raylib::ConstructColor(0, 200, 200);*/
 
 	double segmentSizeH = (double)width / (double)GetWorkoutLength();
 	double segmentSizeV = (double)(height - topMargin) / (double)GetHighestTarget();

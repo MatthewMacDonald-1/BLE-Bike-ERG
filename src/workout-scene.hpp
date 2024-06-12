@@ -16,4 +16,7 @@ public:
 
 private:
 	WorkoutDefinition* workout;
+
+	bool started = false;
+	bool paused = true;
 };
