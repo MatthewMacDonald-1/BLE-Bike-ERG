@@ -21,6 +21,9 @@ private:
 	bool started = false;
 	bool paused = true;
 
+	int timeMode = 0;
+	int maxTimeMode = 2;
+
 	float workoutTime = 0;
 
 	/// <summary>

@@ -62,6 +62,12 @@ public:
 	double EvaluateWorkoutAt(int time);
 
 	/// <summary>
+	/// Get the time information for the current interval.
+	/// </summary>
+	/// <returns>Returns Interval start time and Interval end time.</returns>
+	std::pair<int, int> GetIntervalTime(int time);
+
+	/// <summary>
 	/// 
 	/// </summary>
 	/// <param name="position">Top Left Corner</param>

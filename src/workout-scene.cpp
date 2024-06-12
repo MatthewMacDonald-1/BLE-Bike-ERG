@@ -52,24 +52,73 @@ int WorkoutScene::DrawCall()
 
 	// Data
 
-	int targetPower = workout->EvaluateWorkoutAt((int)workoutTime);
+	int actualFTP = 243;
+	int ftp = workout->GetTargetType() == WorkoutDefinition::RAW_POWER ? 100 : actualFTP;
+
+	int targetPower = (int)std::round(((double)workout->EvaluateWorkoutAt(workoutTime) / 100.0) * (double)ftp);
 	int* currentPower = NULL;
 	int* currentHeartRate = NULL;
 	int* currentCadence = NULL;
 
-	DrawDataValue(
+	std::pair<int, int> intervalTimeData = workout->GetIntervalTime(workoutTime);
+	int intervalElapsedTime = (int)workoutTime - intervalTimeData.first;
+	int intervalLength = intervalTimeData.second - intervalTimeData.first;
+
+	std::stringstream elapsedTimeSS;
+	std::string elapsedTime;
+	std::string elapsedTimeHeading;
+
+	std::stringstream elapsedIntervalTimeSS;
+	std::string elapsedIntervalTime;
+	std::string elapsedIntervalTimeHeading;
+	switch (timeMode) {
+	default:
+		elapsedTimeHeading = "Elapsed Time";
+		elapsedTime = MattsUtils::Time::ToString(workoutTime);
+
+		elapsedIntervalTimeHeading = "Elapsed Interval Time";
+		elapsedIntervalTime = MattsUtils::Time::ToString(intervalElapsedTime);
+		break;
+	case 1:
+		elapsedTimeHeading = "Time Remaining";
+		elapsedTimeSS << MattsUtils::Time::ToString(workout->GetWorkoutLength() - workoutTime);
+		elapsedTime = elapsedTimeSS.str();
+
+		elapsedIntervalTimeHeading = "Interval Time Remaining";
+		elapsedIntervalTimeSS << MattsUtils::Time::ToString(intervalLength - intervalElapsedTime);
+		elapsedIntervalTime = elapsedIntervalTimeSS.str();
+		break;
+	case 2:
+		elapsedTimeHeading = "Time";
+		elapsedTimeSS << MattsUtils::Time::ToString(workoutTime) << " / " << MattsUtils::Time::ToString(workout->GetWorkoutLength());
+		elapsedTime = elapsedTimeSS.str();
+
+		elapsedIntervalTimeHeading = "Interval Time";
+		elapsedIntervalTimeSS << MattsUtils::Time::ToString(intervalElapsedTime) << " / " << MattsUtils::Time::ToString(intervalLength);
+		elapsedIntervalTime = elapsedIntervalTimeSS.str();
+		break;
+	}
+
+	bool timeElapsedClicked = DrawDataValue(
 		fontType, 
-		"Elapsed Time", 
-		MattsUtils::Time::ToString(workoutTime),
+		elapsedTimeHeading, 
+		elapsedTime,
 		raylib::ConstructVector2(0, 10)
 	);
 
-	DrawDataValue(
+	bool intervalTimeClicked = DrawDataValue(
 		fontType,
-		"Interval Time",
-		MattsUtils::Time::ToString(0),
+		elapsedIntervalTimeHeading,
+		elapsedIntervalTime,
 		raylib::ConstructVector2(0, 70)
 	);
+
+	if (timeElapsedClicked || intervalTimeClicked) {
+		timeMode++;
+		if (timeMode > maxTimeMode) {
+			timeMode = 0;
+		}
+	}
 
 	DrawDataValue(
 		fontType,
@@ -104,8 +153,6 @@ int WorkoutScene::DrawCall()
 	Color graphScaleLines = raylib::ConstructColor(120, 120, 120);
 	Color graphScaleLineFTP100 = raylib::ConstructColor(255, 255, 255);
 
-	int actualFTP = 243;
-	int ftp = workout->GetTargetType() == WorkoutDefinition::RAW_POWER ? 100 : actualFTP;
 	int highestTarget = (int)(((double)workout->GetHighestTarget() / 100.0) * (double)ftp);
 	int highestGraphPoint = (int)std::ceil((double)highestTarget / 100.0) * 100;
 
@@ -204,7 +251,7 @@ bool WorkoutScene::DrawDataValue(Font font, std::string heading, std::string val
 		1,
 		valueNameColor
 	);
-	RelativeDrawing::DrawTextRelEx(
+	Bounds bounds = RelativeDrawing::DrawTextRelEx(
 		font,
 		value.c_str(),
 		raylib::ConstructVector2(position.x, position.y + 16),
@@ -214,4 +261,6 @@ bool WorkoutScene::DrawDataValue(Font font, std::string heading, std::string val
 		1,
 		valueColor
 	);
+
+	return CheckCollisionPointRec(GetMousePosition(), raylib::ConstructRectangle(bounds.minX, bounds.minY, bounds.maxX - bounds.minX, bounds.maxY - bounds.minY)) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 }

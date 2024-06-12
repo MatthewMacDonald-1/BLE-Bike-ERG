@@ -104,7 +104,39 @@ std::string WorkoutDefinition::GetTargetTypeStr()
 
 double WorkoutDefinition::EvaluateWorkoutAt(int time)
 {
+	int summedTime = 0;
+	for (int i = 0; i < segments.size(); i++) {
+		int timeOverall = summedTime + segments.at(i).first;
+		if (time < timeOverall) {
+			// Found correct segment. Now get power value
+			if (segments.at(i).second.first == segments.at(i).second.second) {
+				return segments.at(i).second.first;
+			}
+			else {
+				return 0;
+			}
+		}
+		else {
+			summedTime += segments.at(i).first;
+		}
+	}
 	return 0.0;
+}
+
+std::pair<int, int> WorkoutDefinition::GetIntervalTime(int time)
+{
+	int summedTime = 0;
+	for (int i = 0; i < segments.size(); i++) {
+		int timeOverall = summedTime + segments.at(i).first;
+		if (time < timeOverall) {
+			return std::pair<int, int>(summedTime, timeOverall);
+		}
+		else {
+			summedTime += segments.at(i).first;
+		}
+	}
+
+	return std::pair(0, 0);
 }
 
 void WorkoutDefinition::DrawWorkout(Vector2 position, int width, int height, Color segmentColor, int topMargin)
