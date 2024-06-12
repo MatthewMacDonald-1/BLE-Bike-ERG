@@ -39,13 +39,35 @@ public:
 	/// </summary>
 	static std::vector<SimpleBLE::Peripheral> GetDiscoveredDevices();
 
+	/// <summary>
+	/// Not Thread Safe.
+	/// </summary>
+	/// <returns></returns>
 	static std::vector<SimpleBLE::Peripheral> GetConnectedDevices();
 
+	/// <summary>
+	/// Thread Safe.
+	/// </summary>
+	/// <param name="device"></param>
 	static void ConnectToDevice(SimpleBLE::Peripheral device);
 
+	/// <summary>
+	/// Thread Safe.
+	/// </summary>
+	/// <returns></returns>
 	static int GetActiveConnectionThreads();
 
+	/// <summary>
+	/// Thread Safe.
+	/// </summary>
+	/// <param name="device"></param>
 	static void DisconnectFromDevice(SimpleBLE::Peripheral device);
+
+	/// <summary>
+	/// Thread Safe.
+	/// </summary>
+	/// <returns></returns>
+	static int GetActiveDisconnectionThreads();
 
 	static void SetServiceDeviceMap(ServiceType type, SimpleBLE::BluetoothAddress address);
 
@@ -58,6 +80,7 @@ private:
 	static SimpleBLE::Adapter activeAdapter;
 
 	static std::atomic<int> activeConnectionThreads;
+	static std::atomic<int> activeDisconnectionThreads;
 	static std::mutex connectedDevicesMtx;
 
 	static std::unordered_map<ServiceType, SimpleBLE::BluetoothAddress> serviceDeviceMap;

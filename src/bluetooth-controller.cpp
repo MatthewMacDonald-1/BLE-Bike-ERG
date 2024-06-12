@@ -8,6 +8,7 @@ bool BluetoothController::initialized = false;
 SimpleBLE::Adapter BluetoothController::activeAdapter;
 
 std::atomic<int> BluetoothController::activeConnectionThreads = 0;
+std::atomic<int> BluetoothController::activeDisconnectionThreads = 0;
 std::mutex BluetoothController::connectedDevicesMtx;
 
 std::unordered_map<BluetoothController::ServiceType, SimpleBLE::BluetoothAddress> BluetoothController::serviceDeviceMap;
@@ -131,6 +132,7 @@ int BluetoothController::GetActiveConnectionThreads()
 
 void BluetoothController::DisconnectFromDevice(SimpleBLE::Peripheral device)
 {
+	activeDisconnectionThreads++;
 	TraceLog(LOG_INFO, "BLE: Disconnecting from device: %s, %s", device.identifier().c_str(), device.address().c_str());
 	try {
 		device.disconnect();
@@ -155,6 +157,12 @@ void BluetoothController::DisconnectFromDevice(SimpleBLE::Peripheral device)
 	catch (...) {
 		TraceLog(LOG_INFO, "BLE: Failed to disconnect from device: %s, %s", device.identifier().c_str(), device.address().c_str());
 	}
+	activeDisconnectionThreads--;
+}
+
+int BluetoothController::GetActiveDisconnectionThreads()
+{
+	return activeDisconnectionThreads;
 }
 
 void BluetoothController::SetServiceDeviceMap(ServiceType type, SimpleBLE::BluetoothAddress address)
