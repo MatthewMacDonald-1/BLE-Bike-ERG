@@ -184,6 +184,22 @@ int WorkoutDefinition::GetNewId()
 	return thisId;
 }
 
+int WorkoutDefinition::GetHighestTarget()
+{
+	int largest = 0;
+
+	for (int i = 0; i < segments.size(); i++) {
+		if (segments.at(i).second.first > largest) {
+			largest = segments.at(i).second.first;
+		}
+		if (segments.at(i).second.second > largest) {
+			largest = segments.at(i).second.second;
+		}
+	}
+
+	return largest;
+}
+
 void WorkoutDefinition::ReadWorkout(std::vector<std::string> fromFile)
 {
 	name = "Default Name";
@@ -313,20 +329,4 @@ void WorkoutDefinition::ReadWorkout(std::vector<std::string> fromFile)
 
 		}
 	}
-}
-
-int WorkoutDefinition::GetHighestTarget()
-{
-	int largest = 0;
-
-	for (int i = 0; i < segments.size(); i++) {
-		if (segments.at(i).second.first > largest) {
-			largest = segments.at(i).second.first;
-		}
-		if (segments.at(i).second.second > largest) {
-			largest = segments.at(i).second.second;
-		}
-	}
-
-	return largest;
 }

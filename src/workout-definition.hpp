@@ -69,6 +69,8 @@ public:
 	/// <param name="height">Graph container height</param>
 	void DrawWorkout(Vector2 position, int width, int height, Color segmentColor, int topMargin = 0);
 
+	int GetHighestTarget();
+
 private:
 	static int idGen;
 	static int GetNewId();
@@ -83,6 +85,4 @@ private:
 	std::vector<std::pair<int, std::pair<int, int>>> segments; // Time, Start Power, End Power
 
 	void ReadWorkout(std::vector<std::string> fromFile);
-
-	int GetHighestTarget();
 };
