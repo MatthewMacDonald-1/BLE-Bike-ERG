@@ -17,7 +17,7 @@ namespace MattsUtils::RelativeDrawing {
         BottomRight
     };
 
-    void DrawTextRelEx(Font font, const char* text, Vector2 position, PinLocation relativeToWindow, PinLocation relativeToText, float fontSize, float spacing, Color tint);
+    MattsUtils::Bounds DrawTextRelEx(Font font, const char* text, Vector2 position, PinLocation relativeToWindow, PinLocation relativeToText, float fontSize, float spacing, Color tint);
 
     /**
      * This is an extension of the raygui GuiButton.

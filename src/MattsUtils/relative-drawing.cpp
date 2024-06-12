@@ -9,7 +9,7 @@
 
 using namespace MattsUtils::raylib;
 
-void MattsUtils::RelativeDrawing::DrawTextRelEx(Font font, const char* text, Vector2 position, PinLocation relativeToWindow, PinLocation relativeToText, float fontSize, float spacing, Color tint) {
+MattsUtils::Bounds MattsUtils::RelativeDrawing::DrawTextRelEx(Font font, const char* text, Vector2 position, PinLocation relativeToWindow, PinLocation relativeToText, float fontSize, float spacing, Color tint) {
     Vector2 textRenderSize = MeasureTextEx(font, text, fontSize, spacing);
 
     Vector2 pos = { 0, 0 };
@@ -20,6 +20,8 @@ void MattsUtils::RelativeDrawing::DrawTextRelEx(Font font, const char* text, Vec
     pos = OffsetPosByPinLocation(pos, textRenderSize, relativeToText, true);
 
     DrawTextEx(font, text, pos, fontSize, spacing, tint);
+
+    return MattsUtils::Bounds(pos.x, pos.x + textRenderSize.x, pos.y, pos.y + textRenderSize.y);
 }
 
 int MattsUtils::RelativeDrawing::GuiButtonRelative(char* text, Vector2 position, Vector2 buttonDimensions, PinLocation relativeToWindow, PinLocation relativeToText, int fontSize)
