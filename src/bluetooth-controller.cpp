@@ -17,6 +17,7 @@ std::unordered_map<BluetoothController::ServiceType, SimpleBLE::BluetoothAddress
 
 std::string BluetoothController::heartRateMeasurementCharacteristic = "00002a37-0000-1000-8000-00805f9b34fb";
 std::string BluetoothController::cyclingPowerMeasurementCharacteristic = "00002a63-0000-1000-8000-00805f9b34fb";
+std::string BluetoothController::cyclingCadenceMeasurementCharacteristic = "00002a5b-0000-1000-8000-00805f9b34fb";
 
 /// Devices found in scan.
 std::vector<SimpleBLE::Peripheral> BluetoothController::foundDevices;
@@ -25,6 +26,7 @@ std::vector<SimpleBLE::Peripheral> BluetoothController::connectedDevices;
 
 int* BluetoothController::heartRateValue = NULL;
 int* BluetoothController::cyclingPowerValue = NULL;
+int* BluetoothController::cyclingCadenceValue = NULL;
 
 
 bool BluetoothController::BluetoothSupported()
@@ -320,6 +322,77 @@ int BluetoothController::SubscribeToCyclingPower(int* cyclingPowerReference)
 	return EXIT_SUCCESS;
 }
 
+int BluetoothController::SubscribeToCadence(int* cadenceReference)
+{
+	cyclingCadenceValue = NULL;
+	SimpleBLE::BluetoothAddress targetDeviceAddress = serviceDeviceMap[CYCLING_SPEED_CADENCE];
+
+	//std::cout << "Heart Rate Device Address: " << targetDeviceAddress << " (" << targetDeviceAddress.length() << ")" << std::endl;
+	if (targetDeviceAddress.length() == 0) {
+		return EXIT_FAILURE;
+	}
+
+	// Step 1: Find device
+	SimpleBLE::Peripheral device;
+	bool foundDevice = false;
+
+	connectedDevicesMtx.lock();
+	for (int i = 0; i < connectedDevices.size(); i++) {
+		if (connectedDevices.at(i).address() == targetDeviceAddress) {
+			device = connectedDevices.at(i);
+			foundDevice = true;
+			break;
+		}
+	}
+	connectedDevicesMtx.unlock();
+
+	if (!foundDevice) {
+		return EXIT_FAILURE;
+	}
+
+	// Step 2 Find Service
+	std::vector<SimpleBLE::Service> deviceServices = device.services();
+
+	SimpleBLE::Service service;
+	bool foundService = false;
+
+	for (int i = 0; i < deviceServices.size(); i++) {
+		if (deviceServices.at(i).uuid() == GetServiceUuid(CYCLING_SPEED_CADENCE)) {
+			service = deviceServices.at(i);
+			foundService = true;
+			break;
+		}
+	}
+
+	if (!foundService) {
+		return EXIT_FAILURE;
+	}
+
+	// Step 3: Find characteristic
+	std::vector<SimpleBLE::Characteristic> serviceCharacteristics = service.characteristics();
+
+	SimpleBLE::Characteristic characteristic;
+	bool foundCharacteristic = false;
+
+	for (int i = 0; i < serviceCharacteristics.size(); i++) {
+		if (serviceCharacteristics.at(i).uuid() == cyclingCadenceMeasurementCharacteristic) {
+			characteristic = serviceCharacteristics.at(i);
+			foundCharacteristic = true;
+		}
+	}
+
+	if (!foundCharacteristic) {
+		return EXIT_FAILURE;
+	}
+
+	// Step 4: Subscribe
+	cyclingCadenceValue = cadenceReference;
+	device.notify(service.uuid(), characteristic.uuid(), CadenceCallback);
+
+
+	return EXIT_SUCCESS;
+}
+
 BluetoothController::ServiceType BluetoothController::GetServiceType(SimpleBLE::BluetoothUUID uuid)
 {
 	if (uuid == "0000180d-0000-1000-8000-00805f9b34fb") {
@@ -405,6 +478,55 @@ typedef union _2Bytes_t {
 
 } _2Bytes_t;
 
+int BluetoothController::Get8BitValue(char byte) 
+{
+	BitsOfByte_t byteOne;
+
+	byteOne.byte = byte;
+
+	int value = 0;
+
+	value += 1 * byteOne._0;
+	value += 2 * byteOne._1;
+	value += 4 * byteOne._2;
+	value += 8 * byteOne._3;
+	value += 16 * byteOne._4;
+	value += 32 * byteOne._5;
+	value += 64 * byteOne._6;
+	value += 128 * byteOne._7;
+
+	return value;
+}
+
+int BluetoothController::Get16BitValue(char byte_1, char byte_2)
+{
+	BitsOfByte_t byteOne, byteTwo;
+
+	byteOne.byte = byte_1;
+	byteTwo.byte = byte_2;
+
+	int value = 0;
+
+	value += 1 * byteOne._0;
+	value += 2 * byteOne._1;
+	value += 4 * byteOne._2;
+	value += 8 * byteOne._3;
+	value += 16 * byteOne._4;
+	value += 32 * byteOne._5;
+	value += 64 * byteOne._6;
+	value += 128 * byteOne._7;
+
+	value += 256 * byteTwo._0;
+	value += 512 * byteTwo._1;
+	value += 1024 * byteTwo._2;
+	value += 2048 * byteTwo._3;
+	value += 4096 * byteTwo._4;
+	value += 8192 * byteTwo._5;
+	value += 16384 * byteTwo._6;
+	value += 32768 * byteTwo._7;
+
+	return value;
+}
 
 void BluetoothController::HeartRateCallback(SimpleBLE::ByteArray bytes)
 {
@@ -427,17 +549,17 @@ void BluetoothController::HeartRateCallback(SimpleBLE::ByteArray bytes)
 
 	int value = 0;
 
-	value += 1 * byteOne._0;
+	/*value += 1 * byteOne._0;
 	value += 2 * byteOne._1;
 	value += 4 * byteOne._2;
 	value += 8 * byteOne._3;
 	value += 16 * byteOne._4;
 	value += 32 * byteOne._5;
 	value += 64 * byteOne._6;
-	value += 128 * byteOne._7;
+	value += 128 * byteOne._7;*/
 
 	if (!oneByte) { // Heart rate value is two bytes
-		byteTwo.byte = bytes.at(2);
+		/*byteTwo.byte = bytes.at(2);
 
 		value += 256 * byteTwo._0;
 		value += 512 * byteTwo._1;
@@ -446,7 +568,11 @@ void BluetoothController::HeartRateCallback(SimpleBLE::ByteArray bytes)
 		value += 4096 * byteTwo._4;
 		value += 8192 * byteTwo._5;
 		value += 16384 * byteTwo._6;
-		value += 32768 * byteTwo._7;
+		value += 32768 * byteTwo._7;*/
+		value = Get16BitValue(bytes.at(1), bytes.at(2));
+	}
+	else {
+		value = Get8BitValue(bytes.at(1));
 	}
 
 	*heartRateValue = value;
@@ -457,20 +583,20 @@ void BluetoothController::HeartRateCallback(SimpleBLE::ByteArray bytes)
 
 void BluetoothController::CyclingPowerCallback(SimpleBLE::ByteArray bytes)
 {
-	std::cout << "Power Data: ";
+	/*std::cout << "Power Data: ";
 	for (auto b : bytes) {
 		std::cout << std::hex << std::setfill('0') << std::setw(2) << (uint32_t)((uint8_t)b) << " ";
 	}
-	std::cout << std::endl;
+	std::cout << std::endl;*/
 
 	BitsOfByte_t byteOne, byteTwo;
 
 	byteOne.byte = bytes.at(2);
 	byteTwo.byte = bytes.at(3);
 
-	int value = 0;
+	int value = Get16BitValue(bytes.at(2), bytes.at(3));
 
-	value += 1 * byteOne._0;
+	/*value += 1 * byteOne._0;
 	value += 2 * byteOne._1;
 	value += 4 * byteOne._2;
 	value += 8 * byteOne._3;
@@ -486,7 +612,33 @@ void BluetoothController::CyclingPowerCallback(SimpleBLE::ByteArray bytes)
 	value += 4096 * byteTwo._4;
 	value += 8192 * byteTwo._5;
 	value += 16384 * byteTwo._6;
-	value += 32768 * byteTwo._7;
+	value += 32768 * byteTwo._7;*/
 
 	*cyclingPowerValue = value;
+}
+
+void BluetoothController::CadenceCallback(SimpleBLE::ByteArray bytes) 
+{
+	BitsOfByte_t flags;
+	flags.byte = bytes.at(0);
+
+	bool hasWheelData = flags._0 == 1;
+	bool hasCrankData = flags._1 == 1;
+
+	std::cout << "Cadence Data: ";
+	for (auto b : bytes) {
+		std::cout << std::hex << std::setfill('0') << std::setw(2) << (uint32_t)((uint8_t)b) << " ";
+	}
+	std::cout << " Has Wheel: " << hasWheelData;
+	std::cout << " Has Crank: " << hasCrankData;
+	std::cout << std::endl;
+
+	int crankValue = 0;
+
+	if (hasWheelData && hasCrankData) {
+
+	}
+	else if (!hasWheelData && hasCrankData) {
+
+	}
 }

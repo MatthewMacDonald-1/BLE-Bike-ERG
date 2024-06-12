@@ -75,6 +75,8 @@ public:
 
 	static int SubscribeToCyclingPower(int* cyclingPowerReference);
 
+	static int SubscribeToCadence(int* cadenceReference);
+
 	static ServiceType GetServiceType(SimpleBLE::BluetoothUUID uuid);
 
 	static std::string GetServiceUuid(ServiceType type);
@@ -93,6 +95,7 @@ private:
 
 	static std::string heartRateMeasurementCharacteristic;
 	static std::string cyclingPowerMeasurementCharacteristic;
+	static std::string cyclingCadenceMeasurementCharacteristic;
 
 
 	/// Devices found in scan.
@@ -101,8 +104,14 @@ private:
 
 	static int* heartRateValue;
 	static int* cyclingPowerValue;
+	static int* cyclingCadenceValue;
+
+	static int Get8BitValue(char byte);
+	static int Get16BitValue(char byte_1, char byte_2);
 
 	static void HeartRateCallback(SimpleBLE::ByteArray bytes);
 	static void CyclingPowerCallback(SimpleBLE::ByteArray bytes);
+	static void CadenceCallback(SimpleBLE::ByteArray bytes);
+
 
 };

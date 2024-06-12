@@ -327,6 +327,7 @@ int WorkoutScene::DrawCall()
 
 			BluetoothController::SubscribeToCyclingPower(&currentPower);
 			BluetoothController::SubscribeToHeartRate(&currentHeartRate);
+			BluetoothController::SubscribeToCadence(&currentCadence);
 			
 			
 			// Set up data logging.
