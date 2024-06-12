@@ -113,7 +113,11 @@ double WorkoutDefinition::EvaluateWorkoutAt(int time)
 				return segments.at(i).second.first;
 			}
 			else {
-				return 0;
+				double a = segments.at(i).second.first;
+				double b = segments.at(i).second.second;
+				double t1 = summedTime;
+				double t2 = timeOverall;
+				return (int)((double)time - t1) * ((b - a) / (t2 - t1)) + a;
 			}
 		}
 		else {

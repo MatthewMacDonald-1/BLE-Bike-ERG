@@ -55,12 +55,12 @@ int WorkoutScene::DrawCall()
 	int actualFTP = 243;
 	int ftp = workout->GetTargetType() == WorkoutDefinition::RAW_POWER ? 100 : actualFTP;
 
-	int targetPower = (int)std::round(((double)workout->EvaluateWorkoutAt(workoutTime) / 100.0) * (double)ftp);
+	int targetPower = (int)std::round(((double)workout->EvaluateWorkoutAt((int)workoutTime) / 100.0) * (double)ftp);
 	int* currentPower = NULL;
 	int* currentHeartRate = NULL;
 	int* currentCadence = NULL;
 
-	std::pair<int, int> intervalTimeData = workout->GetIntervalTime(workoutTime);
+	std::pair<int, int> intervalTimeData = workout->GetIntervalTime((int)workoutTime);
 	int intervalElapsedTime = (int)workoutTime - intervalTimeData.first;
 	int intervalLength = intervalTimeData.second - intervalTimeData.first;
 
