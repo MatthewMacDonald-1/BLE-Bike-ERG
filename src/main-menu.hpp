@@ -43,6 +43,7 @@ private:
 
 	bool menuOpen = false;
 	bool connectingScreen = false;
+	bool disconnectingScreen = false;
 
 	void DrawDeviceConnectionBox(Vector2 position, Vector2 dimensions, Texture icon, int iconWidth, BleUtils::ServiceType type, Rectangle& panelContentRec, Rectangle& panelView, Vector2& panelScroll, int& selectedIndex);
 

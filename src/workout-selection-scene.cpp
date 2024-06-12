@@ -3,9 +3,11 @@
 
 #include "raygui.h"
 #include "raymath.h"
+
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <thread>
 
 #include "font-settings.hpp"
 #include "MattsUtils/relative-drawing.hpp"
@@ -13,6 +15,7 @@
 #include "settings-menu.hpp"
 #include "scene-manager.hpp"
 #include "workout-scene.hpp"
+#include "bluetooth-controller.hpp"
 
 using namespace MattsUtils;
 
@@ -110,6 +113,14 @@ int WorkoutSelectionMenuScene::DrawCall()
 
 	bool backToStartMenuSceneRes = RelativeDrawing::GuiButtonRelative("Back", offsetDstBC, buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
 	if (backToStartMenuSceneRes) {
+		std::vector<SimpleBLE::Peripheral> devices = BluetoothController::GetConnectedDevices();
+
+		for (int i = 0; i < devices.size(); i++) {
+			std::thread connectThread(BluetoothController::DisconnectFromDevice, devices.at(i));
+			connectThread.detach(); // Runs the thread detached
+		}
+
+
 		SceneManager::LoadScene("MainMenu");
 	}
 
