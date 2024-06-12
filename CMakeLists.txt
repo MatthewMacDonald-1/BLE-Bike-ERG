@@ -47,6 +47,8 @@ set(MAIN_SRC
     src/MattsUtils/bounds.hpp
     src/MattsUtils/number.cpp
     src/MattsUtils/number.hpp
+    src/MattsUtils/time.cpp
+    src/MattsUtils/time.hpp
     src/MattsUtils/string-func.cpp
     src/MattsUtils/string-func.hpp
 )
