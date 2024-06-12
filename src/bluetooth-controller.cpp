@@ -186,217 +186,23 @@ void BluetoothController::SetServiceDeviceMap(ServiceType type, SimpleBLE::Bluet
 
 int BluetoothController::SubscribeToHeartRate(int* heartRateReference)
 {
-	//heartRateValue = NULL;
-	//SimpleBLE::BluetoothAddress targetDeviceAddress = serviceDeviceMap[HEART_RATE];
-
-	////std::cout << "Heart Rate Device Address: " << targetDeviceAddress << " (" << targetDeviceAddress.length() << ")" << std::endl;
-	//if (targetDeviceAddress.length() == 0) {
-	//	return EXIT_FAILURE;
-	//}
-
-	//// Step 1: Find device
-	//SimpleBLE::Peripheral device;
-	//bool foundDevice = false;
-
-	//connectedDevicesMtx.lock();
-	//for (int i = 0; i < connectedDevices.size(); i++) {
-	//	if (connectedDevices.at(i).address() == targetDeviceAddress) {
-	//		device = connectedDevices.at(i);
-	//		foundDevice = true;
-	//		break;
-	//	}
-	//}
-	//connectedDevicesMtx.unlock();
-
-	//if (!foundDevice) {
-	//	return EXIT_FAILURE;
-	//}
-
-	//// Step 2 Find Service
-	//std::vector<SimpleBLE::Service> deviceServices = device.services();
-
-	//SimpleBLE::Service service;
-	//bool foundService = false;
-
-	//for (int i = 0; i < deviceServices.size(); i++) {
-	//	if (deviceServices.at(i).uuid() == GetServiceUuid(HEART_RATE)) {
-	//		service = deviceServices.at(i);
-	//		foundService = true;
-	//		break;
-	//	}
-	//}
-
-	//if (!foundService) {
-	//	return EXIT_FAILURE;
-	//}
-
-	//// Step 3: Find characteristic
-	//std::vector<SimpleBLE::Characteristic> serviceCharacteristics = service.characteristics();
-
-	//SimpleBLE::Characteristic characteristic;
-	//bool foundCharacteristic = false;
-
-	//for (int i = 0; i < serviceCharacteristics.size(); i++) {
-	//	if (serviceCharacteristics.at(i).uuid() == heartRateMeasurementCharacteristic) {
-	//		characteristic = serviceCharacteristics.at(i);
-	//		foundCharacteristic = true;
-	//	}
-	//}
-
-	//if (!foundCharacteristic) {
-	//	return EXIT_FAILURE;
-	//}
-
-	//// Step 4: Subscribe
-	heartRateValue = heartRateReference;
+	heartRateValue = heartRateReference; // Set Value for callback
 
 	return SubscribeToGenericNotify(HEART_RATE, HeartRateCallback);
-	//device.notify(service.uuid(), characteristic.uuid(), HeartRateCallback);
-	
-
-	//return EXIT_SUCCESS;
 }
 
 int BluetoothController::SubscribeToCyclingPower(int* cyclingPowerReference)
 {
-	cyclingPowerValue = NULL;
-	SimpleBLE::BluetoothAddress targetDeviceAddress = serviceDeviceMap[CYCLING_POWER];
+	cyclingPowerValue = cyclingPowerReference; // Set Value for callback
 
-	//std::cout << "Heart Rate Device Address: " << targetDeviceAddress << " (" << targetDeviceAddress.length() << ")" << std::endl;
-	if (targetDeviceAddress.length() == 0) {
-		return EXIT_FAILURE;
-	}
-
-	// Step 1: Find device
-	SimpleBLE::Peripheral device;
-	bool foundDevice = false;
-
-	connectedDevicesMtx.lock();
-	for (int i = 0; i < connectedDevices.size(); i++) {
-		if (connectedDevices.at(i).address() == targetDeviceAddress) {
-			device = connectedDevices.at(i);
-			foundDevice = true;
-			break;
-		}
-	}
-	connectedDevicesMtx.unlock();
-
-	if (!foundDevice) {
-		return EXIT_FAILURE;
-	}
-
-	// Step 2 Find Service
-	std::vector<SimpleBLE::Service> deviceServices = device.services();
-
-	SimpleBLE::Service service;
-	bool foundService = false;
-
-	for (int i = 0; i < deviceServices.size(); i++) {
-		if (deviceServices.at(i).uuid() == GetServiceUuid(CYCLING_POWER)) {
-			service = deviceServices.at(i);
-			foundService = true;
-			break;
-		}
-	}
-
-	if (!foundService) {
-		return EXIT_FAILURE;
-	}
-
-	// Step 3: Find characteristic
-	std::vector<SimpleBLE::Characteristic> serviceCharacteristics = service.characteristics();
-
-	SimpleBLE::Characteristic characteristic;
-	bool foundCharacteristic = false;
-
-	for (int i = 0; i < serviceCharacteristics.size(); i++) {
-		if (serviceCharacteristics.at(i).uuid() == cyclingPowerMeasurementCharacteristic) {
-			characteristic = serviceCharacteristics.at(i);
-			foundCharacteristic = true;
-		}
-	}
-
-	if (!foundCharacteristic) {
-		return EXIT_FAILURE;
-	}
-
-	// Step 4: Subscribe
-	cyclingPowerValue = cyclingPowerReference;
-	device.notify(service.uuid(), characteristic.uuid(), CyclingPowerCallback);
-
-
-	return EXIT_SUCCESS;
+	return SubscribeToGenericNotify(CYCLING_POWER, CyclingPowerCallback);
 }
 
 int BluetoothController::SubscribeToCadence(int* cadenceReference)
 {
-	cyclingCadenceValue = NULL;
-	SimpleBLE::BluetoothAddress targetDeviceAddress = serviceDeviceMap[CYCLING_SPEED_CADENCE];
+	cyclingCadenceValue = cadenceReference; // Set Value for callback
 
-	//std::cout << "Heart Rate Device Address: " << targetDeviceAddress << " (" << targetDeviceAddress.length() << ")" << std::endl;
-	if (targetDeviceAddress.length() == 0) {
-		return EXIT_FAILURE;
-	}
-
-	// Step 1: Find device
-	SimpleBLE::Peripheral device;
-	bool foundDevice = false;
-
-	connectedDevicesMtx.lock();
-	for (int i = 0; i < connectedDevices.size(); i++) {
-		if (connectedDevices.at(i).address() == targetDeviceAddress) {
-			device = connectedDevices.at(i);
-			foundDevice = true;
-			break;
-		}
-	}
-	connectedDevicesMtx.unlock();
-
-	if (!foundDevice) {
-		return EXIT_FAILURE;
-	}
-
-	// Step 2 Find Service
-	std::vector<SimpleBLE::Service> deviceServices = device.services();
-
-	SimpleBLE::Service service;
-	bool foundService = false;
-
-	for (int i = 0; i < deviceServices.size(); i++) {
-		if (deviceServices.at(i).uuid() == GetServiceUuid(CYCLING_SPEED_CADENCE)) {
-			service = deviceServices.at(i);
-			foundService = true;
-			break;
-		}
-	}
-
-	if (!foundService) {
-		return EXIT_FAILURE;
-	}
-
-	// Step 3: Find characteristic
-	std::vector<SimpleBLE::Characteristic> serviceCharacteristics = service.characteristics();
-
-	SimpleBLE::Characteristic characteristic;
-	bool foundCharacteristic = false;
-
-	for (int i = 0; i < serviceCharacteristics.size(); i++) {
-		if (serviceCharacteristics.at(i).uuid() == cyclingCadenceMeasurementCharacteristic) {
-			characteristic = serviceCharacteristics.at(i);
-			foundCharacteristic = true;
-		}
-	}
-
-	if (!foundCharacteristic) {
-		return EXIT_FAILURE;
-	}
-
-	// Step 4: Subscribe
-	cyclingCadenceValue = cadenceReference;
-	device.notify(service.uuid(), characteristic.uuid(), CadenceCallback);
-
-
-	return EXIT_SUCCESS;
+	return SubscribeToGenericNotify(CYCLING_SPEED_CADENCE, CadenceCallback);
 }
 
 BluetoothController::ServiceType BluetoothController::GetServiceType(SimpleBLE::BluetoothUUID uuid)
@@ -625,14 +431,6 @@ int BluetoothController::Get16BitValue(char byte_1, char byte_2)
 
 void BluetoothController::HeartRateCallback(SimpleBLE::ByteArray bytes)
 {
-
-	//std::cout << "Heart Rate Data: " << bytes << std::endl;
-	/*std::cout << "Heart Rate Data: ";
-	for (auto b : bytes) {
-		std::cout << std::hex << std::setfill('0') << std::setw(2) << (uint32_t)((uint8_t)b) << " ";
-	}
-	std::cout << std::endl;*/
-
 	BitsOfByte_t flags;
 	flags.byte = bytes.at(0);
 
@@ -648,19 +446,10 @@ void BluetoothController::HeartRateCallback(SimpleBLE::ByteArray bytes)
 	}
 
 	*heartRateValue = value;
-
-	//std::cout << "Value: " << std::to_string(value) << std::endl;
-
 }
 
 void BluetoothController::CyclingPowerCallback(SimpleBLE::ByteArray bytes)
 {
-	/*std::cout << "Power Data: ";
-	for (auto b : bytes) {
-		std::cout << std::hex << std::setfill('0') << std::setw(2) << (uint32_t)((uint8_t)b) << " ";
-	}
-	std::cout << std::endl;*/
-
 	int value = Get16BitValue(bytes.at(2), bytes.at(3));
 
 	*cyclingPowerValue = value;
@@ -674,10 +463,10 @@ void BluetoothController::CadenceCallback(SimpleBLE::ByteArray bytes)
 	bool hasWheelData = flags._0 == 1;
 	bool hasCrankData = flags._1 == 1;
 
-	std::cout << "Cadence Data: ";
+	/*std::cout << "Cadence Data: ";
 	for (auto b : bytes) {
 		std::cout << std::hex << std::setfill('0') << std::setw(2) << (uint32_t)((uint8_t)b) << " ";
-	}
+	}*/
 
 	int crankRevolutions = 0;
 	int crankEventTime = 0;
@@ -696,16 +485,13 @@ void BluetoothController::CadenceCallback(SimpleBLE::ByteArray bytes)
 	if (divisor != 0) {
 		cadenceValue = (int)(((double)std::abs(lastCrankRevolutions - crankRevolutions) / (double)divisor) * 1024 * 60);
 	}
-	
-	
-	
 
-	std::cout << " Has Wheel: " << hasWheelData;
+	/*std::cout << " Has Wheel: " << hasWheelData;
 	std::cout << " Has Crank: " << hasCrankData;
-	std::cout << " Cadence: " << cadenceValue;
+	std::cout << " Cadence: " << std::to_string(cadenceValue);
 	std::cout << " Revs: " << std::to_string(crankRevolutions);
 	std::cout << " Time: " << std::to_string(crankEventTime);
-	std::cout << std::endl;
+	std::cout << std::endl;*/
 
 	*cyclingCadenceValue = cadenceValue;
 
