@@ -30,6 +30,7 @@ int* BluetoothController::cyclingCadenceValue = NULL;
 
 int BluetoothController::lastCrankRevolutions = 0;
 int BluetoothController::lastCrankEventTime = 0;
+int BluetoothController::numSinceNotDuplicate = 0;
 
 
 bool BluetoothController::BluetoothSupported()
@@ -185,73 +186,75 @@ void BluetoothController::SetServiceDeviceMap(ServiceType type, SimpleBLE::Bluet
 
 int BluetoothController::SubscribeToHeartRate(int* heartRateReference)
 {
-	heartRateValue = NULL;
-	SimpleBLE::BluetoothAddress targetDeviceAddress = serviceDeviceMap[HEART_RATE];
+	//heartRateValue = NULL;
+	//SimpleBLE::BluetoothAddress targetDeviceAddress = serviceDeviceMap[HEART_RATE];
 
-	//std::cout << "Heart Rate Device Address: " << targetDeviceAddress << " (" << targetDeviceAddress.length() << ")" << std::endl;
-	if (targetDeviceAddress.length() == 0) {
-		return EXIT_FAILURE;
-	}
+	////std::cout << "Heart Rate Device Address: " << targetDeviceAddress << " (" << targetDeviceAddress.length() << ")" << std::endl;
+	//if (targetDeviceAddress.length() == 0) {
+	//	return EXIT_FAILURE;
+	//}
 
-	// Step 1: Find device
-	SimpleBLE::Peripheral device;
-	bool foundDevice = false;
+	//// Step 1: Find device
+	//SimpleBLE::Peripheral device;
+	//bool foundDevice = false;
 
-	connectedDevicesMtx.lock();
-	for (int i = 0; i < connectedDevices.size(); i++) {
-		if (connectedDevices.at(i).address() == targetDeviceAddress) {
-			device = connectedDevices.at(i);
-			foundDevice = true;
-			break;
-		}
-	}
-	connectedDevicesMtx.unlock();
+	//connectedDevicesMtx.lock();
+	//for (int i = 0; i < connectedDevices.size(); i++) {
+	//	if (connectedDevices.at(i).address() == targetDeviceAddress) {
+	//		device = connectedDevices.at(i);
+	//		foundDevice = true;
+	//		break;
+	//	}
+	//}
+	//connectedDevicesMtx.unlock();
 
-	if (!foundDevice) {
-		return EXIT_FAILURE;
-	}
+	//if (!foundDevice) {
+	//	return EXIT_FAILURE;
+	//}
 
-	// Step 2 Find Service
-	std::vector<SimpleBLE::Service> deviceServices = device.services();
+	//// Step 2 Find Service
+	//std::vector<SimpleBLE::Service> deviceServices = device.services();
 
-	SimpleBLE::Service service;
-	bool foundService = false;
+	//SimpleBLE::Service service;
+	//bool foundService = false;
 
-	for (int i = 0; i < deviceServices.size(); i++) {
-		if (deviceServices.at(i).uuid() == GetServiceUuid(HEART_RATE)) {
-			service = deviceServices.at(i);
-			foundService = true;
-			break;
-		}
-	}
+	//for (int i = 0; i < deviceServices.size(); i++) {
+	//	if (deviceServices.at(i).uuid() == GetServiceUuid(HEART_RATE)) {
+	//		service = deviceServices.at(i);
+	//		foundService = true;
+	//		break;
+	//	}
+	//}
 
-	if (!foundService) {
-		return EXIT_FAILURE;
-	}
+	//if (!foundService) {
+	//	return EXIT_FAILURE;
+	//}
 
-	// Step 3: Find characteristic
-	std::vector<SimpleBLE::Characteristic> serviceCharacteristics = service.characteristics();
+	//// Step 3: Find characteristic
+	//std::vector<SimpleBLE::Characteristic> serviceCharacteristics = service.characteristics();
 
-	SimpleBLE::Characteristic characteristic;
-	bool foundCharacteristic = false;
+	//SimpleBLE::Characteristic characteristic;
+	//bool foundCharacteristic = false;
 
-	for (int i = 0; i < serviceCharacteristics.size(); i++) {
-		if (serviceCharacteristics.at(i).uuid() == heartRateMeasurementCharacteristic) {
-			characteristic = serviceCharacteristics.at(i);
-			foundCharacteristic = true;
-		}
-	}
+	//for (int i = 0; i < serviceCharacteristics.size(); i++) {
+	//	if (serviceCharacteristics.at(i).uuid() == heartRateMeasurementCharacteristic) {
+	//		characteristic = serviceCharacteristics.at(i);
+	//		foundCharacteristic = true;
+	//	}
+	//}
 
-	if (!foundCharacteristic) {
-		return EXIT_FAILURE;
-	}
+	//if (!foundCharacteristic) {
+	//	return EXIT_FAILURE;
+	//}
 
-	// Step 4: Subscribe
+	//// Step 4: Subscribe
 	heartRateValue = heartRateReference;
-	device.notify(service.uuid(), characteristic.uuid(), HeartRateCallback);
+
+	return SubscribeToGenericNotify(HEART_RATE, HeartRateCallback);
+	//device.notify(service.uuid(), characteristic.uuid(), HeartRateCallback);
 	
 
-	return EXIT_SUCCESS;
+	//return EXIT_SUCCESS;
 }
 
 int BluetoothController::SubscribeToCyclingPower(int* cyclingPowerReference)
@@ -463,6 +466,95 @@ std::string BluetoothController::ToString(ServiceType type)
 		return "Uknown";
 		break;
 	}
+}
+
+int BluetoothController::SubscribeToGenericNotify(ServiceType type, std::function<void(SimpleBLE::ByteArray payload)> callback)
+{
+	SimpleBLE::BluetoothAddress targetDeviceAddress = serviceDeviceMap[type];
+
+	//std::cout << "Heart Rate Device Address: " << targetDeviceAddress << " (" << targetDeviceAddress.length() << ")" << std::endl;
+	if (targetDeviceAddress.length() == 0) {
+		return EXIT_FAILURE;
+	}
+
+	// Step 1: Find device
+	SimpleBLE::Peripheral device;
+	bool foundDevice = false;
+
+	connectedDevicesMtx.lock();
+	for (int i = 0; i < connectedDevices.size(); i++) {
+		if (connectedDevices.at(i).address() == targetDeviceAddress) {
+			device = connectedDevices.at(i);
+			foundDevice = true;
+			break;
+		}
+	}
+	connectedDevicesMtx.unlock();
+
+	if (!foundDevice) {
+		return EXIT_FAILURE;
+	}
+
+	// Step 2 Find Service
+	std::vector<SimpleBLE::Service> deviceServices = device.services();
+
+	SimpleBLE::Service service;
+	bool foundService = false;
+
+	for (int i = 0; i < deviceServices.size(); i++) {
+		if (deviceServices.at(i).uuid() == GetServiceUuid(type)) {
+			service = deviceServices.at(i);
+			foundService = true;
+			break;
+		}
+	}
+
+	if (!foundService) {
+		return EXIT_FAILURE;
+	}
+
+	// Step 3: Find characteristic
+	std::vector<SimpleBLE::Characteristic> serviceCharacteristics = service.characteristics();
+
+	SimpleBLE::Characteristic characteristic;
+	bool foundCharacteristic = false;
+
+	std::string characteristicUUID = "";
+	switch (type)
+	{
+	case BluetoothController::UNKNOWN:
+		break;
+	case BluetoothController::HEART_RATE:
+		characteristicUUID = heartRateMeasurementCharacteristic;
+		break;
+	case BluetoothController::CYCLING_POWER:
+		characteristicUUID = cyclingPowerMeasurementCharacteristic;
+		break;
+	case BluetoothController::CYCLING_SPEED_CADENCE:
+		characteristicUUID = cyclingCadenceMeasurementCharacteristic;
+		break;
+	case BluetoothController::FITNESS_MACHINE:
+		break;
+	default:
+		break;
+	}
+
+	for (int i = 0; i < serviceCharacteristics.size(); i++) {
+		if (serviceCharacteristics.at(i).uuid() == characteristicUUID) {
+			characteristic = serviceCharacteristics.at(i);
+			foundCharacteristic = true;
+		}
+	}
+
+	if (!foundCharacteristic) {
+		return EXIT_FAILURE;
+	}
+
+	// Step 4: Subscribe
+	device.notify(service.uuid(), characteristic.uuid(), callback);
+
+
+	return EXIT_SUCCESS;
 }
 
 typedef union BitsOfByte_t {

@@ -4,6 +4,7 @@
 #include <atomic>
 #include <mutex>
 #include <unordered_map>
+#include <functional>
 
 class BluetoothController {
 public:
@@ -108,6 +109,9 @@ private:
 
 	static int lastCrankRevolutions;
 	static int lastCrankEventTime;
+	static int numSinceNotDuplicate;
+
+	static int SubscribeToGenericNotify(ServiceType type, std::function<void(SimpleBLE::ByteArray payload)> callback);
 
 	static int Get8BitValue(char byte);
 	static int Get16BitValue(char byte_1, char byte_2);
