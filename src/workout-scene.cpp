@@ -43,12 +43,22 @@ int WorkoutScene::DrawCall()
 
 	Color dataDisplayBackground = raylib::ConstructColor(64, 64, 64);
 	Color graphAreaBackground = raylib::ConstructColor(32, 32, 32);
+
+	Color graphScaleLines = raylib::ConstructColor(120, 120, 120);
+	Color graphScaleLineFTP100 = raylib::ConstructColor(255, 255, 255);
+	Color graphProgressLineColor = raylib::ConstructColor(255, 199, 0);
+	Color graphProgressCompletedColor = raylib::ConstructColor(255, 199, 0, 50);
 	
 	int dataDisplayHeight = 128;
-	int graphAreaHeight = GetScreenHeight() - dataDisplayHeight - 32;
+	int graphTimeAxisHeight = 20;
+	int bottomControlBarHeight = 32;
+	int graphAreaHeight = GetScreenHeight() - dataDisplayHeight - graphTimeAxisHeight - bottomControlBarHeight;
+	
+
 	DrawRectangle(0, 0, GetScreenWidth(), dataDisplayHeight, dataDisplayBackground);
 	DrawRectangle(0, dataDisplayHeight, GetScreenWidth(), graphAreaHeight, graphAreaBackground);
-	DrawRectangle(0, GetScreenHeight() - 32, GetScreenWidth(), 32, dataDisplayBackground);
+	DrawRectangle(0, dataDisplayHeight + graphAreaHeight, GetScreenWidth(), graphTimeAxisHeight, graphAreaBackground);
+	DrawRectangle(0, GetScreenHeight() - bottomControlBarHeight, GetScreenWidth(), bottomControlBarHeight, dataDisplayBackground);
 
 	// Data
 
@@ -150,8 +160,6 @@ int WorkoutScene::DrawCall()
 
 
 	// Graph Stuff Start
-	Color graphScaleLines = raylib::ConstructColor(120, 120, 120);
-	Color graphScaleLineFTP100 = raylib::ConstructColor(255, 255, 255);
 
 	int highestTarget = (int)(((double)workout->GetHighestTarget() / 100.0) * (double)ftp);
 	int highestGraphPoint = (int)std::ceil((double)highestTarget / 100.0) * 100;
@@ -186,6 +194,43 @@ int WorkoutScene::DrawCall()
 		1.0,
 		graphScaleLineFTP100
 	);
+
+	// Draw Time line
+	int x_pos = (int)std::round((double)GetScreenWidth() * ((double)(int)workoutTime / (double)workout->GetWorkoutLength()));
+
+	DrawRectangle(0, dataDisplayHeight, x_pos, graphAreaHeight, graphProgressCompletedColor);
+	DrawLine(x_pos, dataDisplayHeight, x_pos, dataDisplayHeight + graphAreaHeight, graphProgressLineColor);
+
+	// Graph Time axis
+	int timeAxisY = dataDisplayHeight + graphAreaHeight;
+	DrawLine(0, timeAxisY, GetScreenWidth(), timeAxisY, graphScaleLines);
+	double secondDist = (double)GetScreenWidth() / (double)workout->GetWorkoutLength();
+
+	int workoutLength = workout->GetWorkoutLength();
+	for (int i = 0; i < workoutLength; i += 60) {
+		int timeAxisX = secondDist * i;
+		if (i % 300 == 0) {
+			
+			DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + graphTimeAxisHeight, graphScaleLines);
+			if (workoutLength - i > 300) {
+				RelativeDrawing::DrawTextRelEx(
+					fontType,
+					MattsUtils::Time::ToString(i).c_str(),
+					raylib::ConstructVector2(timeAxisX + 3, timeAxisY + 3),
+					RelativeDrawing::TopLeft,
+					RelativeDrawing::TopLeft,
+					16,
+					1.0,
+					graphScaleLines
+				);
+			}
+			
+		}
+		else {
+			DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 4, graphScaleLines);
+		}
+	}
+
 	// Graph Stuff end
 
 	bool pauseRes = RelativeDrawing::GuiButtonRelative((!paused ? "Pause" : "Play"), raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
