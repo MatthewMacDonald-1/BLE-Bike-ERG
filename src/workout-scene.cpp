@@ -212,10 +212,12 @@ int WorkoutScene::DrawCall()
 		if (i % 300 == 0) {
 			
 			DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + graphTimeAxisHeight, graphScaleLines);
-			if (workoutLength - i > 300) {
+			std::string timeStr = MattsUtils::Time::ToString(i);
+
+			if (GetScreenWidth() - timeAxisX > MeasureTextEx(fontType, timeStr.c_str(), 16, 1.0).x + 15) {
 				RelativeDrawing::DrawTextRelEx(
 					fontType,
-					MattsUtils::Time::ToString(i).c_str(),
+					timeStr.c_str(),
 					raylib::ConstructVector2(timeAxisX + 3, timeAxisY + 3),
 					RelativeDrawing::TopLeft,
 					RelativeDrawing::TopLeft,
