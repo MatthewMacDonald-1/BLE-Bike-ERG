@@ -37,6 +37,7 @@ int WorkoutScene::DrawCall()
 		// Reset the records so that if this workout is opened a second time it will apear fresh and ready.
 		workoutTime = 0;
 		startCountDown = 5;
+		timeMode = 0;
 
 		powerRecord.clear();
 		heartRateRecord.clear();
@@ -351,6 +352,7 @@ int WorkoutScene::DrawCall()
 			paused = true;
 			workoutTime = 0;
 			startCountDown = 5;
+			timeMode = 0;
 
 			powerRecord.clear();
 			heartRateRecord.clear();
