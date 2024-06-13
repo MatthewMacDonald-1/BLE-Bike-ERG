@@ -8,7 +8,7 @@
 
 // Sets the gui debug overlay default state
 #ifdef DEBUG
-#define DEBUG_OVERLAY_DEFAULT_STATE true
+#define DEBUG_OVERLAY_DEFAULT_STATE false
 #endif // DEBUG
 #ifndef DEBUG
 #define DEBUG_OVERLAY_DEFAULT_STATE false
