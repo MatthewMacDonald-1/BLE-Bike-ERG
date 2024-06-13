@@ -33,7 +33,21 @@ int WorkoutScene::DrawCall()
 {
 	using namespace MattsUtils;
 
-	if (!started) GuiLock();
+	if (!started) {
+		// Reset the records so that if this workout is opened a second time it will apear fresh and ready.
+		workoutTime = 0;
+		startCountDown = 5;
+
+		powerRecord.clear();
+		heartRateRecord.clear();
+		cadenceRecord.clear();
+
+		currentPower = -1;
+		currentHeartRate = -1;
+		currentCadence = -1;
+	}
+
+	if (!started || startCountDown > 0) GuiLock();
 
 	Font fontType = FontSettings::GetMainFont();
 
@@ -297,6 +311,26 @@ int WorkoutScene::DrawCall()
 
 	GuiUnlock();
 
+	if (started && startCountDown > 0) {
+		DrawRectangle(0, dataDisplayHeight, GetScreenWidth(), graphAreaHeight, raylib::ConstructColor(0, 0, 0, 100));
+
+		RelativeDrawing::DrawTextRelEx(
+			fontType,
+			TextFormat("%d", (int)std::ceil(startCountDown)),
+			raylib::ConstructVector2(0, dataDisplayHeight + graphAreaHeight / 2),
+			RelativeDrawing::TopCenter,
+			RelativeDrawing::Center,
+			64,
+			1.5,
+			WHITE
+		);
+
+		startCountDown -= GetFrameTime();
+		if (startCountDown <= 0) {
+			paused = false;
+		}
+	}
+
 	if (!started) {
 		DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), raylib::ConstructColor(0, 0, 0, 100));
 
@@ -316,6 +350,7 @@ int WorkoutScene::DrawCall()
 			started = true;
 			paused = true;
 			workoutTime = 0;
+			startCountDown = 5;
 
 			powerRecord.clear();
 			heartRateRecord.clear();

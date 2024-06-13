@@ -19,6 +19,8 @@ private:
 	WorkoutDefinition* workout;
 
 	bool started = false;
+	float startCountDown = 5;
+
 	bool paused = true;
 
 	int timeMode = 0;
