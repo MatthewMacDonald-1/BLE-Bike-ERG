@@ -238,6 +238,7 @@ int WorkoutScene::DrawCall()
 		rec_xp = rec_x;
 		rec_yp = rec_y;
 	}
+	if (x_pos > 0) DrawLine(rec_xp, rec_yp, x_pos, dataDisplayHeight + (graphAreaHeight - (oneWattDist * std::max(currentCadence, 0))), graphCadenceRecordLineColor);
 
 	for (int i = 0; i < heartRateRecord.size(); i++) {
 		int rec_y = dataDisplayHeight + (graphAreaHeight - (oneWattDist * std::max(heartRateRecord.at(i), 0)));
@@ -250,6 +251,7 @@ int WorkoutScene::DrawCall()
 		rec_xp = rec_x;
 		rec_yp = rec_y;
 	}
+	if (x_pos > 0) DrawLine(rec_xp, rec_yp, x_pos, dataDisplayHeight + (graphAreaHeight - (oneWattDist * std::max(currentHeartRate, 0))), graphHeartRateRecordLineColor);
 
 	for (int i = 0; i < powerRecord.size(); i++) {
 		int rec_y = dataDisplayHeight + (graphAreaHeight - (oneWattDist * std::max(powerRecord.at(i), 0)));
@@ -262,6 +264,7 @@ int WorkoutScene::DrawCall()
 		rec_xp = rec_x;
 		rec_yp = rec_y;
 	}
+	if (x_pos > 0) DrawLine(rec_xp, rec_yp, x_pos, dataDisplayHeight + (graphAreaHeight - (oneWattDist * std::max(currentPower, 0))), graphProgressLineColor);
 
 	DrawLine(x_pos, dataDisplayHeight, x_pos, dataDisplayHeight + graphAreaHeight, graphProgressLineColor);
 
