@@ -228,11 +228,11 @@ int WorkoutScene::DrawCall()
 	Rectangle graphSizedata = raylib::ConstructRectangle(0, dataDisplayHeight, GetScreenWidth(), graphAreaHeight);
 
 	// Draw Power Record
-	GraphDrawDataLine(cadenceRecord, (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphCadenceRecordLineColor, graphSizedata);
+	GraphDrawDataLine(cadenceRecord, currentCadence, (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphCadenceRecordLineColor, graphSizedata);
 
-	GraphDrawDataLine(heartRateRecord, (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphHeartRateRecordLineColor, graphSizedata);
+	GraphDrawDataLine(heartRateRecord, currentHeartRate, (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphHeartRateRecordLineColor, graphSizedata);
 
-	GraphDrawDataLine(powerRecord, (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphProgressLineColor, graphSizedata);
+	GraphDrawDataLine(powerRecord, currentPower, (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphProgressLineColor, graphSizedata);
 
 	DrawLine(x_pos, dataDisplayHeight, x_pos, dataDisplayHeight + graphAreaHeight, graphProgressLineColor);
 
@@ -387,7 +387,7 @@ bool WorkoutScene::DrawDataValue(Font font, std::string heading, std::string val
 	return CheckCollisionPointRec(GetMousePosition(), raylib::ConstructRectangle(bounds.minX, bounds.minY, bounds.maxX - bounds.minX, bounds.maxY - bounds.minY)) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 }
 
-void WorkoutScene::GraphDrawDataLine(std::vector<int> dataValues, int currentTime, int totalTime, double yScale, Color lineColor, Rectangle graph)
+void WorkoutScene::GraphDrawDataLine(std::vector<int> dataValues, int currentValue, int currentTime, int totalTime, double yScale, Color lineColor, Rectangle graph)
 {
 	int x_pos = (int)std::round((double)GetScreenWidth() * ((double)currentTime / (double)totalTime));
 	int rec_xp, rec_yp = 0;
@@ -402,5 +402,5 @@ void WorkoutScene::GraphDrawDataLine(std::vector<int> dataValues, int currentTim
 		rec_xp = rec_x;
 		rec_yp = rec_y;
 	}
-	if (x_pos > 0) DrawLine(rec_xp, rec_yp, x_pos, graph.y + (graph.height - (yScale * std::max(currentHeartRate, 0))), lineColor);
+	if (x_pos > 0) DrawLine(rec_xp, rec_yp, x_pos, graph.y + (graph.height - (yScale * std::max(currentValue, 0))), lineColor);
 }
