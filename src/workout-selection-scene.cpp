@@ -18,7 +18,15 @@
 #include "workout-scene.hpp"
 #include "bluetooth-controller.hpp"
 
-#include <stdlib.h>
+#ifdef _WIN32
+#define CloseWindow CloseWindow_windows
+#define ShowCursor ShowCursor_windows
+#include <windows.h>	  // For common windows data types and function headers// For common windows data types and function headers
+#undef CloseWindow
+#undef ShowCursor
+
+#endif // _WIN32
+
 
 using namespace MattsUtils;
 
@@ -114,7 +122,7 @@ int WorkoutSelectionMenuScene::DrawCall()
 
 	if (btnClicked) {
 #ifdef _WIN32
-		system("explorer /select,C:\\Windows\\notepad.exe");
+		
 #endif // _WIN32
 
 	}
@@ -286,3 +294,4 @@ int WorkoutSelectionMenuScene::DrawWorkoutButton(WorkoutDefinition* workout, Vec
 
 	return 66;
 }
+
