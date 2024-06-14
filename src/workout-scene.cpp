@@ -225,49 +225,14 @@ int WorkoutScene::DrawCall()
 
 	DrawRectangle(0, dataDisplayHeight, x_pos, graphAreaHeight, graphProgressCompletedColor);
 
+	Rectangle graphSizedata = raylib::ConstructRectangle(0, dataDisplayHeight, GetScreenWidth(), graphAreaHeight);
+
 	// Draw Power Record
-	int rec_yp, rec_xp;
-	for (int i = 0; i < cadenceRecord.size(); i++) {
-		int rec_y = dataDisplayHeight + (graphAreaHeight - (oneWattDist * std::max(cadenceRecord.at(i), 0)));
-		int rec_x = (int)std::round((double)GetScreenWidth() * ((double)i / (double)workout->GetWorkoutLength()));
+	GraphDrawDataLine(cadenceRecord, (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphCadenceRecordLineColor, graphSizedata);
 
-		if (i != 0) {
-			DrawLine(rec_xp, rec_yp, rec_x, rec_y, graphCadenceRecordLineColor);
-		}
+	GraphDrawDataLine(heartRateRecord, (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphHeartRateRecordLineColor, graphSizedata);
 
-		rec_xp = rec_x;
-		rec_yp = rec_y;
-	}
-	if (x_pos > 0) DrawLine(rec_xp, rec_yp, x_pos, dataDisplayHeight + (graphAreaHeight - (oneWattDist * std::max(currentCadence, 0))), graphCadenceRecordLineColor);
-
-	/*for (int i = 0; i < heartRateRecord.size(); i++) {
-		int rec_y = dataDisplayHeight + (graphAreaHeight - (oneWattDist * std::max(heartRateRecord.at(i), 0)));
-		int rec_x = (int)std::round((double)GetScreenWidth() * ((double)i / (double)workout->GetWorkoutLength()));
-
-		if (i != 0) {
-			DrawLine(rec_xp, rec_yp, rec_x, rec_y, graphHeartRateRecordLineColor);
-		}
-
-		rec_xp = rec_x;
-		rec_yp = rec_y;
-	}
-	if (x_pos > 0) DrawLine(rec_xp, rec_yp, x_pos, dataDisplayHeight + (graphAreaHeight - (oneWattDist * std::max(currentHeartRate, 0))), graphHeartRateRecordLineColor);*/
-	GraphDrawDataLine(heartRateRecord, (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphHeartRateRecordLineColor,
-		raylib::ConstructRectangle(0, dataDisplayHeight, GetScreenWidth(), graphAreaHeight)
-	);
-
-	for (int i = 0; i < powerRecord.size(); i++) {
-		int rec_y = dataDisplayHeight + (graphAreaHeight - (oneWattDist * std::max(powerRecord.at(i), 0)));
-		int rec_x = (int)std::round((double)GetScreenWidth() * ((double)i / (double)workout->GetWorkoutLength()));
-
-		if (i != 0) {
-			DrawLine(rec_xp, rec_yp, rec_x, rec_y, graphProgressLineColor);
-		}
-
-		rec_xp = rec_x;
-		rec_yp = rec_y;
-	}
-	if (x_pos > 0) DrawLine(rec_xp, rec_yp, x_pos, dataDisplayHeight + (graphAreaHeight - (oneWattDist * std::max(currentPower, 0))), graphProgressLineColor);
+	GraphDrawDataLine(powerRecord, (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphProgressLineColor, graphSizedata);
 
 	DrawLine(x_pos, dataDisplayHeight, x_pos, dataDisplayHeight + graphAreaHeight, graphProgressLineColor);
 
