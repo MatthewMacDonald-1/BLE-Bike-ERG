@@ -2,6 +2,7 @@
 #include "config.hpp"
 
 #include "raygui.h"
+
 #include "raymath.h"
 
 #include <string>
@@ -45,6 +46,7 @@ int WorkoutSelectionMenuScene::UpdateLogic()
 
 int WorkoutSelectionMenuScene::DrawCall()
 {
+
 	Font fontType = FontSettings::GetMainFont();
 
 	Vector2 buttonSize = raylib::ConstructVector2(128, 32);
@@ -97,9 +99,16 @@ int WorkoutSelectionMenuScene::DrawCall()
 			raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight),
 			panelContentRec.width
 		);
-
-		
 	}
+
+	/*int btnheight = 0;
+	bool btnClicked = DrawWorkoutListButton(
+		"Load from file",
+		raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight),
+		panelContentRec.width,
+		btnheight
+	);
+	panelInnerHeight += btnheight;*/
 
 	panelContentRec.height = panelInnerHeight != panelContentRec.height ? panelInnerHeight : panelContentRec.height;
 
@@ -167,6 +176,37 @@ int WorkoutSelectionMenuScene::DrawWorkoutListHeading(std::string heading, Vecto
 	return 46;
 }
 
+bool WorkoutSelectionMenuScene::DrawWorkoutListButton(std::string text, Vector2 position, int width, int& heightReturn)
+{
+	Font fontType = FontSettings::GetMainFont();
+
+	RelativeDrawing::DrawRectangle(
+		position,
+		raylib::ConstructVector2(width, 44),
+		RelativeDrawing::TopLeft,
+		RelativeDrawing::TopLeft,
+		raylib::ConstructColor(255, 255, 255)
+	);
+	RelativeDrawing::DrawRectangle(
+		raylib::ConstructVector2(position.x, position.y + 44),
+		raylib::ConstructVector2(width, 2),
+		RelativeDrawing::TopLeft,
+		RelativeDrawing::TopLeft,
+		raylib::ConstructColor(206, 206, 206)
+	);
+
+	heightReturn = 46;
+
+	return RelativeDrawing::GuiButtonRelative(
+		(char*)text.c_str(),
+		raylib::ConstructVector2(position.x + (width / 2) - (192 / 2), position.y + 7),
+		raylib::ConstructVector2(192, 32),
+		RelativeDrawing::TopLeft,
+		RelativeDrawing::TopLeft,
+		24
+	);
+}
+
 int WorkoutSelectionMenuScene::DrawWorkoutButton(WorkoutDefinition* workout, Vector2 position, int width)
 {
 	Font fontType = FontSettings::GetMainFont();
@@ -185,9 +225,6 @@ int WorkoutSelectionMenuScene::DrawWorkoutButton(WorkoutDefinition* workout, Vec
 		RelativeDrawing::TopLeft,
 		raylib::ConstructColor(206, 206, 206)
 	);
-
-	std::stringstream duration;
-	duration << "Duration";
 
 	RelativeDrawing::DrawTextRelEx(
 		fontType,

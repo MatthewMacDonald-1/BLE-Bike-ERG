@@ -4,6 +4,7 @@
 #include "workout-definition.hpp"
 
 #include "raylib.h"
+
 #include <simpleble/SimpleBLE.h>
 
 class WorkoutSelectionMenuScene : public Scene {
@@ -26,6 +27,8 @@ private:
 	std::vector<WorkoutDefinition*> workouts;
 
 	int DrawWorkoutListHeading(std::string heading, Vector2 position, int width);
+
+	bool WorkoutSelectionMenuScene::DrawWorkoutListButton(std::string text, Vector2 position, int width, int& heightReturn);
 
 	int DrawWorkoutButton(WorkoutDefinition* device, Vector2 position, int width);
 };
