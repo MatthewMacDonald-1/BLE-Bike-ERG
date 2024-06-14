@@ -49,4 +49,6 @@ private:
 	bool DrawDataValue(Font font, std::string heading, std::string value, Vector2 position);
 
 	void GraphDrawDataLine(std::vector<int> dataValues, int currentValue, int currentTime, int totalTime, double yScale, Color lineColor, Rectangle graph);
+
+	int DrawWorkoutOverScreen();
 };

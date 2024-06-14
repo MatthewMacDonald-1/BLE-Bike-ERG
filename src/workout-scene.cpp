@@ -404,3 +404,10 @@ void WorkoutScene::GraphDrawDataLine(std::vector<int> dataValues, int currentVal
 	}
 	if (x_pos > 0) DrawLine(rec_xp, rec_yp, x_pos, graph.y + (graph.height - (yScale * std::max(currentValue, 0))), lineColor);
 }
+
+int WorkoutScene::DrawWorkoutOverScreen()
+{
+
+
+	return EXIT_SUCCESS;
+}
