@@ -18,6 +18,8 @@
 #include "workout-scene.hpp"
 #include "bluetooth-controller.hpp"
 
+#include <stdlib.h>
+
 using namespace MattsUtils;
 
 WorkoutSelectionMenuScene::WorkoutSelectionMenuScene()
@@ -101,14 +103,21 @@ int WorkoutSelectionMenuScene::DrawCall()
 		);
 	}
 
-	/*int btnheight = 0;
+	int btnheight = 0;
 	bool btnClicked = DrawWorkoutListButton(
 		"Load from file",
 		raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight),
 		panelContentRec.width,
 		btnheight
 	);
-	panelInnerHeight += btnheight;*/
+	panelInnerHeight += btnheight;
+
+	if (btnClicked) {
+#ifdef _WIN32
+		system("explorer /select,C:\\Windows\\notepad.exe");
+#endif // _WIN32
+
+	}
 
 	panelContentRec.height = panelInnerHeight != panelContentRec.height ? panelInnerHeight : panelContentRec.height;
 
