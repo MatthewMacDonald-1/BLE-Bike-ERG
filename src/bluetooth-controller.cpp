@@ -30,7 +30,9 @@ int* BluetoothController::cyclingCadenceValue = NULL;
 
 int BluetoothController::lastCrankRevolutions = 0;
 int BluetoothController::lastCrankEventTime = 0;
-int BluetoothController::numSinceNotDuplicate = 0;
+
+int BluetoothController::cyclingCadenceAvgIdx = 0;
+int BluetoothController::cyclingCadenceAvg[3] = { 0 };
 
 
 bool BluetoothController::BluetoothSupported()
@@ -201,6 +203,10 @@ int BluetoothController::SubscribeToCyclingPower(int* cyclingPowerReference)
 int BluetoothController::SubscribeToCadence(int* cadenceReference)
 {
 	cyclingCadenceValue = cadenceReference; // Set Value for callback
+
+	cyclingCadenceAvg[0] = 0;
+	cyclingCadenceAvg[1] = 0;
+	cyclingCadenceAvg[2] = 0;
 
 	return SubscribeToGenericNotify(CYCLING_SPEED_CADENCE, CadenceCallback);
 }
@@ -493,7 +499,16 @@ void BluetoothController::CadenceCallback(SimpleBLE::ByteArray bytes)
 	std::cout << " Time: " << std::to_string(crankEventTime);
 	std::cout << std::endl;
 
-	*cyclingCadenceValue = cadenceValue;
+	// Calculate 3 second avg
+	cyclingCadenceAvg[cyclingCadenceAvgIdx] = cadenceValue;
+	cyclingCadenceAvgIdx++;
+	if (cyclingCadenceAvgIdx > 2) {
+		cyclingCadenceAvgIdx = 0;
+	}
+
+	double avgCadence = (cyclingCadenceAvg[0] + cyclingCadenceAvg[1] + cyclingCadenceAvg[2]) / 3.0;
+
+	*cyclingCadenceValue = (int)(avgCadence);
 
 	lastCrankRevolutions = crankRevolutions;
 	lastCrankEventTime = crankEventTime;
