@@ -25,6 +25,8 @@ private:
 
 	bool paused = true;
 
+	bool finished = false;
+
 	int timeMode = 0;
 	int maxTimeMode = 2;
 
@@ -50,7 +52,13 @@ private:
 	/// <returns>Value clicked</returns>
 	bool DrawDataValue(Font font, std::string heading, std::string value, Vector2 position);
 
+	void DrawWorkoutDataReadout(Rectangle dataRect, Font fontType, Color backgroundColor, int targetPower);
+
+	void DrawWorkoutGraph(Rectangle graphRect, Font fontType, Color backgroundColor, Color graphScaleLines, Color graphScaleLineFTP100, Color graphProgressCompletedAreaColor, Color graphHeartRateRecordLineColor, Color graphCadenceRecordLineColor, Color graphPowerRecordLineColor, Color graphProgressLineColor, int ftp);
+
+	void DrawWorkoutTimeAxis(Rectangle axisRect, Font fontType, Color lineColor, Color backgroundColor, int timePeriod);
+
 	void GraphDrawDataLine(std::vector<int> dataValues, int currentValue, int currentTime, int totalTime, double yScale, Color lineColor, Rectangle graph);
 
-	int DrawWorkoutOverScreen();
+	int DrawWorkoutOverScreen(Font fontType, Vector2 buttonSize, Color dataDisplayBackground, Color graphAreaBackground, Color graphScaleLines, Color graphScaleLineFTP100, Color graphHeartRateRecordLineColor, Color graphCadenceRecordLineColor, Color graphProgressLineColor, Color graphProgressCompletedColor);
 };

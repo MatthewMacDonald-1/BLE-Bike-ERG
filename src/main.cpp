@@ -8,6 +8,7 @@
 #include "config.hpp"
 #include "font-settings.hpp"
 #include "video-settings.hpp"
+#include "user-data.hpp"
 #include "bluetooth-controller.hpp"
 #include "scene.hpp"
 #include "scene-manager.hpp"
@@ -34,6 +35,8 @@ int main(void) {
     if (res == EXIT_FAILURE) {
         VideoSettings::WriteVideoSettingsConfigFile();
     }
+
+    UserData::LoadUserData();
 
 
     // Raylib Initialization ----------------------------------------------------------------------

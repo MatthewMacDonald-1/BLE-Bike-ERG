@@ -38,6 +38,8 @@ set(MAIN_SRC
     src/workout-selection-scene.hpp
     src/workout-definition.cpp
     src/workout-definition.hpp
+    src/user-data.cpp
+    src/user-data.hpp
 
     src/MattsUtils/relative-drawing.cpp
     src/MattsUtils/relative-drawing.hpp

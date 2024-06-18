@@ -14,6 +14,7 @@
 #include "settings-menu.hpp"
 #include "scene-manager.hpp"
 #include "bluetooth-controller.hpp"
+#include "user-data.hpp"
 
 WorkoutScene::WorkoutScene(WorkoutDefinition* workoutSrc)
 {
@@ -35,6 +36,9 @@ int WorkoutScene::DrawCall()
 
 	if (!started) {
 		// Reset the records so that if this workout is opened a second time it will apear fresh and ready.
+		finished = false;
+		paused = true;
+
 		workoutTime = 0;
 		startCountDown = 5;
 		timeMode = 0;
@@ -67,24 +71,29 @@ int WorkoutScene::DrawCall()
 	Color graphCadenceRecordLineColor = raylib::ConstructColor(255, 255, 255);
 	Color graphProgressLineColor = raylib::ConstructColor(255, 199, 0);
 	Color graphProgressCompletedColor = raylib::ConstructColor(255, 199, 0, 50);
+
+	if (finished) {
+		return DrawWorkoutOverScreen(
+			fontType,
+			buttonSize,
+			dataDisplayBackground,
+			graphAreaBackground,
+			graphScaleLines,
+			graphScaleLineFTP100,
+			graphHeartRateRecordLineColor,
+			graphCadenceRecordLineColor,
+			graphProgressLineColor,
+			graphProgressCompletedColor
+		);
+	}
 	
 	int dataDisplayHeight = 128;
 	int graphTimeAxisHeight = 20;
 	int bottomControlBarHeight = 32;
 	int graphAreaHeight = GetScreenHeight() - dataDisplayHeight - graphTimeAxisHeight - bottomControlBarHeight;
-	
 
-	DrawRectangle(0, 0, GetScreenWidth(), dataDisplayHeight, dataDisplayBackground);
-	DrawRectangle(0, dataDisplayHeight, GetScreenWidth(), graphAreaHeight, graphAreaBackground);
-	DrawRectangle(0, dataDisplayHeight + graphAreaHeight, GetScreenWidth(), graphTimeAxisHeight, graphAreaBackground);
-	DrawRectangle(0, GetScreenHeight() - bottomControlBarHeight, GetScreenWidth(), bottomControlBarHeight, dataDisplayBackground);
-
-	// Data
-
-	int actualFTP = 243;
+	int actualFTP = UserData::GetFTP();
 	int ftp = workout->GetTargetType() == WorkoutDefinition::RAW_POWER ? 100 : actualFTP;
-
-	int targetPower = (int)std::round(((double)workout->EvaluateWorkoutAt((int)workoutTime) / 100.0) * (double)ftp);
 
 	if ((int)workoutTime != previousFrameIntTime) {
 		powerRecord.push_back(currentPower);
@@ -93,182 +102,39 @@ int WorkoutScene::DrawCall()
 
 		previousFrameIntTime = (int)workoutTime;
 	}
-	
 
-	std::pair<int, int> intervalTimeData = workout->GetIntervalTime((int)workoutTime);
-	int intervalElapsedTime = (int)workoutTime - intervalTimeData.first;
-	int intervalLength = intervalTimeData.second - intervalTimeData.first;
+	int targetPower = (int)std::round(((double)workout->EvaluateWorkoutAt((int)workoutTime) / 100.0) * (double)ftp);
 
-	std::stringstream elapsedTimeSS;
-	std::string elapsedTime;
-	std::string elapsedTimeHeading;
-
-	std::stringstream elapsedIntervalTimeSS;
-	std::string elapsedIntervalTime;
-	std::string elapsedIntervalTimeHeading;
-	switch (timeMode) {
-	default:
-		elapsedTimeHeading = "Elapsed Time";
-		elapsedTime = MattsUtils::Time::ToString(workoutTime);
-
-		elapsedIntervalTimeHeading = "Elapsed Interval Time";
-		elapsedIntervalTime = MattsUtils::Time::ToString(intervalElapsedTime);
-		break;
-	case 1:
-		elapsedTimeHeading = "Time Remaining";
-		elapsedTimeSS << MattsUtils::Time::ToString(workout->GetWorkoutLength() - workoutTime);
-		elapsedTime = elapsedTimeSS.str();
-
-		elapsedIntervalTimeHeading = "Interval Time Remaining";
-		elapsedIntervalTimeSS << MattsUtils::Time::ToString(intervalLength - intervalElapsedTime);
-		elapsedIntervalTime = elapsedIntervalTimeSS.str();
-		break;
-	case 2:
-		elapsedTimeHeading = "Time";
-		elapsedTimeSS << MattsUtils::Time::ToString(workoutTime) << " / " << MattsUtils::Time::ToString(workout->GetWorkoutLength());
-		elapsedTime = elapsedTimeSS.str();
-
-		elapsedIntervalTimeHeading = "Interval Time";
-		elapsedIntervalTimeSS << MattsUtils::Time::ToString(intervalElapsedTime) << " / " << MattsUtils::Time::ToString(intervalLength);
-		elapsedIntervalTime = elapsedIntervalTimeSS.str();
-		break;
-	}
-
-	bool timeElapsedClicked = DrawDataValue(
-		fontType, 
-		elapsedTimeHeading, 
-		elapsedTime,
-		raylib::ConstructVector2(0, 10)
-	);
-
-	bool intervalTimeClicked = DrawDataValue(
+	DrawWorkoutGraph(
+		raylib::ConstructRectangle(0, 0 + dataDisplayHeight, GetScreenWidth(), graphAreaHeight),
 		fontType,
-		elapsedIntervalTimeHeading,
-		elapsedIntervalTime,
-		raylib::ConstructVector2(0, 70)
+		graphAreaBackground,
+		graphScaleLines,
+		graphScaleLineFTP100,
+		graphProgressCompletedColor,
+		graphHeartRateRecordLineColor,
+		graphCadenceRecordLineColor,
+		graphProgressLineColor,
+		graphProgressLineColor,
+		ftp
 	);
 
-	if (timeElapsedClicked || intervalTimeClicked) {
-		timeMode++;
-		if (timeMode > maxTimeMode) {
-			timeMode = 0;
-		}
-	}
-
-	DrawDataValue(
+	DrawWorkoutTimeAxis(
+		raylib::ConstructRectangle(0, 0 + dataDisplayHeight + graphAreaHeight, GetScreenWidth(), graphTimeAxisHeight),
 		fontType,
-		"Power",
-		std::string(TextFormat("%s", (currentPower == -1 ? "--" : TextFormat("%d", currentPower)))),
-		raylib::ConstructVector2(-GetScreenWidth() / 4, 10)
+		graphScaleLines,
+		graphAreaBackground,
+		workout->GetWorkoutLength()
 	);
 
-	DrawDataValue(
+	DrawRectangle(0, GetScreenHeight() - bottomControlBarHeight, GetScreenWidth(), bottomControlBarHeight, dataDisplayBackground);
+
+	DrawWorkoutDataReadout(
+		raylib::ConstructRectangle(0, 0, GetScreenWidth(), dataDisplayHeight),
 		fontType,
-		"Target Power",
-		std::string(TextFormat("%d", targetPower)),
-		raylib::ConstructVector2(-GetScreenWidth() / 4, 70)
+		dataDisplayBackground,
+		targetPower
 	);
-
-	DrawDataValue(
-		fontType,
-		"Cadence",
-		std::string(TextFormat("%s", (currentCadence == -1 ? "--" : TextFormat("%d", currentCadence)))),
-		raylib::ConstructVector2(GetScreenWidth() / 4, 10)
-	);
-
-	DrawDataValue(
-		fontType,
-		"Heart Rate",
-		std::string(TextFormat("%s", (currentHeartRate == -1 ? "--" : TextFormat("%d", currentHeartRate)))),
-		raylib::ConstructVector2(GetScreenWidth() / 4, 70)
-	);
-
-
-	// Graph Stuff Start
-
-	int highestTarget = (int)(((double)workout->GetHighestTarget() / 100.0) * (double)ftp);
-	int highestGraphPoint = (int)std::ceil((double)highestTarget / 100.0) * 100;
-
-	int workoutDrawHeight = (int)(((double)highestTarget / (double)highestGraphPoint) * (double)graphAreaHeight);
-
-	double oneWattDist = (double)graphAreaHeight / (double)highestGraphPoint;
-
-	for (int i = 100; i < highestGraphPoint; i += 100) {
-		int y = dataDisplayHeight + (graphAreaHeight - (oneWattDist * i));
-		DrawLine(0, y, GetScreenWidth(), y, graphScaleLines);
-		RelativeDrawing::DrawTextRelEx(fontType, TextFormat("%d", i),
-			raylib::ConstructVector2(3, y - 1),
-			RelativeDrawing::TopLeft,
-			RelativeDrawing::BottomLeft,
-			16,
-			1.0,
-			graphScaleLines
-		);
-	}
-
-	workout->DrawWorkout(raylib::ConstructVector2(0, dataDisplayHeight + (graphAreaHeight - workoutDrawHeight)), GetScreenWidth(), workoutDrawHeight, raylib::ConstructColor(0, 178, 255, 255), 0);
-
-	int ftp_y = dataDisplayHeight + (graphAreaHeight - (oneWattDist * actualFTP));
-	DrawLine(0, ftp_y, GetScreenWidth(), ftp_y, graphScaleLineFTP100);
-
-	RelativeDrawing::DrawTextRelEx(fontType, TextFormat("FTP %d", actualFTP),
-		raylib::ConstructVector2(-3, ftp_y - 1),
-		RelativeDrawing::TopRight,
-		RelativeDrawing::BottomRight,
-		16,
-		1.0,
-		graphScaleLineFTP100
-	);
-
-	// Draw Time line
-	int x_pos = (int)std::round((double)GetScreenWidth() * ((double)(int)workoutTime / (double)workout->GetWorkoutLength()));
-
-	DrawRectangle(0, dataDisplayHeight, x_pos, graphAreaHeight, graphProgressCompletedColor);
-
-	Rectangle graphSizedata = raylib::ConstructRectangle(0, dataDisplayHeight, GetScreenWidth(), graphAreaHeight);
-
-	// Draw Power Record
-	GraphDrawDataLine(cadenceRecord, currentCadence, (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphCadenceRecordLineColor, graphSizedata);
-
-	GraphDrawDataLine(heartRateRecord, currentHeartRate, (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphHeartRateRecordLineColor, graphSizedata);
-
-	GraphDrawDataLine(powerRecord, currentPower, (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphProgressLineColor, graphSizedata);
-
-	DrawLine(x_pos, dataDisplayHeight, x_pos, dataDisplayHeight + graphAreaHeight, graphProgressLineColor);
-
-	// Graph Time axis
-	int timeAxisY = dataDisplayHeight + graphAreaHeight;
-	DrawLine(0, timeAxisY, GetScreenWidth(), timeAxisY, graphScaleLines);
-	double secondDist = (double)GetScreenWidth() / (double)workout->GetWorkoutLength();
-
-	int workoutLength = workout->GetWorkoutLength();
-	for (int i = 0; i < workoutLength; i += 60) {
-		int timeAxisX = secondDist * i;
-		if (i % 300 == 0) {
-			
-			DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + graphTimeAxisHeight, graphScaleLines);
-			std::string timeStr = MattsUtils::Time::ToString(i);
-
-			if (GetScreenWidth() - timeAxisX > MeasureTextEx(fontType, timeStr.c_str(), 16, 1.0).x + 15) {
-				RelativeDrawing::DrawTextRelEx(
-					fontType,
-					timeStr.c_str(),
-					raylib::ConstructVector2(timeAxisX + 3, timeAxisY + 3),
-					RelativeDrawing::TopLeft,
-					RelativeDrawing::TopLeft,
-					16,
-					1.0,
-					graphScaleLines
-				);
-			}
-			
-		}
-		else {
-			DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 4, graphScaleLines);
-		}
-	}
-
-	// Graph Stuff end
 
 	bool pauseRes = RelativeDrawing::GuiButtonRelative((!paused ? "Pause" : "Play"), raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
 	if (pauseRes) {
@@ -277,8 +143,9 @@ int WorkoutScene::DrawCall()
 
 	bool finishRes = RelativeDrawing::GuiButtonRelative("Finish", raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
 	if (finishRes) {
-		started = false;
-		SceneManager::LoadScene("WorkoutSelectionMenu");
+		/*started = false;
+		SceneManager::LoadScene("WorkoutSelectionMenu");*/
+		finished = true;
 	}
 
 	GuiUnlock();
@@ -321,6 +188,7 @@ int WorkoutScene::DrawCall()
 		if (startRes) {
 			started = true;
 			paused = true;
+			finished = false;
 			workoutTime = 0;
 			startCountDown = 5;
 			timeMode = 0;
@@ -387,13 +255,227 @@ bool WorkoutScene::DrawDataValue(Font font, std::string heading, std::string val
 	return CheckCollisionPointRec(GetMousePosition(), raylib::ConstructRectangle(bounds.minX, bounds.minY, bounds.maxX - bounds.minX, bounds.maxY - bounds.minY)) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 }
 
+void WorkoutScene::DrawWorkoutDataReadout(Rectangle dataRect, Font fontType, Color backgroundColor, int targetPower)
+{
+	using namespace MattsUtils;
+
+	DrawRectangle(dataRect.x, dataRect.y, GetScreenWidth(), dataRect.height, backgroundColor);
+
+	// Data
+
+	std::pair<int, int> intervalTimeData = workout->GetIntervalTime((int)workoutTime);
+	int intervalElapsedTime = (int)workoutTime - intervalTimeData.first;
+	int intervalLength = intervalTimeData.second - intervalTimeData.first;
+
+	std::stringstream elapsedTimeSS;
+	std::string elapsedTime;
+	std::string elapsedTimeHeading;
+
+	std::stringstream elapsedIntervalTimeSS;
+	std::string elapsedIntervalTime;
+	std::string elapsedIntervalTimeHeading;
+	switch (timeMode) {
+	default:
+		elapsedTimeHeading = "Elapsed Time";
+		elapsedTime = MattsUtils::Time::ToString(workoutTime);
+
+		elapsedIntervalTimeHeading = "Elapsed Interval Time";
+		elapsedIntervalTime = MattsUtils::Time::ToString(intervalElapsedTime);
+		break;
+	case 1:
+		elapsedTimeHeading = "Time Remaining";
+		elapsedTimeSS << MattsUtils::Time::ToString(workout->GetWorkoutLength() - workoutTime);
+		elapsedTime = elapsedTimeSS.str();
+
+		elapsedIntervalTimeHeading = "Interval Time Remaining";
+		elapsedIntervalTimeSS << MattsUtils::Time::ToString(intervalLength - intervalElapsedTime);
+		elapsedIntervalTime = elapsedIntervalTimeSS.str();
+		break;
+	case 2:
+		elapsedTimeHeading = "Time";
+		elapsedTimeSS << MattsUtils::Time::ToString(workoutTime) << " / " << MattsUtils::Time::ToString(workout->GetWorkoutLength());
+		elapsedTime = elapsedTimeSS.str();
+
+		elapsedIntervalTimeHeading = "Interval Time";
+		elapsedIntervalTimeSS << MattsUtils::Time::ToString(intervalElapsedTime) << " / " << MattsUtils::Time::ToString(intervalLength);
+		elapsedIntervalTime = elapsedIntervalTimeSS.str();
+		break;
+	}
+
+	bool timeElapsedClicked = DrawDataValue(
+		fontType,
+		elapsedTimeHeading,
+		elapsedTime,
+		raylib::ConstructVector2(0, 10)
+	);
+
+	bool intervalTimeClicked = DrawDataValue(
+		fontType,
+		elapsedIntervalTimeHeading,
+		elapsedIntervalTime,
+		raylib::ConstructVector2(0, 70)
+	);
+
+	if (timeElapsedClicked || intervalTimeClicked) {
+		timeMode++;
+		if (timeMode > maxTimeMode) {
+			timeMode = 0;
+		}
+	}
+
+	DrawDataValue(
+		fontType,
+		"Power",
+		std::string(TextFormat("%s", (currentPower == -1 ? "--" : TextFormat("%d", currentPower)))),
+		raylib::ConstructVector2(-GetScreenWidth() / 4, 10)
+	);
+
+	DrawDataValue(
+		fontType,
+		"Target Power",
+		std::string(TextFormat("%d", targetPower)),
+		raylib::ConstructVector2(-GetScreenWidth() / 4, 70)
+	);
+
+	DrawDataValue(
+		fontType,
+		"Cadence",
+		std::string(TextFormat("%s", (currentCadence == -1 ? "--" : TextFormat("%d", currentCadence)))),
+		raylib::ConstructVector2(GetScreenWidth() / 4, 10)
+	);
+
+	DrawDataValue(
+		fontType,
+		"Heart Rate",
+		std::string(TextFormat("%s", (currentHeartRate == -1 ? "--" : TextFormat("%d", currentHeartRate)))),
+		raylib::ConstructVector2(GetScreenWidth() / 4, 70)
+	);
+}
+
+void WorkoutScene::DrawWorkoutGraph(Rectangle graphRect, Font fontType, Color backgroundColor, Color graphScaleLines, Color graphScaleLineFTP100, Color graphProgressCompletedAreaColor, Color graphHeartRateRecordLineColor, Color graphCadenceRecordLineColor, Color graphPowerRecordLineColor, Color graphProgressLineColor, int ftp)
+{
+	using namespace MattsUtils;
+
+	DrawRectangle(graphRect.x, graphRect.y, graphRect.width, graphRect.height, backgroundColor);
+
+	// Graph Stuff Start
+
+	int highestTarget = (int)(((double)workout->GetHighestTarget() / 100.0) * (double)ftp);
+	int highestGraphPoint = (int)std::ceil((double)highestTarget / 100.0) * 100;
+
+	int workoutDrawHeight = (int)(((double)highestTarget / (double)highestGraphPoint) * (double)graphRect.height);
+
+	double oneWattDist = (double)graphRect.height / (double)highestGraphPoint;
+
+	for (int i = 100; i < highestGraphPoint; i += 100) {
+		int y = graphRect.y + (graphRect.height - (oneWattDist * i));
+		DrawLine(graphRect.x, y, graphRect.width, y, graphScaleLines);
+		RelativeDrawing::DrawTextRelEx(fontType, TextFormat("%d", i),
+			raylib::ConstructVector2(3, y - 1),
+			RelativeDrawing::TopLeft,
+			RelativeDrawing::BottomLeft,
+			16,
+			1.0,
+			graphScaleLines
+		);
+	}
+
+	workout->DrawWorkout(raylib::ConstructVector2(graphRect.x, graphRect.y + (graphRect.height - workoutDrawHeight)), graphRect.width, workoutDrawHeight, raylib::ConstructColor(0, 178, 255, 255), 0);
+
+	int ftp_y = graphRect.y + (graphRect.height - (oneWattDist * UserData::GetFTP()));
+	DrawLine(graphRect.x, ftp_y, graphRect.width, ftp_y, graphScaleLineFTP100);
+
+	RelativeDrawing::DrawTextRelEx(fontType, TextFormat("FTP %d", UserData::GetFTP()),
+		raylib::ConstructVector2(-3, ftp_y - 1),
+		RelativeDrawing::TopRight,
+		RelativeDrawing::BottomRight,
+		16,
+		1.0,
+		graphScaleLineFTP100
+	);
+
+	// Draw Time line
+	int x_pos = (int)std::round((double)graphRect.width * ((double)(int)workoutTime / (double)workout->GetWorkoutLength()));
+
+	DrawRectangle(graphRect.x, graphRect.y, x_pos, graphRect.height, graphProgressCompletedAreaColor);
+
+	Rectangle graphSizedata = raylib::ConstructRectangle(graphRect.x, graphRect.y, graphRect.width, graphRect.height);
+
+	// Draw Power Record
+	GraphDrawDataLine(cadenceRecord, currentCadence, (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphCadenceRecordLineColor, graphSizedata);
+
+	GraphDrawDataLine(heartRateRecord, currentHeartRate, (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphHeartRateRecordLineColor, graphSizedata);
+
+	GraphDrawDataLine(powerRecord, currentPower, (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphPowerRecordLineColor, graphSizedata);
+
+	DrawLine(x_pos, graphRect.y, x_pos, graphRect.y + graphRect.height, graphProgressLineColor);
+
+	// Graph Stuff end
+}
+
+void WorkoutScene::DrawWorkoutTimeAxis(Rectangle axisRect, Font fontType, Color lineColor, Color backgroundColor, int timePeriod)
+{
+	using namespace MattsUtils;
+
+	DrawRectangle(0, axisRect.y, GetScreenWidth(), axisRect.height, backgroundColor);
+
+	// Graph Time axis
+	int timeAxisY = axisRect.y;
+
+	DrawLine(0, timeAxisY, GetScreenWidth(), timeAxisY, lineColor);
+	double secondDist = (double)GetScreenWidth() / (double)timePeriod;
+
+	int workoutLength = timePeriod;
+
+	bool drawMoreMiuntes = secondDist * 60 > 100;
+
+	int increment = !drawMoreMiuntes ? 60 : 30;
+
+	for (int i = 0; i < workoutLength; i += increment) {
+		int timeAxisX = secondDist * i;
+
+		if (i % 300 == 0 || (i % 60 == 0 && drawMoreMiuntes)) {
+
+			DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + axisRect.height, lineColor);
+			std::string timeStr = MattsUtils::Time::ToString(i);
+
+			if (GetScreenWidth() - timeAxisX > MeasureTextEx(fontType, timeStr.c_str(), 16, 1.0).x + 15) {
+				RelativeDrawing::DrawTextRelEx(
+					fontType,
+					timeStr.c_str(),
+					raylib::ConstructVector2(timeAxisX + 3, timeAxisY + 3),
+					RelativeDrawing::TopLeft,
+					RelativeDrawing::TopLeft,
+					16,
+					1.0,
+					lineColor
+				);
+			}
+
+		}
+		else if (i % 60 == 0) {
+			if (drawMoreMiuntes) {
+				DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 8, lineColor);
+			}
+			else {
+				DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 4, lineColor);
+			}
+			
+		}
+		else if (i % 30 == 0 && drawMoreMiuntes) {
+			DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 4, lineColor);
+		}
+	}
+}
+
 void WorkoutScene::GraphDrawDataLine(std::vector<int> dataValues, int currentValue, int currentTime, int totalTime, double yScale, Color lineColor, Rectangle graph)
 {
-	int x_pos = (int)std::round((double)GetScreenWidth() * ((double)currentTime / (double)totalTime));
-	int rec_xp, rec_yp = 0;
+	int x_pos = (int)std::round((double)graph.width * ((double)currentTime / (double)totalTime));
+	int rec_xp = 0;
+	int rec_yp = 0;
 	for (int i = 0; i < dataValues.size(); i++) {
 		int rec_y = graph.y + (graph.height - (yScale * std::max(dataValues.at(i), 0)));
-		int rec_x = (int)std::round((double)GetScreenWidth() * ((double)i / (double)totalTime));
+		int rec_x = graph.x + (int)std::round((double)graph.width * ((double)i / (double)totalTime));
 
 		if (i != 0) {
 			DrawLine(rec_xp, rec_yp, rec_x, rec_y, lineColor);
@@ -405,9 +487,46 @@ void WorkoutScene::GraphDrawDataLine(std::vector<int> dataValues, int currentVal
 	if (x_pos > 0) DrawLine(rec_xp, rec_yp, x_pos, graph.y + (graph.height - (yScale * std::max(currentValue, 0))), lineColor);
 }
 
-int WorkoutScene::DrawWorkoutOverScreen()
+int WorkoutScene::DrawWorkoutOverScreen(Font fontType, Vector2 buttonSize, Color dataDisplayBackground, Color graphAreaBackground, Color graphScaleLines, Color graphScaleLineFTP100, Color graphHeartRateRecordLineColor, Color graphCadenceRecordLineColor, Color graphProgressLineColor, Color graphProgressCompletedColor)
 {
+	using namespace MattsUtils;
 
+	int actualFTP = UserData::GetFTP();
+	int ftp = workout->GetTargetType() == WorkoutDefinition::RAW_POWER ? 100 : actualFTP;
+
+	int bottomControlBarHeight = 32;
+	int timeAxisHeight = 20;
+	
+	DrawWorkoutGraph(
+		raylib::ConstructRectangle(0, GetScreenHeight() / 2 - bottomControlBarHeight - timeAxisHeight, GetScreenWidth(), GetScreenHeight() / 2),
+		fontType,
+		graphAreaBackground,
+		graphScaleLines,
+		graphScaleLineFTP100,
+		raylib::ConstructColor(0, 0, 0, 0),
+		graphHeartRateRecordLineColor,
+		graphCadenceRecordLineColor,
+		graphProgressLineColor,
+		raylib::ConstructColor(0, 0, 0, 0),
+		ftp
+	);
+
+	DrawWorkoutTimeAxis(
+		raylib::ConstructRectangle(0, 0 + GetScreenHeight() - bottomControlBarHeight - timeAxisHeight, GetScreenWidth(), timeAxisHeight),
+		fontType,
+		graphScaleLines,
+		graphAreaBackground,
+		(int)workoutTime
+	);
+
+	DrawRectangle(0, GetScreenHeight() - bottomControlBarHeight, GetScreenWidth(), bottomControlBarHeight, dataDisplayBackground);
+
+
+	bool continueRes = RelativeDrawing::GuiButtonRelative("Continue", raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
+	if (continueRes) {
+		started = false;
+		SceneManager::LoadScene("WorkoutSelectionMenu");
+	}
 
 	return EXIT_SUCCESS;
 }
