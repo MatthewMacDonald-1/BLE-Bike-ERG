@@ -428,16 +428,67 @@ void WorkoutScene::DrawWorkoutTimeAxis(Rectangle axisRect, Font fontType, Color 
 	int workoutLength = timePeriod;
 
 	int minuteDist = secondDist * 60;
+	int halfMinuteDist = secondDist * 30;
+	int tenSecDist = secondDist * 10;
 	int minMinuteDist = 100;
 
 	//int increment = !drawMoreMiuntes ? 60 : 30;
-	int increment = 5;
+	int increment = 1;
 
 	for (int i = 0; i < workoutLength; i += increment) {
 		int timeAxisX = secondDist * i;
 
+		if (tenSecDist >= minMinuteDist) {
+			if (i % 10 == 0) {
+				DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + axisRect.height, lineColor);
+				std::string timeStr = MattsUtils::Time::ToString(i);
 
-		if (minuteDist >= minMinuteDist) {
+				if (GetScreenWidth() - timeAxisX > MeasureTextEx(fontType, timeStr.c_str(), 16, 1.0).x + 15) {
+					RelativeDrawing::DrawTextRelEx(
+						fontType,
+						timeStr.c_str(),
+						raylib::ConstructVector2(timeAxisX + 3, timeAxisY + 3),
+						RelativeDrawing::TopLeft,
+						RelativeDrawing::TopLeft,
+						16,
+						1.0,
+						lineColor
+					);
+				}
+			}
+			else if (i % 5 == 0) {
+				DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 8, lineColor);
+			}
+			else if (i % 1 == 0) {
+				DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 4, lineColor);
+			}
+		}
+		else if (halfMinuteDist >= minMinuteDist) {
+			if (i % 30 == 0) {
+				DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + axisRect.height, lineColor);
+				std::string timeStr = MattsUtils::Time::ToString(i);
+
+				if (GetScreenWidth() - timeAxisX > MeasureTextEx(fontType, timeStr.c_str(), 16, 1.0).x + 15) {
+					RelativeDrawing::DrawTextRelEx(
+						fontType,
+						timeStr.c_str(),
+						raylib::ConstructVector2(timeAxisX + 3, timeAxisY + 3),
+						RelativeDrawing::TopLeft,
+						RelativeDrawing::TopLeft,
+						16,
+						1.0,
+						lineColor
+					);
+				}
+			}
+			else if (i % 10 == 0) {
+				DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 8, lineColor);
+			}
+			else if (i % 5 == 0) {
+				DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 4, lineColor);
+			}
+		}
+		else if (minuteDist >= minMinuteDist) {
 			if (i % 60 == 0) {
 				DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + axisRect.height, lineColor);
 				std::string timeStr = MattsUtils::Time::ToString(i);
@@ -456,42 +507,13 @@ void WorkoutScene::DrawWorkoutTimeAxis(Rectangle axisRect, Font fontType, Color 
 				}
 			}
 			else if (i % 30 == 0) {
-				if (secondDist * 30 >= minMinuteDist) {
-					DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + axisRect.height, lineColor);
-					std::string timeStr = MattsUtils::Time::ToString(i);
-
-					if (GetScreenWidth() - timeAxisX > MeasureTextEx(fontType, timeStr.c_str(), 16, 1.0).x + 15) {
-						RelativeDrawing::DrawTextRelEx(
-							fontType,
-							timeStr.c_str(),
-							raylib::ConstructVector2(timeAxisX + 3, timeAxisY + 3),
-							RelativeDrawing::TopLeft,
-							RelativeDrawing::TopLeft,
-							16,
-							1.0,
-							lineColor
-						);
-					}
-				} 
-				else {
-					DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 8, lineColor);
-				}
+				DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 8, lineColor);
 			}
 			else if (i % 10 == 0) {
-				if (secondDist * 30 >= minMinuteDist) {
-					DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 8, lineColor);
-				}
-				else {
-					DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 4, lineColor);
-				}
+				DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 4, lineColor);
 			}
 			else if (i % 5 == 0) {
-				if (secondDist * 30 >= minMinuteDist) {
-					DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 4, lineColor);
-				}
-				else {
-					DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 2, lineColor);
-				}
+				DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 2, lineColor);
 			}
 		}
 		else {
@@ -511,7 +533,6 @@ void WorkoutScene::DrawWorkoutTimeAxis(Rectangle axisRect, Font fontType, Color 
 						lineColor
 					);
 				}
-
 			}
 			else if (i % 60 == 0) {
 				DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 4, lineColor);
@@ -548,9 +569,10 @@ int WorkoutScene::DrawWorkoutOverScreen(Font fontType, Vector2 buttonSize, Color
 
 	int bottomControlBarHeight = 32;
 	int timeAxisHeight = 20;
+	int graphStartY = GetScreenHeight() / 2 - bottomControlBarHeight - timeAxisHeight;
 	
 	DrawWorkoutGraph(
-		raylib::ConstructRectangle(0, GetScreenHeight() / 2 - bottomControlBarHeight - timeAxisHeight, GetScreenWidth(), GetScreenHeight() / 2),
+		raylib::ConstructRectangle(0, graphStartY, GetScreenWidth(), GetScreenHeight() / 2),
 		fontType,
 		graphAreaBackground,
 		graphScaleLines,
@@ -570,6 +592,55 @@ int WorkoutScene::DrawWorkoutOverScreen(Font fontType, Vector2 buttonSize, Color
 		graphAreaBackground,
 		(int)workoutTime
 	);
+
+	// Summary Start
+
+	DrawRectangle(0, 0, GetScreenWidth(), graphStartY, dataDisplayBackground);
+
+	RelativeDrawing::DrawTextRelEx(
+		fontType,
+		"Summary",
+		raylib::ConstructVector2(0, 0),
+		RelativeDrawing::TopCenter,
+		RelativeDrawing::TopCenter,
+		48,
+		1.0,
+		WHITE
+	);
+
+	int avgPower = -1;
+	DrawDataValue(
+		fontType,
+		"Avg Power",
+		std::string(TextFormat("%s", (avgPower == -1 ? "--" : TextFormat("%d", avgPower)))),
+		raylib::ConstructVector2(-GetScreenWidth() / 4, 10)
+	);
+
+	int maxPower = -1;
+	DrawDataValue(
+		fontType,
+		"Max Power",
+		std::string(TextFormat("%s", (maxPower == -1 ? "--" : TextFormat("%d", maxPower)))),
+		raylib::ConstructVector2(-GetScreenWidth() / 4, 70)
+	);
+
+	int avgCadence = -1;
+	DrawDataValue(
+		fontType,
+		"Cadence",
+		std::string(TextFormat("%s", (avgCadence == -1 ? "--" : TextFormat("%d", avgCadence)))),
+		raylib::ConstructVector2(GetScreenWidth() / 4, 10)
+	);
+
+	int avgHeartRate = -1;
+	DrawDataValue(
+		fontType,
+		"Heart Rate",
+		std::string(TextFormat("%s", (avgHeartRate == -1 ? "--" : TextFormat("%d", avgHeartRate)))),
+		raylib::ConstructVector2(GetScreenWidth() / 4, 70)
+	);
+
+	// Summary End
 
 	DrawRectangle(0, GetScreenHeight() - bottomControlBarHeight, GetScreenWidth(), bottomControlBarHeight, dataDisplayBackground);
 
