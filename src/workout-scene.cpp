@@ -427,43 +427,95 @@ void WorkoutScene::DrawWorkoutTimeAxis(Rectangle axisRect, Font fontType, Color 
 
 	int workoutLength = timePeriod;
 
-	bool drawMoreMiuntes = secondDist * 60 > 100;
+	int minuteDist = secondDist * 60;
+	int minMinuteDist = 100;
 
-	int increment = !drawMoreMiuntes ? 60 : 30;
+	//int increment = !drawMoreMiuntes ? 60 : 30;
+	int increment = 5;
 
 	for (int i = 0; i < workoutLength; i += increment) {
 		int timeAxisX = secondDist * i;
 
-		if (i % 300 == 0 || (i % 60 == 0 && drawMoreMiuntes)) {
 
-			DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + axisRect.height, lineColor);
-			std::string timeStr = MattsUtils::Time::ToString(i);
+		if (minuteDist >= minMinuteDist) {
+			if (i % 60 == 0) {
+				DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + axisRect.height, lineColor);
+				std::string timeStr = MattsUtils::Time::ToString(i);
 
-			if (GetScreenWidth() - timeAxisX > MeasureTextEx(fontType, timeStr.c_str(), 16, 1.0).x + 15) {
-				RelativeDrawing::DrawTextRelEx(
-					fontType,
-					timeStr.c_str(),
-					raylib::ConstructVector2(timeAxisX + 3, timeAxisY + 3),
-					RelativeDrawing::TopLeft,
-					RelativeDrawing::TopLeft,
-					16,
-					1.0,
-					lineColor
-				);
+				if (GetScreenWidth() - timeAxisX > MeasureTextEx(fontType, timeStr.c_str(), 16, 1.0).x + 15) {
+					RelativeDrawing::DrawTextRelEx(
+						fontType,
+						timeStr.c_str(),
+						raylib::ConstructVector2(timeAxisX + 3, timeAxisY + 3),
+						RelativeDrawing::TopLeft,
+						RelativeDrawing::TopLeft,
+						16,
+						1.0,
+						lineColor
+					);
+				}
 			}
+			else if (i % 30 == 0) {
+				if (secondDist * 30 >= minMinuteDist) {
+					DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + axisRect.height, lineColor);
+					std::string timeStr = MattsUtils::Time::ToString(i);
 
+					if (GetScreenWidth() - timeAxisX > MeasureTextEx(fontType, timeStr.c_str(), 16, 1.0).x + 15) {
+						RelativeDrawing::DrawTextRelEx(
+							fontType,
+							timeStr.c_str(),
+							raylib::ConstructVector2(timeAxisX + 3, timeAxisY + 3),
+							RelativeDrawing::TopLeft,
+							RelativeDrawing::TopLeft,
+							16,
+							1.0,
+							lineColor
+						);
+					}
+				} 
+				else {
+					DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 8, lineColor);
+				}
+			}
+			else if (i % 10 == 0) {
+				if (secondDist * 30 >= minMinuteDist) {
+					DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 8, lineColor);
+				}
+				else {
+					DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 4, lineColor);
+				}
+			}
+			else if (i % 5 == 0) {
+				if (secondDist * 30 >= minMinuteDist) {
+					DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 4, lineColor);
+				}
+				else {
+					DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 2, lineColor);
+				}
+			}
 		}
-		else if (i % 60 == 0) {
-			if (drawMoreMiuntes) {
-				DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 8, lineColor);
+		else {
+			if (i % 300 == 0) {
+				DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + axisRect.height, lineColor);
+				std::string timeStr = MattsUtils::Time::ToString(i);
+
+				if (GetScreenWidth() - timeAxisX > MeasureTextEx(fontType, timeStr.c_str(), 16, 1.0).x + 15) {
+					RelativeDrawing::DrawTextRelEx(
+						fontType,
+						timeStr.c_str(),
+						raylib::ConstructVector2(timeAxisX + 3, timeAxisY + 3),
+						RelativeDrawing::TopLeft,
+						RelativeDrawing::TopLeft,
+						16,
+						1.0,
+						lineColor
+					);
+				}
+
 			}
-			else {
+			else if (i % 60 == 0) {
 				DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 4, lineColor);
 			}
-			
-		}
-		else if (i % 30 == 0 && drawMoreMiuntes) {
-			DrawLine(timeAxisX, timeAxisY, timeAxisX, timeAxisY + 4, lineColor);
 		}
 	}
 }
