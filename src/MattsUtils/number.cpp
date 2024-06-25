@@ -50,3 +50,13 @@ unsigned char MattsUtils::Number::parseCharNum(std::string str)
 {
     return (unsigned char)parseLong(str);
 }
+
+double MattsUtils::Number::average(std::vector<int> array)
+{
+    double sum = 0;
+    for (int i = 0; i < array.size(); i++) {
+        sum += array.at(i);
+    }
+
+    return sum / (double)array.size();
+}

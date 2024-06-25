@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include <vector>
 
 namespace MattsUtils::Number {
 
@@ -14,4 +15,6 @@ namespace MattsUtils::Number {
 
     unsigned char parseCharNum(std::string str);
 	
+    double average(std::vector<int> array);
+
 }

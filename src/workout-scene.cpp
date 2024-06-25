@@ -6,11 +6,13 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <chrono>
 
 #include "font-settings.hpp"
 #include "MattsUtils/relative-drawing.hpp"
 #include "MattsUtils/raylib-structs.hpp"
 #include "MattsUtils/time.hpp"
+#include "MattsUtils/number.hpp"
 #include "settings-menu.hpp"
 #include "scene-manager.hpp"
 #include "bluetooth-controller.hpp"
@@ -96,9 +98,26 @@ int WorkoutScene::DrawCall()
 	int ftp = workout->GetTargetType() == WorkoutDefinition::RAW_POWER ? 100 : actualFTP;
 
 	if ((int)workoutTime != previousFrameIntTime) {
-		powerRecord.push_back(currentPower);
+		// Record values
+		timeRecord.push_back(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+
+		previousPowerValues[currentPowerValueIdx] = currentPower;
+		currentPowerValueIdx++;
+		if (currentPowerValueIdx >= powerAveragePeriod) {
+			currentPowerValueIdx = 0;
+		}
+		int averagePower = (int)MattsUtils::Number::average(previousPowerValues);
+
+		powerRecord.push_back(averagePower);
 		heartRateRecord.push_back(currentHeartRate);
-		cadenceRecord.push_back(currentCadence);
+
+		previousCadenceValues[currentCadenceValueIdx] = currentCadence;
+		currentCadenceValueIdx++;
+		if (currentCadenceValueIdx >= cadenceAveragePeriod) {
+			currentCadenceValueIdx = 0;
+		}
+		int averageCadence = (int)MattsUtils::Number::average(previousCadenceValues);
+		cadenceRecord.push_back(averageCadence);
 
 		previousFrameIntTime = (int)workoutTime;
 	}

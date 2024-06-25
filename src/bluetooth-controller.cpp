@@ -506,9 +506,9 @@ void BluetoothController::CadenceCallback(SimpleBLE::ByteArray bytes)
 		cyclingCadenceAvgIdx = 0;
 	}
 
-	double avgCadence = (cyclingCadenceAvg[0] + cyclingCadenceAvg[1] + cyclingCadenceAvg[2]) / 3.0;
+	//double avgCadence = (cyclingCadenceAvg[0] + cyclingCadenceAvg[1] + cyclingCadenceAvg[2]) / 3.0;
 
-	*cyclingCadenceValue = (int)(avgCadence);
+	*cyclingCadenceValue = (int)(cadenceValue); // Do averaging in workout class.
 
 	lastCrankRevolutions = crankRevolutions;
 	lastCrankEventTime = crankEventTime;
