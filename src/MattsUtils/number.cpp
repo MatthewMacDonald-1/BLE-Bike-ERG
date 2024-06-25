@@ -60,3 +60,18 @@ double MattsUtils::Number::average(std::vector<int> array)
 
     return sum / (double)array.size();
 }
+
+int MattsUtils::Number::max(std::vector<int> array)
+{
+    if (array.size() < 1) {
+        std::cerr << "ERROR: cannot compute max from array of size zero (no values)." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    int max = array.at(0);
+    for (int i = 1; i < array.size(); i++) {
+        if (array.at(i) > max) {
+            max = array.at(i);
+        }
+    }
+    return max;
+}

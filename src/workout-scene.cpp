@@ -609,7 +609,7 @@ int WorkoutScene::DrawWorkoutOverScreen(Font fontType, Vector2 buttonSize, Color
 		fontType,
 		graphScaleLines,
 		graphAreaBackground,
-		(int)workoutTime
+		(int)workout->GetWorkoutLength()
 	);
 
 	// Summary Start
@@ -627,7 +627,7 @@ int WorkoutScene::DrawWorkoutOverScreen(Font fontType, Vector2 buttonSize, Color
 		WHITE
 	);
 
-	int avgPower = -1;
+	int avgPower = MattsUtils::Number::average(powerRecord);
 	DrawDataValue(
 		fontType,
 		"Avg Power",
@@ -635,7 +635,7 @@ int WorkoutScene::DrawWorkoutOverScreen(Font fontType, Vector2 buttonSize, Color
 		raylib::ConstructVector2(-GetScreenWidth() / 4, 10)
 	);
 
-	int maxPower = -1;
+	int maxPower = MattsUtils::Number::max(powerRecord);
 	DrawDataValue(
 		fontType,
 		"Max Power",
@@ -643,18 +643,18 @@ int WorkoutScene::DrawWorkoutOverScreen(Font fontType, Vector2 buttonSize, Color
 		raylib::ConstructVector2(-GetScreenWidth() / 4, 70)
 	);
 
-	int avgCadence = -1;
+	int avgCadence = MattsUtils::Number::average(cadenceRecord);
 	DrawDataValue(
 		fontType,
-		"Cadence",
+		"Avg Cadence",
 		std::string(TextFormat("%s", (avgCadence == -1 ? "--" : TextFormat("%d", avgCadence)))),
 		raylib::ConstructVector2(GetScreenWidth() / 4, 10)
 	);
 
-	int avgHeartRate = -1;
+	int avgHeartRate = MattsUtils::Number::average(heartRateRecord);
 	DrawDataValue(
 		fontType,
-		"Heart Rate",
+		"Avg Heart Rate",
 		std::string(TextFormat("%s", (avgHeartRate == -1 ? "--" : TextFormat("%d", avgHeartRate)))),
 		raylib::ConstructVector2(GetScreenWidth() / 4, 70)
 	);

@@ -17,4 +17,6 @@ namespace MattsUtils::Number {
 	
     double average(std::vector<int> array);
 
+    int max(std::vector<int> array);
+
 }
