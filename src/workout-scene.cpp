@@ -630,39 +630,77 @@ int WorkoutScene::DrawWorkoutOverScreen(Font fontType, Vector2 buttonSize, Color
 		WHITE
 	);
 
-	int dataValueRow1Height = 64;
-	int dataValueRow2Height = 64 + 70;
+	int dataValueRow1Y = 80;
+	int dataValueRow2Y = dataValueRow1Y + 70;
 
-	int avgPower = MattsUtils::Number::average(powerRecord);
+	int dataValueCol1X = GetScreenWidth() / 2 - (GetScreenWidth() / 5 * 4);
+	int dataValueCol2X = GetScreenWidth() / 2 - (GetScreenWidth() / 5 * 3);
+	int dataValueCol3X = GetScreenWidth() / 2 - (GetScreenWidth() / 5 * 2);
+	int dataValueCol4X = GetScreenWidth() / 2 - (GetScreenWidth() / 5);
+
+	// Time
+	DrawDataValue(
+		fontType,
+		"Workout Time",
+		MattsUtils::Time::ToString(workoutTime),
+		raylib::ConstructVector2(dataValueCol1X, dataValueRow1Y)
+	);
+	DrawDataValue(
+		fontType,
+		"Elapsed Time",
+		MattsUtils::Time::ToString(timeRecord.size() < 1 ? 0 : (timeRecord.at(timeRecord.size() - 1) - timeRecord.at(0))),
+		raylib::ConstructVector2(dataValueCol1X, dataValueRow2Y)
+	);
+
+	// Power
+	int avgPower = powerRecord.size() < 1 ? -1 : MattsUtils::Number::average(powerRecord);
 	DrawDataValue(
 		fontType,
 		"Avg Power",
 		std::string(TextFormat("%s", (avgPower == -1 ? "--" : TextFormat("%d", avgPower)))),
-		raylib::ConstructVector2(-GetScreenWidth() / 5, dataValueRow1Height)
+		raylib::ConstructVector2(dataValueCol2X, dataValueRow1Y)
 	);
 
-	int maxPower = MattsUtils::Number::max(powerRecord);
+	int maxPower = powerRecord.size() < 1 ? -1 : MattsUtils::Number::max(powerRecord);
 	DrawDataValue(
 		fontType,
 		"Max Power",
 		std::string(TextFormat("%s", (maxPower == -1 ? "--" : TextFormat("%d", maxPower)))),
-		raylib::ConstructVector2(-GetScreenWidth() / 4, dataValueRow2Height)
+		raylib::ConstructVector2(dataValueCol2X, dataValueRow2Y)
 	);
 
-	int avgCadence = MattsUtils::Number::average(cadenceRecord);
+	// Cadence
+	int avgCadence = cadenceRecord.size() < 1 ? -1 : MattsUtils::Number::average(cadenceRecord);
 	DrawDataValue(
 		fontType,
 		"Avg Cadence",
 		std::string(TextFormat("%s", (avgCadence == -1 ? "--" : TextFormat("%d", avgCadence)))),
-		raylib::ConstructVector2(GetScreenWidth() / 4, dataValueRow1Height)
+		raylib::ConstructVector2(dataValueCol3X, dataValueRow1Y)
 	);
 
-	int avgHeartRate = MattsUtils::Number::average(heartRateRecord);
+	int maxCadence = cadenceRecord.size() < 1 ? -1 : MattsUtils::Number::max(cadenceRecord);
+	DrawDataValue(
+		fontType,
+		"Max Cadence",
+		std::string(TextFormat("%s", (maxCadence == -1 ? "--" : TextFormat("%d", maxCadence)))),
+		raylib::ConstructVector2(dataValueCol3X, dataValueRow2Y)
+	);
+
+	// Heart Rate
+	int avgHeartRate = heartRateRecord.size() < 1 ? -1 : MattsUtils::Number::average(heartRateRecord);
 	DrawDataValue(
 		fontType,
 		"Avg Heart Rate",
 		std::string(TextFormat("%s", (avgHeartRate == -1 ? "--" : TextFormat("%d", avgHeartRate)))),
-		raylib::ConstructVector2(GetScreenWidth() / 4, dataValueRow2Height)
+		raylib::ConstructVector2(dataValueCol4X, dataValueRow1Y)
+	);
+
+	int maxHeartRate = heartRateRecord.size() < 1 ? -1 : MattsUtils::Number::max(heartRateRecord);
+	DrawDataValue(
+		fontType,
+		"Max Heart Rate",
+		std::string(TextFormat("%s", (maxHeartRate == -1 ? "--" : TextFormat("%d", maxHeartRate)))),
+		raylib::ConstructVector2(dataValueCol4X, dataValueRow2Y)
 	);
 
 	// Summary End
