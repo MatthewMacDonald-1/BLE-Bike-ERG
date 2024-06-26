@@ -102,17 +102,30 @@ int WorkoutScene::DrawCall()
 		// Record values
 		timeRecord.push_back(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 
-		previousPowerValues.insert(previousPowerValues.begin() + currentPowerValueIdx, currentPower);
+
+		if (previousPowerValues.size() == powerAveragePeriod) {
+			previousPowerValues.insert(previousPowerValues.begin() + currentPowerValueIdx, currentPower);
+		}
+		else {
+			previousPowerValues.push_back(currentPower);
+		}
 		currentPowerValueIdx++;
 		if (currentPowerValueIdx >= powerAveragePeriod) {
 			currentPowerValueIdx = 0;
 		}
 		int averagePower = (int)MattsUtils::Number::average(previousPowerValues);
+		
 
 		powerRecord.push_back(averagePower);
 		heartRateRecord.push_back(currentHeartRate);
 
-		previousCadenceValues.insert(previousCadenceValues.begin() + currentCadenceValueIdx, currentCadence);
+		if (previousCadenceValues.size() == cadenceAveragePeriod) {
+			previousCadenceValues.insert(previousCadenceValues.begin() + currentCadenceValueIdx, currentCadence);
+		}
+		else {
+			previousCadenceValues.push_back(currentCadence);
+		}
+		
 		currentCadenceValueIdx++;
 		if (currentCadenceValueIdx >= cadenceAveragePeriod) {
 			currentCadenceValueIdx = 0;
