@@ -34,14 +34,14 @@ private:
 	float workoutTime = 0;
 
 	int currentPower = -1;
-	const int powerAveragePeriod = 3;
+	int powerAveragePeriod = 3;
 	int currentPowerValueIdx = 0;
 	std::vector<int> previousPowerValues; // For calculating rolling averages
 
 	int currentHeartRate = -1;
 
 	int currentCadence = -1;
-	const int cadenceAveragePeriod = 3;
+	int cadenceAveragePeriod = 3;
 	int currentCadenceValueIdx = 0;
 	std::vector<int> previousCadenceValues; // For calculating rolling averages
 

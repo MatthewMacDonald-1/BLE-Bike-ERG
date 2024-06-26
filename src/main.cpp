@@ -36,7 +36,7 @@ int main(void) {
         VideoSettings::WriteVideoSettingsConfigFile();
     }
 
-    UserData::LoadUserData();
+    UserSettings::LoadUserSettings();
 
 
     // Raylib Initialization ----------------------------------------------------------------------

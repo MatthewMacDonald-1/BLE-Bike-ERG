@@ -1,13 +1,27 @@
 #include "user-data.hpp"
 
-int UserData::ftp = 0;
+int UserSettings::ftp = 0;
+int UserSettings::powerAveragePeriod = 3; // Default
+int UserSettings::cadenceAveragePeriod = 3; // Default
 
-void UserData::LoadUserData()
+void UserSettings::LoadUserSettings()
 {
 	ftp = 243;
+	powerAveragePeriod = 3;
+	cadenceAveragePeriod = 3;
 }
 
-int UserData::GetFTP()
+int UserSettings::GetFTP()
 {
 	return ftp;
+}
+
+int UserSettings::GetPowerAveragePeriod()
+{
+	return powerAveragePeriod;
+}
+
+int UserSettings::GetCadenceAveragePeriod()
+{
+	return cadenceAveragePeriod;
 }

@@ -97,7 +97,7 @@ int WorkoutScene::DrawCall()
 	int bottomControlBarHeight = 32;
 	int graphAreaHeight = GetScreenHeight() - dataDisplayHeight - graphTimeAxisHeight - bottomControlBarHeight;
 
-	int actualFTP = UserData::GetFTP();
+	int actualFTP = UserSettings::GetFTP();
 	int ftp = workout->GetTargetType() == WorkoutDefinition::RAW_POWER ? 100 : actualFTP;
 
 	if ((int)workoutTime != previousFrameIntTime) {
@@ -229,6 +229,14 @@ int WorkoutScene::DrawCall()
 			workoutTime = 0;
 			startCountDown = 5;
 			timeMode = 0;
+
+			powerAveragePeriod = UserSettings::GetPowerAveragePeriod();
+			currentPowerValueIdx = 0;
+			previousPowerValues.clear();
+
+			cadenceAveragePeriod = UserSettings::GetCadenceAveragePeriod();
+			currentCadenceValueIdx = 0;
+			previousCadenceValues.clear();
 
 			powerRecord.clear();
 			heartRateRecord.clear();
@@ -419,10 +427,10 @@ void WorkoutScene::DrawWorkoutGraph(Rectangle graphRect, Font fontType, Color ba
 
 	workout->DrawWorkout(raylib::ConstructVector2(graphRect.x, graphRect.y + (graphRect.height - workoutDrawHeight)), graphRect.width, workoutDrawHeight, raylib::ConstructColor(0, 178, 255, 255), 0);
 
-	int ftp_y = graphRect.y + (graphRect.height - (oneWattDist * UserData::GetFTP()));
+	int ftp_y = graphRect.y + (graphRect.height - (oneWattDist * UserSettings::GetFTP()));
 	DrawLine(graphRect.x, ftp_y, graphRect.width, ftp_y, graphScaleLineFTP100);
 
-	RelativeDrawing::DrawTextRelEx(fontType, TextFormat("FTP %d", UserData::GetFTP()),
+	RelativeDrawing::DrawTextRelEx(fontType, TextFormat("FTP %d", UserSettings::GetFTP()),
 		raylib::ConstructVector2(-3, ftp_y - 1),
 		RelativeDrawing::TopRight,
 		RelativeDrawing::BottomRight,
@@ -601,7 +609,7 @@ int WorkoutScene::DrawWorkoutOverScreen(Font fontType, Vector2 buttonSize, Color
 {
 	using namespace MattsUtils;
 
-	int actualFTP = UserData::GetFTP();
+	int actualFTP = UserSettings::GetFTP();
 	int ftp = workout->GetTargetType() == WorkoutDefinition::RAW_POWER ? 100 : actualFTP;
 
 	int bottomControlBarHeight = 32;
