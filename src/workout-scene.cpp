@@ -102,7 +102,7 @@ int WorkoutScene::DrawCall()
 		// Record values
 		timeRecord.push_back(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 
-		previousPowerValues[currentPowerValueIdx] = currentPower;
+		previousPowerValues.insert(previousPowerValues.begin() + currentPowerValueIdx, currentPower);
 		currentPowerValueIdx++;
 		if (currentPowerValueIdx >= powerAveragePeriod) {
 			currentPowerValueIdx = 0;
@@ -112,7 +112,7 @@ int WorkoutScene::DrawCall()
 		powerRecord.push_back(averagePower);
 		heartRateRecord.push_back(currentHeartRate);
 
-		previousCadenceValues[currentCadenceValueIdx] = currentCadence;
+		previousCadenceValues.insert(previousCadenceValues.begin() + currentCadenceValueIdx, currentCadence);
 		currentCadenceValueIdx++;
 		if (currentCadenceValueIdx >= cadenceAveragePeriod) {
 			currentCadenceValueIdx = 0;
@@ -638,7 +638,7 @@ int WorkoutScene::DrawWorkoutOverScreen(Font fontType, Vector2 buttonSize, Color
 		fontType,
 		"Avg Power",
 		std::string(TextFormat("%s", (avgPower == -1 ? "--" : TextFormat("%d", avgPower)))),
-		raylib::ConstructVector2(-GetScreenWidth() / 4, dataValueRow1Height)
+		raylib::ConstructVector2(-GetScreenWidth() / 5, dataValueRow1Height)
 	);
 
 	int maxPower = MattsUtils::Number::max(powerRecord);
