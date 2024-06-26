@@ -105,11 +105,11 @@ int WorkoutScene::DrawCall()
 		timeRecord.push_back(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 
 
-		if (previousPowerValues.size() == powerAveragePeriod) {
-			previousPowerValues.insert(previousPowerValues.begin() + currentPowerValueIdx, currentPower);
+		if (previousPowerValues.size() < powerAveragePeriod) {
+			previousPowerValues.push_back(currentPower);
 		}
 		else {
-			previousPowerValues.push_back(currentPower);
+			previousPowerValues.insert(previousPowerValues.begin() + currentPowerValueIdx, currentPower);
 		}
 		currentPowerValueIdx++;
 		if (currentPowerValueIdx >= powerAveragePeriod) {
@@ -121,13 +121,13 @@ int WorkoutScene::DrawCall()
 		powerRecord.push_back(averagePower);
 		heartRateRecord.push_back(currentHeartRate);
 
-		if (previousCadenceValues.size() == cadenceAveragePeriod) {
-			previousCadenceValues.insert(previousCadenceValues.begin() + currentCadenceValueIdx, currentCadence);
-		}
-		else {
+
+		if (previousCadenceValues.size() < cadenceAveragePeriod) {
 			previousCadenceValues.push_back(currentCadence);
 		}
-		
+		else {
+			previousCadenceValues.insert(previousCadenceValues.begin() + currentCadenceValueIdx, currentCadence);
+		}		
 		currentCadenceValueIdx++;
 		if (currentCadenceValueIdx >= cadenceAveragePeriod) {
 			currentCadenceValueIdx = 0;
@@ -386,10 +386,11 @@ void WorkoutScene::DrawWorkoutDataReadout(Rectangle dataRect, Font fontType, Col
 		}
 	}
 
+	int powerValue = (int)MattsUtils::Number::average(previousPowerValues);
 	DrawDataValue(
 		fontType,
 		"Power",
-		std::string(TextFormat("%s", (currentPower == -1 ? "--" : TextFormat("%d", currentPower)))),
+		std::string(TextFormat("%s", (powerValue == -1 ? "--" : TextFormat("%d", powerValue)))),
 		raylib::ConstructVector2(-GetScreenWidth() / 4, 10)
 	);
 
@@ -400,10 +401,11 @@ void WorkoutScene::DrawWorkoutDataReadout(Rectangle dataRect, Font fontType, Col
 		raylib::ConstructVector2(-GetScreenWidth() / 4, 70)
 	);
 
+	int cadenceValue = (int)MattsUtils::Number::average(previousCadenceValues);
 	DrawDataValue(
 		fontType,
 		"Cadence",
-		std::string(TextFormat("%s", (currentCadence == -1 ? "--" : TextFormat("%d", currentCadence)))),
+		std::string(TextFormat("%s", (cadenceValue == -1 ? "--" : TextFormat("%d", cadenceValue)))),
 		raylib::ConstructVector2(GetScreenWidth() / 4, 10)
 	);
 
@@ -465,11 +467,11 @@ void WorkoutScene::DrawWorkoutGraph(Rectangle graphRect, Font fontType, Color ba
 	Rectangle graphSizedata = raylib::ConstructRectangle(graphRect.x, graphRect.y, graphRect.width, graphRect.height);
 
 	// Draw Power Record
-	GraphDrawDataLine(cadenceRecord, currentCadence, (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphCadenceRecordLineColor, graphSizedata);
+	GraphDrawDataLine(cadenceRecord, (int)MattsUtils::Number::average(previousCadenceValues), (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphCadenceRecordLineColor, graphSizedata);
 
 	GraphDrawDataLine(heartRateRecord, currentHeartRate, (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphHeartRateRecordLineColor, graphSizedata);
 
-	GraphDrawDataLine(powerRecord, currentPower, (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphPowerRecordLineColor, graphSizedata);
+	GraphDrawDataLine(powerRecord, (int)MattsUtils::Number::average(previousPowerValues), (int)workoutTime, workout->GetWorkoutLength(), oneWattDist, graphPowerRecordLineColor, graphSizedata);
 
 	DrawLine(x_pos, graphRect.y, x_pos, graphRect.y + graphRect.height, graphProgressLineColor);
 
