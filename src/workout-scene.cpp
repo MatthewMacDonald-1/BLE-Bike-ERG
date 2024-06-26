@@ -39,6 +39,7 @@ int WorkoutScene::DrawCall()
 	if (!started) {
 		// Reset the records so that if this workout is opened a second time it will apear fresh and ready.
 		finished = false;
+		finshedSaveDiscard = false;
 		paused = true;
 
 		workoutTime = 0;
@@ -165,6 +166,7 @@ int WorkoutScene::DrawCall()
 		/*started = false;
 		SceneManager::LoadScene("WorkoutSelectionMenu");*/
 		finished = true;
+		finshedSaveDiscard = false;
 	}
 
 	GuiUnlock();
@@ -208,6 +210,7 @@ int WorkoutScene::DrawCall()
 			started = true;
 			paused = true;
 			finished = false;
+			finshedSaveDiscard = false;
 			workoutTime = 0;
 			startCountDown = 5;
 			timeMode = 0;
@@ -627,12 +630,15 @@ int WorkoutScene::DrawWorkoutOverScreen(Font fontType, Vector2 buttonSize, Color
 		WHITE
 	);
 
+	int dataValueRow1Height = 64;
+	int dataValueRow2Height = 64 + 70;
+
 	int avgPower = MattsUtils::Number::average(powerRecord);
 	DrawDataValue(
 		fontType,
 		"Avg Power",
 		std::string(TextFormat("%s", (avgPower == -1 ? "--" : TextFormat("%d", avgPower)))),
-		raylib::ConstructVector2(-GetScreenWidth() / 4, 10)
+		raylib::ConstructVector2(-GetScreenWidth() / 4, dataValueRow1Height)
 	);
 
 	int maxPower = MattsUtils::Number::max(powerRecord);
@@ -640,7 +646,7 @@ int WorkoutScene::DrawWorkoutOverScreen(Font fontType, Vector2 buttonSize, Color
 		fontType,
 		"Max Power",
 		std::string(TextFormat("%s", (maxPower == -1 ? "--" : TextFormat("%d", maxPower)))),
-		raylib::ConstructVector2(-GetScreenWidth() / 4, 70)
+		raylib::ConstructVector2(-GetScreenWidth() / 4, dataValueRow2Height)
 	);
 
 	int avgCadence = MattsUtils::Number::average(cadenceRecord);
@@ -648,7 +654,7 @@ int WorkoutScene::DrawWorkoutOverScreen(Font fontType, Vector2 buttonSize, Color
 		fontType,
 		"Avg Cadence",
 		std::string(TextFormat("%s", (avgCadence == -1 ? "--" : TextFormat("%d", avgCadence)))),
-		raylib::ConstructVector2(GetScreenWidth() / 4, 10)
+		raylib::ConstructVector2(GetScreenWidth() / 4, dataValueRow1Height)
 	);
 
 	int avgHeartRate = MattsUtils::Number::average(heartRateRecord);
@@ -656,7 +662,7 @@ int WorkoutScene::DrawWorkoutOverScreen(Font fontType, Vector2 buttonSize, Color
 		fontType,
 		"Avg Heart Rate",
 		std::string(TextFormat("%s", (avgHeartRate == -1 ? "--" : TextFormat("%d", avgHeartRate)))),
-		raylib::ConstructVector2(GetScreenWidth() / 4, 70)
+		raylib::ConstructVector2(GetScreenWidth() / 4, dataValueRow2Height)
 	);
 
 	// Summary End
@@ -666,8 +672,21 @@ int WorkoutScene::DrawWorkoutOverScreen(Font fontType, Vector2 buttonSize, Color
 
 	bool continueRes = RelativeDrawing::GuiButtonRelative("Continue", raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
 	if (continueRes) {
-		started = false;
-		SceneManager::LoadScene("WorkoutSelectionMenu");
+		finshedSaveDiscard = true;
+	}
+
+	if (finshedSaveDiscard) {
+		// Save
+		bool save = false;
+
+		// Discard
+		bool discard = false;
+
+		if (save || discard) {
+			started = false;
+			finshedSaveDiscard = false;
+			SceneManager::LoadScene("WorkoutSelectionMenu");
+		}
 	}
 
 	return EXIT_SUCCESS;

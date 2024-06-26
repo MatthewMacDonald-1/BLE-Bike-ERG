@@ -26,6 +26,7 @@ private:
 	bool paused = true;
 
 	bool finished = false;
+	bool finshedSaveDiscard = false;
 
 	int timeMode = 0;
 	int maxTimeMode = 2;
