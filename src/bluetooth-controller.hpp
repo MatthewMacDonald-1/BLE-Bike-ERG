@@ -109,8 +109,6 @@ private:
 
 	static int lastCrankRevolutions;
 	static int lastCrankEventTime;
-	static int cyclingCadenceAvgIdx;
-	static int cyclingCadenceAvg[];
 
 	static int SubscribeToGenericNotify(ServiceType type, std::function<void(SimpleBLE::ByteArray payload)> callback);
 

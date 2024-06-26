@@ -31,9 +31,6 @@ int* BluetoothController::cyclingCadenceValue = NULL;
 int BluetoothController::lastCrankRevolutions = 0;
 int BluetoothController::lastCrankEventTime = 0;
 
-int BluetoothController::cyclingCadenceAvgIdx = 0;
-int BluetoothController::cyclingCadenceAvg[3] = { 0 };
-
 
 bool BluetoothController::BluetoothSupported()
 {
@@ -203,10 +200,6 @@ int BluetoothController::SubscribeToCyclingPower(int* cyclingPowerReference)
 int BluetoothController::SubscribeToCadence(int* cadenceReference)
 {
 	cyclingCadenceValue = cadenceReference; // Set Value for callback
-
-	cyclingCadenceAvg[0] = 0;
-	cyclingCadenceAvg[1] = 0;
-	cyclingCadenceAvg[2] = 0;
 
 	return SubscribeToGenericNotify(CYCLING_SPEED_CADENCE, CadenceCallback);
 }
@@ -469,10 +462,10 @@ void BluetoothController::CadenceCallback(SimpleBLE::ByteArray bytes)
 	bool hasWheelData = flags._0 == 1;
 	bool hasCrankData = flags._1 == 1;
 
-	std::cout << "Cadence Data: ";
+	/*std::cout << "Cadence Data: ";
 	for (auto b : bytes) {
 		std::cout << std::hex << std::setfill('0') << std::setw(2) << (uint32_t)((uint8_t)b) << " ";
-	}
+	}*/
 
 	int crankRevolutions = 0;
 	int crankEventTime = 0;
@@ -492,21 +485,12 @@ void BluetoothController::CadenceCallback(SimpleBLE::ByteArray bytes)
 		cadenceValue = (int)(((double)std::abs(lastCrankRevolutions - crankRevolutions) / (double)divisor) * 1024 * 60);
 	}
 
-	std::cout << " Has Wheel: " << hasWheelData;
+	/*std::cout << " Has Wheel: " << hasWheelData;
 	std::cout << " Has Crank: " << hasCrankData;
 	std::cout << " Cadence: " << std::to_string(cadenceValue);
 	std::cout << " Revs: " << std::to_string(crankRevolutions);
 	std::cout << " Time: " << std::to_string(crankEventTime);
-	std::cout << std::endl;
-
-	// Calculate 3 second avg
-	cyclingCadenceAvg[cyclingCadenceAvgIdx] = cadenceValue;
-	cyclingCadenceAvgIdx++;
-	if (cyclingCadenceAvgIdx > 2) {
-		cyclingCadenceAvgIdx = 0;
-	}
-
-	//double avgCadence = (cyclingCadenceAvg[0] + cyclingCadenceAvg[1] + cyclingCadenceAvg[2]) / 3.0;
+	std::cout << std::endl;*/
 
 	*cyclingCadenceValue = (int)(cadenceValue); // Do averaging in workout class.
 
