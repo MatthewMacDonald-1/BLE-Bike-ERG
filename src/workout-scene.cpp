@@ -7,6 +7,8 @@
 #include <iostream>
 #include <sstream>
 #include <chrono>
+#include <fstream>
+#include <cstdlib> 
 
 #include "font-settings.hpp"
 #include "MattsUtils/relative-drawing.hpp"
@@ -606,6 +608,8 @@ int WorkoutScene::DrawWorkoutOverScreen(Font fontType, Vector2 buttonSize, Color
 	int timeAxisHeight = 20;
 	int graphStartY = GetScreenHeight() / 2 - bottomControlBarHeight - timeAxisHeight;
 	
+	if (finshedSaveDiscard) GuiLock();
+
 	DrawWorkoutGraph(
 		raylib::ConstructRectangle(0, graphStartY, GetScreenWidth(), GetScreenHeight() / 2),
 		fontType,
@@ -661,7 +665,7 @@ int WorkoutScene::DrawWorkoutOverScreen(Font fontType, Vector2 buttonSize, Color
 	DrawDataValue(
 		fontType,
 		"Elapsed Time",
-		MattsUtils::Time::ToString(timeRecord.size() < 1 ? 0 : (timeRecord.at(timeRecord.size() - 1) - timeRecord.at(0))),
+		MattsUtils::Time::ToString(timeRecord.size() < 1 ? 0 : (int)(timeRecord.at(timeRecord.size() - 1) - timeRecord.at(0)) / 1000),
 		raylib::ConstructVector2(dataValueCol1X, dataValueRow2Y)
 	);
 
@@ -727,11 +731,58 @@ int WorkoutScene::DrawWorkoutOverScreen(Font fontType, Vector2 buttonSize, Color
 	}
 
 	if (finshedSaveDiscard) {
+		GuiUnlock();
+
+		DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), raylib::ConstructColor(0, 0, 0, 100));
+
 		// Save
-		bool save = false;
+		bool save = RelativeDrawing::GuiButtonRelative("Save", raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::Center, RelativeDrawing::Center, 24);
+		if (save && timeRecord.size() > 0) {
+			// Save recorded data to file
+
+			long long randNum = timeRecord.at(0) + std::rand() % 1000000;
+			std::string fileName = TextFormat("saves/%s-%lld.csv", workout->GetName().c_str(), randNum);
+
+			TraceLog(LOG_INFO, "Workout Save: filename=%s", fileName.c_str());
+
+			std::ofstream outputFile(fileName.c_str());
+
+			// Header
+			outputFile << "time";
+
+			bool hasPower, hasCadence, hasHeartRate;
+			hasPower = (powerRecord.size() > 0 ? MattsUtils::Number::max(powerRecord) : -1) != -1;
+			hasCadence = (cadenceRecord.size() > 0 ? MattsUtils::Number::max(cadenceRecord) : -1) != -1;
+			hasHeartRate = (heartRateRecord.size() > 0 ? MattsUtils::Number::max(heartRateRecord) : -1) != -1;
+
+			if (hasPower) outputFile << ", power";
+			if (hasCadence) outputFile << ", cadence";
+			if (hasHeartRate) outputFile << ", hr";
+
+			outputFile << std::endl;
+
+			// Contents
+			int range = timeRecord.size();
+			if (hasPower) range = std::min(range, (int)powerRecord.size());
+			if (hasCadence) range = std::min(range, (int)cadenceRecord.size());
+			if (hasHeartRate) range = std::min(range, (int)heartRateRecord.size());
+
+			for (int i = 0; i < range; i++) {
+				outputFile << std::to_string(timeRecord.at(i));
+
+				if (hasPower) outputFile << ", " << std::to_string(powerRecord.at(i));
+				if (hasCadence) outputFile << ", " << std::to_string(cadenceRecord.at(i));
+				if (hasHeartRate) outputFile << ", " << std::to_string(heartRateRecord.at(i));
+
+				outputFile << std::endl;
+			}
+
+			outputFile.close();
+			// Saved to file
+		}
 
 		// Discard
-		bool discard = false;
+		bool discard = RelativeDrawing::GuiButtonRelative("Discard", raylib::ConstructVector2(0, 40), buttonSize, RelativeDrawing::Center, RelativeDrawing::Center, 24);
 
 		if (save || discard) {
 			started = false;

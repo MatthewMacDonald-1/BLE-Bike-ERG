@@ -48,6 +48,7 @@ private:
 	int previousFrameIntTime = -1;
 
 	std::vector<long long> timeRecord; // in system time (time since epoch)
+
 	std::vector<int> powerRecord;
 	std::vector<int> heartRateRecord;
 	std::vector<int> cadenceRecord;
