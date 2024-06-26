@@ -171,6 +171,24 @@ int WorkoutScene::DrawCall()
 		targetPower
 	);
 
+	bool setPower50 = RelativeDrawing::GuiButtonRelative("Set 50w", raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomLeft, RelativeDrawing::BottomLeft, 24);
+	bool setPower100 = RelativeDrawing::GuiButtonRelative("Set 100w", raylib::ConstructVector2(128 * 1, 0), buttonSize, RelativeDrawing::BottomLeft, RelativeDrawing::BottomLeft, 24);
+	bool setPower150 = RelativeDrawing::GuiButtonRelative("Set 150w", raylib::ConstructVector2(128 * 2, 0), buttonSize, RelativeDrawing::BottomLeft, RelativeDrawing::BottomLeft, 24);
+
+	if (setPower50) {
+		TraceLog(LOG_INFO, "POWER: Attempt set power 50");
+		//TraceLog(LOG_INFO, "POWER: Succesfully set power 50");
+	}
+	if (setPower100) {
+		TraceLog(LOG_INFO, "POWER: Attempt set power 100");
+		//TraceLog(LOG_INFO, "POWER: Succesfully set power 100");
+	}
+	if (setPower150) {
+		TraceLog(LOG_INFO, "POWER: Attempt set power 150");
+		//TraceLog(LOG_INFO, "POWER: Succesfully set power 150");
+	}
+
+
 	bool pauseRes = RelativeDrawing::GuiButtonRelative((!paused ? "Pause" : "Play"), raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
 	if (pauseRes) {
 		paused = !paused;
