@@ -6,6 +6,8 @@ set(CMAKE_C_STANDARD 11) # Requires C11 standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(CMAKE_CXX_FLAGS  "-D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING")
+
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/lib/SimpleBLE/simpleble ${CMAKE_BINARY_DIR}/simpleble)
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/lib/raylib ${CMAKE_BINARY_DIR}/raylib)
