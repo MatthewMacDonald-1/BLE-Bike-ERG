@@ -204,6 +204,104 @@ int BluetoothController::SubscribeToCadence(int* cadenceReference)
 	return SubscribeToGenericNotify(CYCLING_SPEED_CADENCE, CadenceCallback);
 }
 
+void BluetoothController::SetTrainerTargetPower(int targetPower, bool* complete, int* response)
+{
+	ServiceType type = FITNESS_MACHINE;
+	SimpleBLE::BluetoothAddress targetDeviceAddress = serviceDeviceMap[type];
+
+	//std::cout << "Heart Rate Device Address: " << targetDeviceAddress << " (" << targetDeviceAddress.length() << ")" << std::endl;
+	if (targetDeviceAddress.length() == 0) {
+		*complete = true;
+		*response = EXIT_FAILURE;
+		return;
+	}
+
+	// Step 1: Find device
+	SimpleBLE::Peripheral device;
+	bool foundDevice = false;
+
+	connectedDevicesMtx.lock();
+	for (int i = 0; i < connectedDevices.size(); i++) {
+		if (connectedDevices.at(i).address() == targetDeviceAddress) {
+			device = connectedDevices.at(i);
+			foundDevice = true;
+			break;
+		}
+	}
+	connectedDevicesMtx.unlock();
+
+	if (!foundDevice) {
+		*complete = true;
+		*response = EXIT_FAILURE;
+		return;
+	}
+
+	// Step 2 Find Service
+	std::vector<SimpleBLE::Service> deviceServices = device.services();
+
+	SimpleBLE::Service service;
+	bool foundService = false;
+
+	for (int i = 0; i < deviceServices.size(); i++) {
+		if (deviceServices.at(i).uuid() == GetServiceUuid(type)) {
+			service = deviceServices.at(i);
+			foundService = true;
+			break;
+		}
+	}
+
+	if (!foundService) {
+		*complete = true;
+		*response = EXIT_FAILURE;
+		return;
+	}
+
+	// Step 3: Find characteristic
+	std::vector<SimpleBLE::Characteristic> serviceCharacteristics = service.characteristics();
+
+	SimpleBLE::Characteristic characteristic;
+	bool foundCharacteristic = false;
+
+	std::string characteristicUUID = "";
+	switch (type)
+	{
+	case BluetoothController::UNKNOWN:
+		break;
+	case BluetoothController::HEART_RATE:
+		characteristicUUID = heartRateMeasurementCharacteristic;
+		break;
+	case BluetoothController::CYCLING_POWER:
+		characteristicUUID = cyclingPowerMeasurementCharacteristic;
+		break;
+	case BluetoothController::CYCLING_SPEED_CADENCE:
+		characteristicUUID = cyclingCadenceMeasurementCharacteristic;
+		break;
+	case BluetoothController::FITNESS_MACHINE:
+		break;
+	default:
+		break;
+	}
+
+	for (int i = 0; i < serviceCharacteristics.size(); i++) {
+		/*if (serviceCharacteristics.at(i).uuid() == characteristicUUID) {
+			characteristic = serviceCharacteristics.at(i);
+			foundCharacteristic = true;
+		}*/
+
+		// Print out characteristics
+	}
+
+	if (!foundCharacteristic) {
+		*complete = true;
+		*response = EXIT_FAILURE;
+		return;
+	}
+
+	*complete = true;
+	*response = EXIT_SUCCESS;
+	return;
+}
+
 BluetoothController::ServiceType BluetoothController::GetServiceType(SimpleBLE::BluetoothUUID uuid)
 {
 	if (uuid == "0000180d-0000-1000-8000-00805f9b34fb") {

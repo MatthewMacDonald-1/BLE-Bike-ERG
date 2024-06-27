@@ -78,6 +78,14 @@ public:
 
 	static int SubscribeToCadence(int* cadenceReference);
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="targetPower"></param>
+	/// <param name="complete">Process is completed</param>
+	/// <param name="response">If the desired target was successfully communicated.</param>
+	static void SetTrainerTargetPower(int targetPower, bool* complete, int* response);
+
 	static ServiceType GetServiceType(SimpleBLE::BluetoothUUID uuid);
 
 	static std::string GetServiceUuid(ServiceType type);
