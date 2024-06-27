@@ -190,6 +190,17 @@ int WorkoutScene::DrawCall()
 
 	if (setPower50) {
 		TraceLog(LOG_INFO, "POWER: Attempt set power 50");
+
+		bool complete = false;
+		int response = -1;
+		BluetoothController::SetTrainerTargetPower(50, &complete, &response);
+
+		if (response == EXIT_SUCCESS) {
+			TraceLog(LOG_INFO, "POWER: Succesfully set power 50.");
+		}
+		else {
+			TraceLog(LOG_INFO, "POWER: Unable to set power to 50.");
+		}
 		//TraceLog(LOG_INFO, "POWER: Succesfully set power 50");
 	}
 	if (setPower100) {

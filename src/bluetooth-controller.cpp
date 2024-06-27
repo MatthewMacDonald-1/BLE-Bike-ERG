@@ -19,6 +19,14 @@ std::string BluetoothController::heartRateMeasurementCharacteristic = "00002a37-
 std::string BluetoothController::cyclingPowerMeasurementCharacteristic = "00002a63-0000-1000-8000-00805f9b34fb";
 std::string BluetoothController::cyclingCadenceMeasurementCharacteristic = "00002a5b-0000-1000-8000-00805f9b34fb";
 
+std::string BluetoothController::fitnessMachine_FMF = "00002acc-0000-1000-8000-00805f9b34fb";
+std::string BluetoothController::fitnessMachine_IBD = "00002ad2-0000-1000-8000-00805f9b34fb";
+std::string BluetoothController::fitnessMachine_TS = "00002ad3-0000-1000-8000-00805f9b34fb";
+std::string BluetoothController::fitnessMachine_SRLR = "00002ad6-0000-1000-8000-00805f9b34fb";
+std::string BluetoothController::fitnessMachine_SPR = "00002ad8-0000-1000-8000-00805f9b34fb";
+std::string BluetoothController::fitnessMachine_FMCP = "00002ad9-0000-1000-8000-00805f9b34fb";
+std::string BluetoothController::fitnessMachine_FMS = "00002ada-0000-1000-8000-00805f9b34fb";
+
 /// Devices found in scan.
 std::vector<SimpleBLE::Peripheral> BluetoothController::foundDevices;
 
@@ -204,8 +212,16 @@ int BluetoothController::SubscribeToCadence(int* cadenceReference)
 	return SubscribeToGenericNotify(CYCLING_SPEED_CADENCE, CadenceCallback);
 }
 
+void BluetoothController::RequestTrainerControl(bool* complete, int* response)
+{
+}
+
 void BluetoothController::SetTrainerTargetPower(int targetPower, bool* complete, int* response)
 {
+	// This function assumes that the Power Target Setting is supported (bit 3 of Fitness Machine Feature Target Settings Features Field)
+
+	// This functuion uses the FMCP characteristic
+
 	ServiceType type = FITNESS_MACHINE;
 	SimpleBLE::BluetoothAddress targetDeviceAddress = serviceDeviceMap[type];
 
@@ -262,40 +278,37 @@ void BluetoothController::SetTrainerTargetPower(int targetPower, bool* complete,
 	SimpleBLE::Characteristic characteristic;
 	bool foundCharacteristic = false;
 
-	std::string characteristicUUID = "";
-	switch (type)
-	{
-	case BluetoothController::UNKNOWN:
-		break;
-	case BluetoothController::HEART_RATE:
-		characteristicUUID = heartRateMeasurementCharacteristic;
-		break;
-	case BluetoothController::CYCLING_POWER:
-		characteristicUUID = cyclingPowerMeasurementCharacteristic;
-		break;
-	case BluetoothController::CYCLING_SPEED_CADENCE:
-		characteristicUUID = cyclingCadenceMeasurementCharacteristic;
-		break;
-	case BluetoothController::FITNESS_MACHINE:
-		break;
-	default:
-		break;
-	}
+	std::string characteristicUUID = fitnessMachine_FMCP; // Fitness Machine Control Point
+
+	std::cout << "Characteristics: ";
 
 	for (int i = 0; i < serviceCharacteristics.size(); i++) {
-		/*if (serviceCharacteristics.at(i).uuid() == characteristicUUID) {
+		if (serviceCharacteristics.at(i).uuid() == characteristicUUID) {
 			characteristic = serviceCharacteristics.at(i);
 			foundCharacteristic = true;
-		}*/
+		}
 
 		// Print out characteristics
+		std::cout << serviceCharacteristics.at(i).uuid();
+		if (i + 1 < serviceCharacteristics.size()) {
+			std::cout << ", ";
+		}
 	}
+
+	std::cout << std::endl;
 
 	if (!foundCharacteristic) {
 		*complete = true;
 		*response = EXIT_FAILURE;
 		return;
 	}
+	else {
+		std::cout << "Fitness Machine Control Point Present." << std::endl;
+	}
+
+	// Assuming that the control has been requested set the target power using Op Code: 0x05
+
+	// Write opcodes and check return values
 
 	*complete = true;
 	*response = EXIT_SUCCESS;

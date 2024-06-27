@@ -79,6 +79,13 @@ public:
 	static int SubscribeToCadence(int* cadenceReference);
 
 	/// <summary>
+	/// Request control over the trainer using the FMCP.
+	/// </summary>
+	/// <param name="complete"></param>
+	/// <param name="response"></param>
+	static void RequestTrainerControl(bool* complete, int* response);
+
+	/// <summary>
 	/// 
 	/// </summary>
 	/// <param name="targetPower"></param>
@@ -105,6 +112,14 @@ private:
 	static std::string heartRateMeasurementCharacteristic;
 	static std::string cyclingPowerMeasurementCharacteristic;
 	static std::string cyclingCadenceMeasurementCharacteristic;
+
+	static std::string fitnessMachine_FMF; // Fitness Machine Feature
+	static std::string fitnessMachine_IBD; // Indoor Bike Data
+	static std::string fitnessMachine_TS; // Training Status
+	static std::string fitnessMachine_SRLR; // Supported Resistance Level Range
+	static std::string fitnessMachine_SPR; // Supported Power Range
+	static std::string fitnessMachine_FMCP; // Fitness Machine Control Point
+	static std::string fitnessMachine_FMS; // Fitness Machine Status
 
 
 	/// Devices found in scan.
