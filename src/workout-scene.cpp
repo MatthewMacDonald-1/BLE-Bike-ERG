@@ -167,8 +167,6 @@ int WorkoutScene::DrawCall()
 		previousFrameIntTime = (int)workoutTime;
 	}
 
-
-
 	DrawWorkoutGraph(
 		raylib::ConstructRectangle(0, 0 + dataDisplayHeight, GetScreenWidth(), graphAreaHeight),
 		fontType,
@@ -254,7 +252,7 @@ int WorkoutScene::DrawCall()
 	}
 
 	bool finishRes = RelativeDrawing::GuiButtonRelative("Finish", raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
-	if (finishRes) {
+	if (finishRes || (int)workoutTime > workout->GetWorkoutLength()) {
 		/*started = false;
 		SceneManager::LoadScene("WorkoutSelectionMenu");*/
 		finished = true;
