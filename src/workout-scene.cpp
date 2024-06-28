@@ -253,8 +253,11 @@ int WorkoutScene::DrawCall()
 
 	bool finishRes = RelativeDrawing::GuiButtonRelative("Finish", raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomRight, RelativeDrawing::BottomRight, 24);
 	if (finishRes || (int)workoutTime > workout->GetWorkoutLength()) {
-		/*started = false;
-		SceneManager::LoadScene("WorkoutSelectionMenu");*/
+		// Also set the power target to something easier since workout is over
+		bool complete = false;
+		int response = -1;
+		BluetoothController::SetTrainerTargetPower(75, &complete, &response);
+
 		finished = true;
 		finshedSaveDiscard = false;
 	}
