@@ -20,6 +20,8 @@
 #include "bluetooth-controller.hpp"
 #include "user-data.hpp"
 
+#include "fit-file/encode.hpp"
+
 WorkoutScene::WorkoutScene(WorkoutDefinition* workoutSrc)
 {
 	workout = workoutSrc;
@@ -134,7 +136,7 @@ int WorkoutScene::DrawCall()
 
 	if ((int)workoutTime != previousFrameIntTime) {
 		// Record values
-		timeRecord.push_back(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+		timeRecord.push_back(std::time(nullptr));
 
 		int averagePower = (int)MattsUtils::Number::average(previousPowerValues);		
 		powerRecord.push_back(averagePower);
@@ -839,8 +841,14 @@ int WorkoutScene::DrawWorkoutOverScreen(Font fontType, Vector2 buttonSize, Color
 
 			long long randNum = timeRecord.at(0) + std::rand() % 1000000;
 			std::string fileName = TextFormat("saves/%s-%lld.csv", workout->GetName().c_str(), randNum);
+			std::string fileNameFit = TextFormat("saves/%s-%lld.fit", workout->GetName().c_str(), randNum);
 
 			TraceLog(LOG_INFO, "Workout Save: filename=%s", fileName.c_str());
+
+			int res = FIT_FILE_ENCODER::EncodeWorkout(fileNameFit, timeRecord, powerRecord, cadenceRecord, heartRateRecord);
+			if (res == EXIT_SUCCESS) {
+				TraceLog(LOG_INFO, "Saved to fit file");
+			}
 
 			std::ofstream outputFile(fileName.c_str());
 
