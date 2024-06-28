@@ -101,51 +101,46 @@ int WorkoutScene::DrawCall()
 	int ftp = workout->GetTargetType() == WorkoutDefinition::RAW_POWER ? 100 : actualFTP;
 	int targetPower = (int)std::round(((double)workout->EvaluateWorkoutAt((int)workoutTime) / 100.0) * (double)ftp);
 
+	averageIntervalCounter += GetFrameTime();
+	if (averageIntervalCounter >= 0.1) {
+		averageIntervalCounter = 0;
+
+		// Do averaging
+		// Power
+		if (previousPowerValues.size() < powerAveragePeriod * 10) {
+			previousPowerValues.push_back(currentPower);
+		}
+		else {
+			previousPowerValues.at(currentPowerValueIdx) = currentPower;
+		}
+		currentPowerValueIdx++;
+		if (currentPowerValueIdx >= powerAveragePeriod * 10) {
+			currentPowerValueIdx = 0;
+		}
+
+		// Cadence
+		if (previousCadenceValues.size() < cadenceAveragePeriod * 10) {
+			previousCadenceValues.push_back(currentCadence);
+		}
+		else {
+			previousCadenceValues.at(currentCadenceValueIdx) = currentCadence;
+		}
+		currentCadenceValueIdx++;
+		if (currentCadenceValueIdx >= cadenceAveragePeriod * 10) {
+			currentCadenceValueIdx = 0;
+		}
+
+	}
+
 	if ((int)workoutTime != previousFrameIntTime) {
 		// Record values
 		timeRecord.push_back(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 
-
-		if (previousPowerValues.size() < powerAveragePeriod) {
-			previousPowerValues.push_back(currentPower);
-		}
-		else {
-			//previousPowerValues.insert(previousPowerValues.begin() + currentPowerValueIdx, currentPower);
-			previousPowerValues.at(currentPowerValueIdx) = currentPower;
-		}
-		currentPowerValueIdx++;
-		if (currentPowerValueIdx >= powerAveragePeriod) {
-			currentPowerValueIdx = 0;
-		}
-		int averagePower = (int)MattsUtils::Number::average(previousPowerValues);
-
-		// Print debug of power average array
-		std::stringstream debug;
-		debug << "[ ";
-		for (int i = 0; i < previousPowerValues.size(); i++) {
-			debug << std::to_string(previousPowerValues.at(i));
-			if (i + 1 < previousPowerValues.size()) {
-				debug << ", ";
-			}
-		}
-		debug << " ]";
-		std::cout << debug.str() << std::endl;
-		
+		int averagePower = (int)MattsUtils::Number::average(previousPowerValues);		
 		powerRecord.push_back(averagePower);
+
 		heartRateRecord.push_back(currentHeartRate);
 
-
-		if (previousCadenceValues.size() < cadenceAveragePeriod) {
-			previousCadenceValues.push_back(currentCadence);
-		}
-		else {
-			//previousCadenceValues.insert(previousCadenceValues.begin() + currentCadenceValueIdx, currentCadence);
-			previousCadenceValues.at(currentCadenceValueIdx) = currentCadence;
-		}		
-		currentCadenceValueIdx++;
-		if (currentCadenceValueIdx >= cadenceAveragePeriod) {
-			currentCadenceValueIdx = 0;
-		}
 		int averageCadence = (int)MattsUtils::Number::average(previousCadenceValues);
 		cadenceRecord.push_back(averageCadence);
 

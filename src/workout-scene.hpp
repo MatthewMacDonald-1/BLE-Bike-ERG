@@ -33,6 +33,8 @@ private:
 
 	float workoutTime = 0;
 
+	float averageIntervalCounter = 0; // Seconds
+
 	int currentPower = -1;
 	int powerAveragePeriod = 3;
 	int currentPowerValueIdx = 0;
