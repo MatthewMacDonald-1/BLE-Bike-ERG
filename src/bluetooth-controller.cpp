@@ -6,6 +6,8 @@
 #include "raylib.h"
 #include "bluetooth-utils.hpp"
 
+#include "intrin.h" // Swamping byte order
+
 bool BluetoothController::initialized = false;
 SimpleBLE::Adapter BluetoothController::activeAdapter;
 
@@ -214,6 +216,107 @@ int BluetoothController::SubscribeToCadence(int* cadenceReference)
 
 void BluetoothController::RequestTrainerControl(bool* complete, int* response)
 {
+	// This function assumes that the Power Target Setting is supported (bit 3 of Fitness Machine Feature Target Settings Features Field)
+
+	// This functuion uses the FMCP characteristic
+
+	ServiceType type = FITNESS_MACHINE;
+	SimpleBLE::BluetoothAddress targetDeviceAddress = serviceDeviceMap[type];
+
+	//std::cout << "Heart Rate Device Address: " << targetDeviceAddress << " (" << targetDeviceAddress.length() << ")" << std::endl;
+	if (targetDeviceAddress.length() == 0) {
+		*complete = true;
+		*response = EXIT_FAILURE;
+		return;
+	}
+
+	// Step 1: Find device
+	SimpleBLE::Peripheral device;
+	bool foundDevice = false;
+
+	connectedDevicesMtx.lock();
+	for (int i = 0; i < connectedDevices.size(); i++) {
+		if (connectedDevices.at(i).address() == targetDeviceAddress) {
+			device = connectedDevices.at(i);
+			foundDevice = true;
+			break;
+		}
+	}
+	connectedDevicesMtx.unlock();
+
+	if (!foundDevice) {
+		*complete = true;
+		*response = EXIT_FAILURE;
+		return;
+	}
+
+	// Step 2 Find Service
+	std::vector<SimpleBLE::Service> deviceServices = device.services();
+
+	SimpleBLE::Service service;
+	bool foundService = false;
+
+	for (int i = 0; i < deviceServices.size(); i++) {
+		if (deviceServices.at(i).uuid() == GetServiceUuid(type)) {
+			service = deviceServices.at(i);
+			foundService = true;
+			break;
+		}
+	}
+
+	if (!foundService) {
+		*complete = true;
+		*response = EXIT_FAILURE;
+		return;
+	}
+
+	// Step 3: Find characteristic
+	std::vector<SimpleBLE::Characteristic> serviceCharacteristics = service.characteristics();
+
+	SimpleBLE::Characteristic characteristic;
+	bool foundCharacteristic = false;
+
+	std::string characteristicUUID = fitnessMachine_FMCP; // Fitness Machine Control Point
+
+	//std::cout << "Characteristics: ";
+
+	for (int i = 0; i < serviceCharacteristics.size(); i++) {
+		if (serviceCharacteristics.at(i).uuid() == characteristicUUID) {
+			characteristic = serviceCharacteristics.at(i);
+			foundCharacteristic = true;
+		}
+
+		//// Print out characteristics
+		//std::cout << serviceCharacteristics.at(i).uuid();
+		//if (i + 1 < serviceCharacteristics.size()) {
+		//	std::cout << ", ";
+		//}
+	}
+
+	std::cout << std::endl;
+
+	if (!foundCharacteristic) {
+		*complete = true;
+		*response = EXIT_FAILURE;
+		return;
+	}
+	else {
+		//std::cout << "Fitness Machine Control Point Present." << std::endl;
+	}
+
+	// Assuming that the control has been requested set the target power using Op Code: 0x05
+	char dataSend[1];
+	char opCode = Convert8BitValueToLittleEndian(0x00);
+
+	dataSend[0] = opCode;
+	device.write_request(service.uuid(), characteristic.uuid(), std::string(dataSend));
+
+	// Write opcodes and check return values
+	// Not sure how to check return value
+
+	*complete = true;
+	*response = EXIT_SUCCESS;
+	return;
 }
 
 void BluetoothController::SetTrainerTargetPower(int targetPower, bool* complete, int* response)
@@ -280,7 +383,7 @@ void BluetoothController::SetTrainerTargetPower(int targetPower, bool* complete,
 
 	std::string characteristicUUID = fitnessMachine_FMCP; // Fitness Machine Control Point
 
-	std::cout << "Characteristics: ";
+	//std::cout << "Characteristics: ";
 
 	for (int i = 0; i < serviceCharacteristics.size(); i++) {
 		if (serviceCharacteristics.at(i).uuid() == characteristicUUID) {
@@ -289,13 +392,13 @@ void BluetoothController::SetTrainerTargetPower(int targetPower, bool* complete,
 		}
 
 		// Print out characteristics
-		std::cout << serviceCharacteristics.at(i).uuid();
+		/*std::cout << serviceCharacteristics.at(i).uuid();
 		if (i + 1 < serviceCharacteristics.size()) {
 			std::cout << ", ";
-		}
+		}*/
 	}
 
-	std::cout << std::endl;
+	//std::cout << std::endl;
 
 	if (!foundCharacteristic) {
 		*complete = true;
@@ -303,12 +406,25 @@ void BluetoothController::SetTrainerTargetPower(int targetPower, bool* complete,
 		return;
 	}
 	else {
-		std::cout << "Fitness Machine Control Point Present." << std::endl;
+		//std::cout << "Fitness Machine Control Point Present." << std::endl;
 	}
 
 	// Assuming that the control has been requested set the target power using Op Code: 0x05
+	char dataSend[3];
+	char opCode = Convert8BitValueToLittleEndian(0x05);
+	uint16_t paramaterValue = Convert16BitValueToLittleEndian((uint16_t)targetPower);
+	_2Bytes_t paramaterValue2B;
+	paramaterValue2B._2byte = paramaterValue;
+
+	dataSend[0] = opCode;
+	dataSend[1] = paramaterValue2B.byte1;
+	dataSend[2] = paramaterValue2B.byte2;
+
+	// Convert Values to litte edian
+	device.write_request(service.uuid(), characteristic.uuid(), std::string(dataSend));
 
 	// Write opcodes and check return values
+	// Not sure how to check return value
 
 	*complete = true;
 	*response = EXIT_SUCCESS;
@@ -473,22 +589,6 @@ int BluetoothController::SubscribeToGenericNotify(ServiceType type, std::functio
 	return EXIT_SUCCESS;
 }
 
-typedef union BitsOfByte_t {
-	uint8_t byte;
-	struct {
-		uint8_t _0 : 1, _1 : 1, _2 : 1, _3 : 1, _4 : 1, _5 : 1, _6 : 1, _7 : 1; // Little endian
-	};
-
-} BitsOfByte_t;
-
-typedef union _2Bytes_t {
-	uint16_t _2byte;
-	struct {
-		uint8_t byte1, byte2;
-	};
-
-} _2Bytes_t;
-
 int BluetoothController::Get8BitValue(char byte) 
 {
 	BitsOfByte_t byteOne;
@@ -537,6 +637,59 @@ int BluetoothController::Get16BitValue(char byte_1, char byte_2)
 	value += 32768 * byteTwo._7;
 
 	return value;
+}
+
+bool BluetoothController::IsBigEndian()
+{
+	union {
+		uint32_t i;
+		char c[4];
+	} bint = { 0x01020304 };
+
+	return bint.c[0] == 1;
+}
+
+int8_t BluetoothController::Convert8BitValueToLittleEndian(int8_t value)
+{
+	bool notLittleEndian = IsBigEndian();
+
+	if (notLittleEndian) {
+		int8_t swappedValue = 0;
+
+		BitsOfByte_t byteOrg, byteSwapped;
+		byteOrg.byte = value;
+
+		byteSwapped._0 = byteOrg._7;
+		byteSwapped._1 = byteOrg._6;
+		byteSwapped._2 = byteOrg._5;
+		byteSwapped._3 = byteOrg._4;
+		byteSwapped._4 = byteOrg._3;
+		byteSwapped._5 = byteOrg._2;
+		byteSwapped._6 = byteOrg._1;
+		byteSwapped._7 = byteOrg._0;
+
+		swappedValue = byteSwapped.byte;
+		return swappedValue;
+	}
+	else {
+		return value;
+	}
+}
+
+int16_t BluetoothController::Convert16BitValueToLittleEndian(int16_t value)
+{
+	bool notLittleEndian = IsBigEndian();
+
+	if (notLittleEndian) {
+		int16_t swappedValue = 0;
+
+		swappedValue = _byteswap_ushort(value);
+
+		return swappedValue;
+	}
+	else {
+		return value;
+	}
 }
 
 void BluetoothController::HeartRateCallback(SimpleBLE::ByteArray bytes)

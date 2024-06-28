@@ -99,6 +99,7 @@ int WorkoutScene::DrawCall()
 
 	int actualFTP = UserSettings::GetFTP();
 	int ftp = workout->GetTargetType() == WorkoutDefinition::RAW_POWER ? 100 : actualFTP;
+	int targetPower = (int)std::round(((double)workout->EvaluateWorkoutAt((int)workoutTime) / 100.0) * (double)ftp);
 
 	if ((int)workoutTime != previousFrameIntTime) {
 		// Record values
@@ -148,10 +149,25 @@ int WorkoutScene::DrawCall()
 		int averageCadence = (int)MattsUtils::Number::average(previousCadenceValues);
 		cadenceRecord.push_back(averageCadence);
 
+		if (started && !paused) {
+			TraceLog(LOG_INFO, "POWER: Attempt to set target power %d.", targetPower);
+
+			bool complete = false;
+			int response = -1;
+			BluetoothController::SetTrainerTargetPower(targetPower, &complete, &response);
+
+			if (response == EXIT_SUCCESS) {
+				TraceLog(LOG_INFO, "POWER: Succesfully set target power %d.", targetPower);
+			}
+			else {
+				TraceLog(LOG_INFO, "POWER: Unable to set target power %d.", targetPower);
+			}
+		}
+
 		previousFrameIntTime = (int)workoutTime;
 	}
 
-	int targetPower = (int)std::round(((double)workout->EvaluateWorkoutAt((int)workoutTime) / 100.0) * (double)ftp);
+
 
 	DrawWorkoutGraph(
 		raylib::ConstructRectangle(0, 0 + dataDisplayHeight, GetScreenWidth(), graphAreaHeight),
@@ -184,33 +200,52 @@ int WorkoutScene::DrawCall()
 		targetPower
 	);
 
-	bool setPower50 = RelativeDrawing::GuiButtonRelative("Set 50w", raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomLeft, RelativeDrawing::BottomLeft, 24);
+	bool setPower50 = RelativeDrawing::GuiButtonRelative("Set 200w", raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomLeft, RelativeDrawing::BottomLeft, 24);
 	bool setPower100 = RelativeDrawing::GuiButtonRelative("Set 100w", raylib::ConstructVector2(128 * 1, 0), buttonSize, RelativeDrawing::BottomLeft, RelativeDrawing::BottomLeft, 24);
-	bool setPower150 = RelativeDrawing::GuiButtonRelative("Set 150w", raylib::ConstructVector2(128 * 2, 0), buttonSize, RelativeDrawing::BottomLeft, RelativeDrawing::BottomLeft, 24);
+	//bool setPower150 = RelativeDrawing::GuiButtonRelative("Request Control", raylib::ConstructVector2(128 * 2, 0), buttonSize, RelativeDrawing::BottomLeft, RelativeDrawing::BottomLeft, 24);
 
 	if (setPower50) {
-		TraceLog(LOG_INFO, "POWER: Attempt set power 50");
+		TraceLog(LOG_INFO, "POWER: Attempt set power 200.");
 
 		bool complete = false;
 		int response = -1;
-		BluetoothController::SetTrainerTargetPower(50, &complete, &response);
+		BluetoothController::SetTrainerTargetPower(200, &complete, &response);
 
 		if (response == EXIT_SUCCESS) {
-			TraceLog(LOG_INFO, "POWER: Succesfully set power 50.");
+			TraceLog(LOG_INFO, "POWER: Succesfully set power 200.");
 		}
 		else {
-			TraceLog(LOG_INFO, "POWER: Unable to set power to 50.");
+			TraceLog(LOG_INFO, "POWER: Unable to set power to 200.");
 		}
-		//TraceLog(LOG_INFO, "POWER: Succesfully set power 50");
 	}
 	if (setPower100) {
-		TraceLog(LOG_INFO, "POWER: Attempt set power 100");
-		//TraceLog(LOG_INFO, "POWER: Succesfully set power 100");
+		TraceLog(LOG_INFO, "POWER: Attempt set power 100.");
+		bool complete = false;
+		int response = -1;
+		BluetoothController::SetTrainerTargetPower(100, &complete, &response);
+
+		if (response == EXIT_SUCCESS) {
+			TraceLog(LOG_INFO, "POWER: Succesfully set power 100.");
+		}
+		else {
+			TraceLog(LOG_INFO, "POWER: Unable to set power to 100.");
+		}
 	}
-	if (setPower150) {
-		TraceLog(LOG_INFO, "POWER: Attempt set power 150");
-		//TraceLog(LOG_INFO, "POWER: Succesfully set power 150");
-	}
+	/*if (setPower150) {
+		TraceLog(LOG_INFO, "POWER: Requesting Control.");
+
+		bool complete = false;
+		int response = -1;
+		BluetoothController::RequestTrainerControl(&complete, &response);
+
+		if (response == EXIT_SUCCESS) {
+			TraceLog(LOG_INFO, "POWER: Control recieved.");
+		}
+		else {
+			TraceLog(LOG_INFO, "POWER: Control denied.");
+		}
+		
+	}*/
 
 
 	bool pauseRes = RelativeDrawing::GuiButtonRelative((!paused ? "Pause" : "Play"), raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
@@ -287,6 +322,20 @@ int WorkoutScene::DrawCall()
 			currentPower = -1;
 			currentHeartRate = -1;
 			currentCadence = -1;
+
+			// Request Trainer Control
+			TraceLog(LOG_INFO, "POWER: Requesting Control.");
+
+			bool complete = false;
+			int response = -1;
+			BluetoothController::RequestTrainerControl(&complete, &response);
+
+			if (response == EXIT_SUCCESS) {
+				TraceLog(LOG_INFO, "POWER: Control recieved.");
+			}
+			else {
+				TraceLog(LOG_INFO, "POWER: Control denied.");
+			}
 
 			BluetoothController::SubscribeToCyclingPower(&currentPower);
 			BluetoothController::SubscribeToHeartRate(&currentHeartRate);

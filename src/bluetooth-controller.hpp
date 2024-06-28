@@ -133,10 +133,30 @@ private:
 	static int lastCrankRevolutions;
 	static int lastCrankEventTime;
 
+	typedef union BitsOfByte_t {
+		uint8_t byte;
+		struct {
+			uint8_t _0 : 1, _1 : 1, _2 : 1, _3 : 1, _4 : 1, _5 : 1, _6 : 1, _7 : 1; // Little endian
+		};
+
+	} BitsOfByte_t;
+
+	typedef union _2Bytes_t {
+		uint16_t _2byte;
+		struct {
+			uint8_t byte1, byte2;
+		};
+
+	} _2Bytes_t;
+
 	static int SubscribeToGenericNotify(ServiceType type, std::function<void(SimpleBLE::ByteArray payload)> callback);
 
 	static int Get8BitValue(char byte);
 	static int Get16BitValue(char byte_1, char byte_2);
+
+	static bool IsBigEndian();
+	static int8_t Convert8BitValueToLittleEndian(int8_t value);
+	static int16_t Convert16BitValueToLittleEndian(int16_t value);
 
 	static void HeartRateCallback(SimpleBLE::ByteArray bytes);
 	static void CyclingPowerCallback(SimpleBLE::ByteArray bytes);
