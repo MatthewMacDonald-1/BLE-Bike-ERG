@@ -27,7 +27,7 @@ int FIT_FILE_ENCODER::EncodeWorkout(std::string filename, std::vector<std::time_
 
 		if (!file.is_open())
 		{
-			printf("Error opening file ExampleActivity.fit\n");
+			printf("Error opening file %s\n", filename.c_str());
 			return EXIT_FAILURE;
 		}
 
@@ -191,7 +191,7 @@ int FIT_FILE_ENCODER::EncodeWorkout(std::string filename, std::vector<std::time_
 		// Close the file
 		file.close();
 
-		printf("Encoded FIT file ExampleActivity.fit.\n");
+		printf("Encoded FIT file %s.\n", filename.c_str());
 
 		return EXIT_SUCCESS;
 	}

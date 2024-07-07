@@ -239,7 +239,7 @@ void WorkoutDefinition::ReadWorkout(std::vector<std::string> fromFile)
 
 			for (int j = 0; j < rawHeaders.size(); j++) {
 				std::string headerValue = MattsUtils::String::trim(rawHeaders.at(j));
-				std::cout << "Header Value: " << headerValue << std::endl;
+				//std::cout << "Header Value: " << headerValue << std::endl;
 				std::pair<std::set<std::string>::iterator, bool> res = headers.insert(headerValue);
 				if (!res.second) {
 					isValid = false;

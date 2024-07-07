@@ -297,6 +297,10 @@ void MainMenuScene::DrawDeviceConnectionBox(Vector2 position, Vector2 dimensions
 		Vector2 buttonPosition = raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight);
 		std::vector<SimpleBLE::Service> services;
 
+		if (discoveredDevices.at(i).identifier() == "" || discoveredDevices.at(i).identifier().length() == 0) {
+			continue;
+		}
+
 		try {
 			services = discoveredDevices.at(i).services();
 		}
