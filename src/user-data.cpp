@@ -6,7 +6,7 @@ int UserSettings::cadenceAveragePeriod = 3; // Default
 
 void UserSettings::LoadUserSettings()
 {
-	ftp = 243;
+	ftp = 200;
 	powerAveragePeriod = 3;
 	cadenceAveragePeriod = 3;
 }
