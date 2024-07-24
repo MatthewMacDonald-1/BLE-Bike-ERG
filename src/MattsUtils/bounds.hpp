@@ -14,6 +14,8 @@ namespace MattsUtils {
 		Bounds();
 		Bounds(float minX, float maxX, float minY, float maxY);
 
+		bool InBounds(int x, int y);
+
 		std::string ToString();
 
 

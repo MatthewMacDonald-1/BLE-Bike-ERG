@@ -3,6 +3,8 @@
 #include "raylib.h"
 #include <string>
 
+#define VIDEO_SETTINGS_VERSION 1;
+
 class VideoSettings {
 public:
 	enum MSAA_Level {

@@ -1,5 +1,6 @@
 #pragma once
 #include "raylib.h"
+#include "MattsUtils/bounds.hpp"
 #define CLOSE_MENU
 
 
@@ -20,5 +21,10 @@ private:
 
 	static int activeMSAALevel;
 	static bool editingActiveMSAALevel;
+
+	static bool ftpHover;
+	static MattsUtils::Bounds ftpInputBounds;
+	static char ftpInputBuffer[10];
+	static int ftpInputLetterCount;
 };
 

@@ -7,8 +7,6 @@
 #include "MattsUtils/string-func.hpp"
 #include "MattsUtils/number.hpp"
 
-#define VIDEO_SETTINGS_VERSION 1;
-
 VideoSettings::MSAA_Level VideoSettings::currentMSAALevel = VideoSettings::_x1;
 VideoSettings::MSAA_Level VideoSettings::actualMSAALevel;
 VideoSettings::FPS_Limit VideoSettings::currentFPSLimit = VideoSettings::VSYNC;

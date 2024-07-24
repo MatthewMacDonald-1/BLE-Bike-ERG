@@ -36,7 +36,10 @@ int main(void) {
         VideoSettings::WriteVideoSettingsConfigFile();
     }
 
-    UserSettings::LoadUserSettings();
+    res = UserSettings::ReadSettingsConfigFile();
+    if (res == EXIT_FAILURE) {
+        UserSettings::WriteSettingsConfigFile();
+    }
 
 
     // Raylib Initialization ----------------------------------------------------------------------
