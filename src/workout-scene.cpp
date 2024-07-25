@@ -195,11 +195,11 @@ int WorkoutScene::DrawCall()
 		targetPower
 	);
 
-	bool setPower50 = RelativeDrawing::GuiButtonRelative("Set 200w", raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomLeft, RelativeDrawing::BottomLeft, 24);
-	bool setPower100 = RelativeDrawing::GuiButtonRelative("Set 100w", raylib::ConstructVector2(128 * 1, 0), buttonSize, RelativeDrawing::BottomLeft, RelativeDrawing::BottomLeft, 24);
+	//bool setPower50 = RelativeDrawing::GuiButtonRelative("Set 200w", raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomLeft, RelativeDrawing::BottomLeft, 24);
+	//bool setPower100 = RelativeDrawing::GuiButtonRelative("Set 100w", raylib::ConstructVector2(128 * 1, 0), buttonSize, RelativeDrawing::BottomLeft, RelativeDrawing::BottomLeft, 24);
 	//bool setPower150 = RelativeDrawing::GuiButtonRelative("Request Control", raylib::ConstructVector2(128 * 2, 0), buttonSize, RelativeDrawing::BottomLeft, RelativeDrawing::BottomLeft, 24);
 
-	if (setPower50) {
+	/*if (setPower50) {
 		TraceLog(LOG_INFO, "POWER: Attempt set power 200.");
 
 		bool complete = false;
@@ -225,7 +225,7 @@ int WorkoutScene::DrawCall()
 		else {
 			TraceLog(LOG_INFO, "POWER: Unable to set power to 100.");
 		}
-	}
+	}*/
 	/*if (setPower150) {
 		TraceLog(LOG_INFO, "POWER: Requesting Control.");
 

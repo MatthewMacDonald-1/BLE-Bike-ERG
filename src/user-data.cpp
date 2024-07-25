@@ -86,7 +86,7 @@ void UserSettings::WriteSettingsConfigFile()
 
 void UserSettings::LoadDefaultSettings()
 {
-	ftp = 200;
+	ftp = 150;
 	powerAveragePeriod = 3;
 	cadenceAveragePeriod = 1;
 }
