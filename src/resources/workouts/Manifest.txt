@@ -2,5 +2,3 @@ ramp.workout
 test.workout
 2x20_FTP_Intervals.workout
 Sweet_Sopt.workout
-High_Intensity_Recovery.workout
-Mat_Hayman_Paris_Roubaix_1.workout
