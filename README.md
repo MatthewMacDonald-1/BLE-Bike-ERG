@@ -1,4 +1,4 @@
-# World-Engines
+# BLE Bike ERG
 
 A bluetooth enabled bike exercise program.
 
