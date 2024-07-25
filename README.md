@@ -1,7 +1,14 @@
 # BLE Bike ERG
 
-A bluetooth enabled bike exercise program.
+A bluetooth low energy enabled bike exercise program.
 
+This program supports reading power, heart rate, and cadence sensor data, and can set the target power for trainers that support the BLE Fitness Training Machine Service (FTMS).
+
+This program also supports writing the the recorded workout data to both csv and fit files.
+
+## Workouts
+
+To add workouts or modify the workout list have a read of [Workouts.md](/Workouts.md)
 
 # Build 
 
