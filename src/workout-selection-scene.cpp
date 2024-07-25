@@ -18,15 +18,6 @@
 #include "workout-scene.hpp"
 #include "bluetooth-controller.hpp"
 
-#ifdef _WIN32
-#define CloseWindow CloseWindow_windows
-#define ShowCursor ShowCursor_windows
-#include <windows.h>	  // For common windows data types and function headers// For common windows data types and function headers
-#undef CloseWindow
-#undef ShowCursor
-
-#endif // _WIN32
-
 
 using namespace MattsUtils;
 
@@ -109,22 +100,6 @@ int WorkoutSelectionMenuScene::DrawCall()
 			raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight),
 			panelContentRec.width
 		);
-	}
-
-	int btnheight = 0;
-	bool btnClicked = DrawWorkoutListButton(
-		"Load from file",
-		raylib::ConstructVector2(panelRec.x + panelScroll.x, panelRec.y + panelScroll.y + panelInnerHeight),
-		panelContentRec.width,
-		btnheight
-	);
-	panelInnerHeight += btnheight;
-
-	if (btnClicked) {
-#ifdef _WIN32
-		
-#endif // _WIN32
-
 	}
 
 	panelContentRec.height = panelInnerHeight != panelContentRec.height ? panelInnerHeight : panelContentRec.height;
