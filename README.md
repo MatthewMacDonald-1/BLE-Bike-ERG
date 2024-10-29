@@ -27,3 +27,13 @@ cmake --build . --config Release
 cp -r ./../src/resources/ ./../bin/resources/
 mkdir -p ./../bin/saves/
 ```
+# Linux Dependencies
+
+```
+# Raylib
+sudo apt install libasound2-dev libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev libxkbcommon-dev
+
+# Simpleble
+sudo apt install libdbus-1-dev
+```
+
