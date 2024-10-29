@@ -6,8 +6,6 @@
 #include "raylib.h"
 #include "bluetooth-utils.hpp"
 
-#include "intrin.h" // Swamping byte order
-
 bool BluetoothController::initialized = false;
 SimpleBLE::Adapter BluetoothController::activeAdapter;
 
@@ -651,29 +649,7 @@ bool BluetoothController::IsBigEndian()
 
 int8_t BluetoothController::Convert8BitValueToLittleEndian(int8_t value)
 {
-	bool notLittleEndian = IsBigEndian();
-
-	if (notLittleEndian) {
-		int8_t swappedValue = 0;
-
-		BitsOfByte_t byteOrg, byteSwapped;
-		byteOrg.byte = value;
-
-		byteSwapped._0 = byteOrg._7;
-		byteSwapped._1 = byteOrg._6;
-		byteSwapped._2 = byteOrg._5;
-		byteSwapped._3 = byteOrg._4;
-		byteSwapped._4 = byteOrg._3;
-		byteSwapped._5 = byteOrg._2;
-		byteSwapped._6 = byteOrg._1;
-		byteSwapped._7 = byteOrg._0;
-
-		swappedValue = byteSwapped.byte;
-		return swappedValue;
-	}
-	else {
-		return value;
-	}
+	return value; // Do not need to swap byte order for 1 byte numbers
 }
 
 int16_t BluetoothController::Convert16BitValueToLittleEndian(int16_t value)
@@ -681,11 +657,14 @@ int16_t BluetoothController::Convert16BitValueToLittleEndian(int16_t value)
 	bool notLittleEndian = IsBigEndian();
 
 	if (notLittleEndian) {
-		int16_t swappedValue = 0;
+		_2Bytes_t valueOrg, swappedValue;
+		valueOrg._2byte = value;
 
-		swappedValue = _byteswap_ushort(value);
+		swappedValue.byte1 = valueOrg.byte2;
+		swappedValue.byte2 = valueOrg.byte1;
 
-		return swappedValue;
+
+		return swappedValue._2byte;
 	}
 	else {
 		return value;
