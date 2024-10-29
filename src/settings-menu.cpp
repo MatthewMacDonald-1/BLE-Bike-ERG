@@ -8,6 +8,8 @@
 #include "video-settings.hpp"
 #include "user-data.hpp"
 #include "config.hpp"
+#include <cstring>
+#include <math.h>
 
 bool SettingsMenu::initialized = false;
 Texture SettingsMenu::settingsBackground;
