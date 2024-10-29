@@ -7,6 +7,7 @@
 #include "MattsUtils/time.hpp"
 #include <set>
 #include <fstream>
+#include <cmath>
 
 int WorkoutDefinition::idGen = 0;
 
