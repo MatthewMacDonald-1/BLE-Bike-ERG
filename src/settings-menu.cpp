@@ -170,7 +170,7 @@ int SettingsMenu::DrawSettingsMenu()
 		UserSettings::SetFTP(inputInt);
 
 		char blinker = ' ';
-		if (std::abs(std::sinf(GetTime() * 3.0))  > 0.5f) {
+		if (std::abs(std::sin(GetTime() * 3.0))  > 0.5f) {
 			blinker = '_';
 		}
 		inputText = TextFormat("%d%c", inputInt, blinker);
