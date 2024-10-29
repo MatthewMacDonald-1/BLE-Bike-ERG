@@ -1,4 +1,5 @@
 #include "font-settings.hpp"
+#include <cstddef>
 
 Font FontSettings::mainFont;
 Font FontSettings::debugFont;
