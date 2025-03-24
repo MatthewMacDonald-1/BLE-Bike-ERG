@@ -28,7 +28,7 @@ private:
 
 	int DrawWorkoutListHeading(std::string heading, Vector2 position, int width);
 
-	bool WorkoutSelectionMenuScene::DrawWorkoutListButton(std::string text, Vector2 position, int width, int& heightReturn);
+	bool DrawWorkoutListButton(std::string text, Vector2 position, int width, int& heightReturn);
 
 	int DrawWorkoutButton(WorkoutDefinition* device, Vector2 position, int width);
 };

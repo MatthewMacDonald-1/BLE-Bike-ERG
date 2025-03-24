@@ -242,8 +242,10 @@ int WorkoutScene::DrawCall()
 		
 	}*/
 
+    char* pauseText = "Pause";
+    char* playText = "Play";
 
-	bool pauseRes = RelativeDrawing::GuiButtonRelative((!paused ? "Pause" : "Play"), raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
+	bool pauseRes = RelativeDrawing::GuiButtonRelative((!paused ? pauseText : playText), raylib::ConstructVector2(0, 0), buttonSize, RelativeDrawing::BottomCenter, RelativeDrawing::BottomCenter, 24);
 	if (pauseRes) {
 		paused = !paused;
 	}
