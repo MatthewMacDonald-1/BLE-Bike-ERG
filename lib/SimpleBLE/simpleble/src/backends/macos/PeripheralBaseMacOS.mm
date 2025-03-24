@@ -1,11 +1,15 @@
 #import "PeripheralBaseMacOS.h"
-#import "CharacteristicBuilder.h"
-#import "DescriptorBuilder.h"
+#import "CharacteristicBase.h"
+#import "CommonUtils.h"
+#import "DescriptorBase.h"
 #import "LoggingInternal.h"
-#import "ServiceBuilder.h"
+#import "ServiceBase.h"
 #import "Utils.h"
 
+#import <simpleble/Characteristic.h>
+#import <simpleble/Descriptor.h>
 #import <simpleble/Exceptions.h>
+#import <simpleble/Service.h>
 #import <optional>
 
 #define WAIT_UNTIL_FALSE(obj, var)                \
@@ -19,16 +23,16 @@
         }                                         \
     } while (0)
 
-#define WAIT_UNTIL_FALSE_WITH_TIMEOUT(obj, var, timeout)                                      \
-    do {                                                                                      \
-        BOOL _tmpVar = YES;                                                                   \
-        NSDate* endDate = [NSDate dateWithTimeInterval:timeout sinceDate:NSDate.now];         \
-        while (_tmpVar && [NSDate.now compare:endDate] == NSOrderedAscending) {               \
-            [NSThread sleepForTimeInterval:0.01];                                             \
-            @synchronized(obj) {                                                              \
-                _tmpVar = (var);                                                              \
-            }                                                                                 \
-        }                                                                                     \
+#define WAIT_UNTIL_FALSE_WITH_TIMEOUT(obj, var, timeout)                              \
+    do {                                                                              \
+        BOOL _tmpVar = YES;                                                           \
+        NSDate* endDate = [NSDate dateWithTimeInterval:timeout sinceDate:NSDate.now]; \
+        while (_tmpVar && [NSDate.now compare:endDate] == NSOrderedAscending) {       \
+            [NSThread sleepForTimeInterval:0.01];                                     \
+            @synchronized(obj) {                                                      \
+                _tmpVar = (var);                                                      \
+            }                                                                         \
+        }                                                                             \
     } while (0)
 
 // --------------------------------------------------
@@ -84,7 +88,8 @@
 
 // --------------------------------------------------
 
-@interface PeripheralBaseMacOS () {}
+@interface PeripheralBaseMacOS () {
+}
 
 @property(strong) CBPeripheral* peripheral;
 @property(strong) CBCentralManager* centralManager;
@@ -213,12 +218,12 @@
                 for (CBDescriptor* descriptor in characteristic.descriptors) {
                     @synchronized(self) {
                         [characteristicExtras.descriptorExtras setObject:[[DescriptorExtras alloc] init]
-                                                                  forKey:[[descriptor.UUID UUIDString] lowercaseString]];
+                                                                  forKey:uuidToString(descriptor.UUID)];
                     }
                 }
 
                 @synchronized(self) {
-                    [self.characteristicExtras setObject:characteristicExtras forKey:[[characteristic.UUID UUIDString] lowercaseString]];
+                    [self.characteristicExtras setObject:characteristicExtras forKey:uuidToString(characteristic.UUID)];
                 }
             }
         }
@@ -245,16 +250,16 @@
     return self.peripheral.state == CBPeripheralStateConnected;
 }
 
-- (std::vector<SimpleBLE::Service>)getServices {
-    std::vector<SimpleBLE::Service> service_list;
+- (SimpleBLE::SharedPtrVector<SimpleBLE::ServiceBase>)getServices {
+    SimpleBLE::SharedPtrVector<SimpleBLE::ServiceBase> service_list;
     for (CBService* service in self.peripheral.services) {
         // Build the list of characteristics for the service.
-        std::vector<SimpleBLE::Characteristic> characteristic_list;
+        SimpleBLE::SharedPtrVector<SimpleBLE::CharacteristicBase> characteristic_list;
         for (CBCharacteristic* characteristic in service.characteristics) {
             // Build the list of descriptors for the characteristic.
-            std::vector<SimpleBLE::Descriptor> descriptor_list;
+            SimpleBLE::SharedPtrVector<SimpleBLE::DescriptorBase> descriptor_list;
             for (CBDescriptor* descriptor in characteristic.descriptors) {
-                descriptor_list.push_back(SimpleBLE::DescriptorBuilder(uuidToSimpleBLE(descriptor.UUID)));
+                descriptor_list.push_back(std::make_shared<SimpleBLE::DescriptorBase>(uuidToSimpleBLE(descriptor.UUID)));
             }
 
             bool can_read = (characteristic.properties & CBCharacteristicPropertyRead) != 0;
@@ -263,10 +268,11 @@
             bool can_notify = (characteristic.properties & CBCharacteristicPropertyNotify) != 0;
             bool can_indicate = (characteristic.properties & CBCharacteristicPropertyIndicate) != 0;
 
-            characteristic_list.push_back(SimpleBLE::CharacteristicBuilder(uuidToSimpleBLE(characteristic.UUID), descriptor_list, can_read,
-                                                                           can_write_request, can_write_command, can_notify, can_indicate));
+            characteristic_list.push_back(std::make_shared<SimpleBLE::CharacteristicBase>(uuidToSimpleBLE(characteristic.UUID),
+                                                                                          descriptor_list, can_read, can_write_request,
+                                                                                          can_write_command, can_notify, can_indicate));
         }
-        service_list.push_back(SimpleBLE::ServiceBuilder(uuidToSimpleBLE(service.UUID), characteristic_list));
+        service_list.push_back(std::make_shared<SimpleBLE::ServiceBase>(uuidToSimpleBLE(service.UUID), characteristic_list));
     }
 
     return service_list;
@@ -627,7 +633,7 @@
 }
 
 - (void)peripheral:(CBPeripheral*)peripheral didUpdateValueForCharacteristic:(CBCharacteristic*)characteristic error:(NSError*)error {
-    CharacteristicExtras* characteristicExtras = [self.characteristicExtras objectForKey:[[characteristic.UUID UUIDString] lowercaseString]];
+    CharacteristicExtras* characteristicExtras = [self.characteristicExtras objectForKey:uuidToString(characteristic.UUID)];
 
     if (characteristic.isNotifying) {
         // If the characteristic is notifying, just save the value and trigger the callback.
@@ -651,7 +657,7 @@
 }
 
 - (void)peripheral:(CBPeripheral*)peripheral didWriteValueForCharacteristic:(CBCharacteristic*)characteristic error:(NSError*)error {
-    CharacteristicExtras* characteristicExtras = [self.characteristicExtras objectForKey:[[characteristic.UUID UUIDString] lowercaseString]];
+    CharacteristicExtras* characteristicExtras = [self.characteristicExtras objectForKey:uuidToString(characteristic.UUID)];
     BleTask* task = characteristicExtras.task;
 
     @synchronized(self) {
@@ -663,7 +669,7 @@
 - (void)peripheral:(CBPeripheral*)peripheral
     didUpdateNotificationStateForCharacteristic:(CBCharacteristic*)characteristic
                                           error:(NSError*)error {
-    CharacteristicExtras* characteristicExtras = [self.characteristicExtras objectForKey:[[characteristic.UUID UUIDString] lowercaseString]];
+    CharacteristicExtras* characteristicExtras = [self.characteristicExtras objectForKey:uuidToString(characteristic.UUID)];
     BleTask* task = characteristicExtras.task;
 
     @synchronized(self) {
@@ -673,12 +679,11 @@
 }
 
 - (void)peripheralIsReadyToSendWriteWithoutResponse:(CBPeripheral*)peripheral {
-    NSLog(@"Peripheral ready to send: %@", peripheral);
 }
 
 - (void)peripheral:(CBPeripheral*)peripheral didUpdateValueForDescriptor:(CBDescriptor*)descriptor error:(NSError*)error {
-    CharacteristicExtras* characteristicExtras = [self.characteristicExtras objectForKey:[[descriptor.characteristic.UUID UUIDString] lowercaseString]];
-    DescriptorExtras* descriptorExtras = [characteristicExtras.descriptorExtras objectForKey:[[descriptor.UUID UUIDString] lowercaseString]];
+    CharacteristicExtras* characteristicExtras = [self.characteristicExtras objectForKey:uuidToString(descriptor.characteristic.UUID)];
+    DescriptorExtras* descriptorExtras = [characteristicExtras.descriptorExtras objectForKey:uuidToString(descriptor.UUID)];
     BleTask* task = descriptorExtras.task;
 
     @synchronized(self) {
@@ -688,8 +693,8 @@
 }
 
 - (void)peripheral:(CBPeripheral*)peripheral didWriteValueForDescriptor:(CBDescriptor*)descriptor error:(NSError*)error {
-    CharacteristicExtras* characteristicExtras = [self.characteristicExtras objectForKey:[[descriptor.characteristic.UUID UUIDString] lowercaseString]];
-    DescriptorExtras* descriptorExtras = [characteristicExtras.descriptorExtras objectForKey:[[descriptor.UUID UUIDString] lowercaseString]];
+    CharacteristicExtras* characteristicExtras = [self.characteristicExtras objectForKey:uuidToString(descriptor.characteristic.UUID)];
+    DescriptorExtras* descriptorExtras = [characteristicExtras.descriptorExtras objectForKey:uuidToString(descriptor.UUID)];
     BleTask* task = descriptorExtras.task;
 
     @synchronized(self) {

@@ -5,7 +5,45 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog`_, and this project adheres to `Semantic Versioning`_.
 
-[0.6.2] - XXXX-XX-XX
+[0.9.0] - 2025-01-20
+--------------------
+
+**Important: License has changed, please review the new license terms.**
+
+**Changed**
+
+- Removed unnecessary log print in MacOS backend. *(Thanks will-tm!)*
+- Remove builders in favor of templated approach. *(Thanks jcarrano!)*
+- Refactor code to use abstract classes and PIMPL idiom. *(Thanks jcarrano!)*
+
+
+[0.8.1] - 2024-11-05
+--------------------
+
+**Added**
+
+- (Android) Alpha preview of Android support.
+- (SimpleDBus) Added templated version of creation and getter functions for Holder class. *(Thanks lorsi96!)*
+
+**Changed**
+
+- Implemented standalone ByteArray class derived from `kvn::bytearray`. *(Thanks tlifschitz!)*
+-  **API CHANGE**: Notify and Indicate callback in C bindings now receive the peripheral handle as the first argument.
+
+**Fixed**
+
+- (SimpleBluez) Fixed improper handling of non `org.Bluez.Service1` objects within a `org.bluez.Device1` object. *(Thanks Kober Engineering!)*
+- (MacOS) Fixed incorrect storage and retrieval with standard Bluetooth UUIDs inside the peripheral class. *(Thanks TellowKrinkle!)*
+- (Python) Fixed incorrect handling of the GIL in certain functions. *(Thanks nomenquis and Medra AI!)*
+
+
+[0.7.X]
+--------------------
+
+This entire series is dedicated to reviewing and updating the license terms of the project.
+
+
+[0.7.0] - 2024-02-15
 --------------------
 
 **Added**

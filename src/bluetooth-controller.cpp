@@ -674,17 +674,18 @@ int16_t BluetoothController::Convert16BitValueToLittleEndian(int16_t value)
 void BluetoothController::HeartRateCallback(SimpleBLE::ByteArray bytes)
 {
 	BitsOfByte_t flags;
-	flags.byte = bytes.at(0);
+
+	flags.byte = bytes[0];
 
 	bool oneByte = flags._0 == 0;
 
 	int value = 0;
 
 	if (!oneByte) { // Heart rate value is two bytes
-		value = Get16BitValue(bytes.at(1), bytes.at(2));
+		value = Get16BitValue(bytes[1], bytes[2]);
 	}
 	else {
-		value = Get8BitValue(bytes.at(1));
+		value = Get8BitValue(bytes[1]);
 	}
 
 	*heartRateValue = value;
@@ -692,7 +693,7 @@ void BluetoothController::HeartRateCallback(SimpleBLE::ByteArray bytes)
 
 void BluetoothController::CyclingPowerCallback(SimpleBLE::ByteArray bytes)
 {
-	int value = Get16BitValue(bytes.at(2), bytes.at(3));
+	int value = Get16BitValue(bytes[2], bytes[3]);
 
 	*cyclingPowerValue = value;
 }
@@ -700,7 +701,7 @@ void BluetoothController::CyclingPowerCallback(SimpleBLE::ByteArray bytes)
 void BluetoothController::CadenceCallback(SimpleBLE::ByteArray bytes) 
 {
 	BitsOfByte_t flags;
-	flags.byte = bytes.at(0);
+	flags.byte = bytes[0];
 
 	bool hasWheelData = flags._0 == 1;
 	bool hasCrankData = flags._1 == 1;
@@ -715,12 +716,12 @@ void BluetoothController::CadenceCallback(SimpleBLE::ByteArray bytes)
 	int cadenceValue = 0;
 
 	if (hasWheelData && hasCrankData) {
-		crankRevolutions = Get16BitValue(bytes.at(7), bytes.at(8));
-		crankEventTime = Get16BitValue(bytes.at(9), bytes.at(10));
+		crankRevolutions = Get16BitValue(bytes[7], bytes[8]);
+		crankEventTime = Get16BitValue(bytes[9], bytes[10]);
 	}
 	else if (!hasWheelData && hasCrankData) {
-		crankRevolutions = Get16BitValue(bytes.at(1), bytes.at(2));
-		crankEventTime = Get16BitValue(bytes.at(3), bytes.at(4));
+		crankRevolutions = Get16BitValue(bytes[1], bytes[2]);
+		crankEventTime = Get16BitValue(bytes[3], bytes[4]);
 	}
 	
 	int divisor = std::abs(lastCrankEventTime - crankEventTime);
