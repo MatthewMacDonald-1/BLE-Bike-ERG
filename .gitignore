@@ -49,7 +49,7 @@ _deps
 # VS Code
 out/build/
 .vs/
-build/
+build*/
 .vscode/
 out/
 
